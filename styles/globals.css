@@ -1,3 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* styles/globals.css */
+.department-block {
+    position: relative;
+    padding: 20px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .options {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  button:hover {
+    text-decoration: underline;
+  }
+  

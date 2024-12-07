@@ -1,34 +1,24 @@
-import React, { useState } from "react";
-import ScanUpload from "./ScanUpload";
+"use client"
+import { useState } from "react";
+import ScanUpload from "../components/ScanUpload";
 
-const HomePage = () => {
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [formType, setFormType] = useState(""); // 'Scan' or 'Upload'
 
-  const handleButtonClick = (type) => {
-    setFormType(type);
-    setIsFormVisible(true);
-  };
+export default function Home() {
+  const [showForm, setShowForm] = useState(false);
+  const [action, setAction] = useState("");
 
-  const handleCloseForm = () => {
-    setIsFormVisible(false);
+  const handleOpenForm = (actionType) => {
+    setAction(actionType);
+    setShowForm(true);
   };
 
   return (
     <div>
-      <h1>Home Page</h1>
-      <button onClick={() => handleButtonClick("Scan")}>Scan</button>
-      <button onClick={() => handleButtonClick("Upload")}>Upload</button>
+      <h1>Welcome to File Management System</h1>
+      <button onClick={() => handleOpenForm("Scan")}>Scan</button>
+      <button onClick={() => handleOpenForm("Upload")}>Upload</button>
 
-      {isFormVisible && (
-        <ScanUpload
-          formType={formType}
-          onClose={handleCloseForm}
-        />
-      )}
+      {showForm && <ScanUpload action={action} onClose={() => setShowForm(false)} />}
     </div>
   );
-};
-
-export default HomePage;
-
+}

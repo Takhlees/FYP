@@ -1,4 +1,4 @@
-
+"use client"
 // components/FileList.js
 import { useState, useEffect } from 'react';
 

@@ -1,48 +1,47 @@
+"use client"
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 
-// components/CategoryList.js
-import { useState, useEffect } from 'react';
-import FileList from './FileList';
+const DepartmentPage = () => {
+  const { state } = useLocation();
+  const { department } = state;
+  const [categories, setCategories] = useState(department.categories || []);
+  const [newCategory, setNewCategory] = useState("");
 
-const Category = ({ departmentId }) => {
-  // Mock data for categories (to be replaced by backend API later)
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // Simulate fetching categories based on departmentId
-  useEffect(() => {
-    const categoriesData = [
-      { id: 1, departmentId: 1, name: 'Recruitment' },
-      { id: 2, departmentId: 1, name: 'Employee Benefits' },
-      { id: 3, departmentId: 2, name: 'Tax' },
-      { id: 4, departmentId: 2, name: 'Payroll' },
-      { id: 5, departmentId: 3, name: 'Software' },
-    ];
-    const filteredCategories = categoriesData.filter(
-      (category) => category.departmentId === departmentId
-    );
-    setCategories(filteredCategories);
-  }, [departmentId]);
-
-  const handleSelectCategory = (id) => {
-    setSelectedCategory(id);
+  const addCategory = () => {
+    if (newCategory.trim()) {
+      setCategories([...categories, newCategory]);
+      setNewCategory("");
+    }
   };
 
   return (
-    <div className="category-list">
-      <h3>Categories</h3>
-      <ul>
-        {categories.map((category) => (
-          <li key={category.id}>
-            <button onClick={() => handleSelectCategory(category.id)}>
-              {category.name}
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {selectedCategory && <FileList categoryId={selectedCategory} />}
+    <div>
+      <h2>Department: {department.name}</h2>
+      <div>
+        <input
+          type="text"
+          placeholder="Add Category"
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+        />
+        <button onClick={addCategory}>Add</button>
+      </div>
+      <div style={{ marginTop: "20px" }}>
+        <h3>Categories:</h3>
+        <select>
+          <option value="" disabled selected>
+            Select a Category
+          </option>
+          {categories.map((category, index) => (
+            <option key={index} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };
 
-export default Category;
+export default DepartmentPage;

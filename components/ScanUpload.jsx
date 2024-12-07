@@ -1,175 +1,194 @@
-import React, { useState, useEffect } from "react";
-import { jsPDF } from "jspdf";
+"use client"
 
-const ScanUpload = ({ formType, onClose }) => {
-  const [departments, setDepartments] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [subject, setSubject] = useState("");
-  const [date, setDate] = useState("");
-  const [file, setFile] = useState(null);
+import { useState } from "react"
+import Tesseract from "tesseract.js"
 
-  useEffect(() => {
-    // Mock department data
-    setDepartments([
-      { id: 1, name: "HR" },
-      { id: 2, name: "Finance" },
-      { id: 3, name: "Engineering" },
-    ]);
+const ScanUpload = ({ action, onClose }) => {
+  // const [file, setFile] = useState(null)
+  const [department, setDepartment] = useState("")
+  const [category, setCategory] = useState("")
+  const [subject, setSubject] = useState("")
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+  const [diaryNo, setDiaryNo] = useState("")
+  const [from, setFrom] = useState("")
+  const [disposal, setDisposal] = useState("")
+  const [status, setStatus] = useState("")
+  //const [isProcessing, setIsProcessing] = useState(false)
 
-    // Autofill date
-    setDate(new Date().toISOString().split("T")[0]); // Format: YYYY-MM-DD
-  }, []);
+  // const handleFileChange = async (e) => {
+  //   const selectedFile = e.target.files?.[0]
+  //   if (selectedFile) {
+  //     setFile(selectedFile)
 
-  const handleDepartmentChange = (e) => {
-    const departmentId = e.target.value;
-    setSelectedDepartment(departmentId);
+  //     // Validate file type
+  //     const validTypes = ["application/pdf", "image/png", "image/jpeg"]
+  //     if (!validTypes.includes(selectedFile.type)) {
+  //       alert("Invalid file type. Please upload a PDF or an image.")
+  //       setFile(null)
+  //       return
+  //     }
 
-    const categoryData = [
-      { departmentId: 1, categories: ["Recruitment", "Employee Benefits"] },
-      { departmentId: 2, categories: ["Tax", "Payroll"] },
-      { departmentId: 3, categories: ["Software", "Hardware"] },
-    ];
+  //     // Perform OCR to extract subject if file is an image
+  //     if (selectedFile.type !== "application/pdf") {
+  //       setIsProcessing(true)
+  //       try {
+  //         const result = await Tesseract.recognize(selectedFile, "eng")
+  //         const extractedText = result.data.text
 
-    const selectedDepartmentCategories = categoryData.find(
-      (dept) => dept.departmentId === parseInt(departmentId)
-    );
+  //         // Search for a subject heading in the text
+  //         const subjectMatch = extractedText.match(/(?:subject|subj)[:\-]?\s*(.+)/i)
+  //         if (subjectMatch && subjectMatch[1]) {
+  //           setSubject(subjectMatch[1].trim()) // Automatically fill subject
+  //         } else {
+  //           setSubject("") // Clear subject if not found
+  //           alert("No subject found in the uploaded file.")
+  //         }
+  //       } catch (error) {
+  //         console.error("Error during OCR:", error)
+  //         alert("Failed to extract text from the file.")
+  //       } finally {
+  //         setIsProcessing(false)
+  //       }
+  //     }
+  //   }
+  // }
 
-    setCategories(selectedDepartmentCategories ? selectedDepartmentCategories.categories : []);
-    setSelectedCategory("");
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-
-    // Extract subject from file (if it's a text file)
-    if (selectedFile && selectedFile.type === "text/plain") {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target.result;
-        const firstLine = text.split("\n")[0]; // Use the first line as the subject
-        setSubject(firstLine);
-      };
-      reader.readAsText(selectedFile);
+    if ( !department || !category || !subject || !diaryNo || !from || !disposal || !status) {
+      alert("Please fill out all fields.")
+      return
     }
-  };
 
-  const handleSave = () => {
-    if (!file || !selectedDepartment || !selectedCategory || !subject) {
-      alert("Please complete all fields.");
-      return;
+    const formData = new FormData()
+    //formData.append("file", file)
+    formData.append("department", department)
+    formData.append("category", category)
+    formData.append("subject", subject)
+    formData.append("date", date)
+    formData.append("diaryNo", diaryNo)
+    formData.append("from", from)
+    formData.append("disposal", disposal)
+    formData.append("status", status)
+
+    try {
+      const response = await fetch("/api/scanupload", {
+        method: "POST",
+        body: formData,
+      })
+      if (!response.ok) {
+        alert(`HTTP error! status: ${response.status}`);
+      }
+      let data
+      try {
+        data = await response.json()
+      } catch (error) {
+        console.error("Failed to parse JSON response:", error)
+        alert("Server returned an invalid response. Please try again.")
+        return
+      }
+      
+      
+      if (response.ok) {
+        alert(data.message)
+        onClose()
+      } else {
+        console.error("Error response from server:", data)
+        alert(`Error: ${data.error}${data.details ? ` - ${data.details}` : ''}`)
+      }
+    } catch (error) {
+      console.error("Upload error:", error)
+      alert(`An error occurred during upload: ${error.message}`)
     }
-
-    // Create a PDF from the file content (if needed)
-    const doc = new jsPDF();
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imgData = event.target.result;
-        doc.addImage(imgData, "JPEG", 10, 10, 180, 160);
-        saveFile(doc);
-      };
-      reader.readAsDataURL(file);
-    } else if (file.type === "text/plain") {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target.result;
-        doc.text(text, 10, 10);
-        saveFile(doc);
-      };
-      reader.readAsText(file);
-    } else {
-      alert("Unsupported file type.");
-    }
-  };
-
-  const saveFile = (doc) => {
-    // Save file logic (mocked)
-    const fileName = `${file.name.split(".")[0]}_${selectedCategory}_${selectedDepartment}.pdf`;
-    console.log(`File "${fileName}" saved under Department ${selectedDepartment}, Category ${selectedCategory}.`);
-
-    // Reset form
-  
-    alert("File saved successfully!");
-  };
+  }
 
   return (
-    <div className="form-modal">
-      <h2>{formType} Form</h2>
-      <form onSubmit={(e) => e.preventDefault()}>
+    <div>
+      <h2>{action} Form</h2>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="department">Department:</label>
-          <select
-            id="department"
-            value={selectedDepartment}
-            onChange={handleDepartmentChange}
-            required
-          >
-            <option value="">Select Department</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="category">Category:</label>
-          <select
-            id="category"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            required
-            disabled={!selectedDepartment}
-          >
-            <option value="">Select Category</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="subject">Subject:</label>
+          <label>Department:</label>
           <input
             type="text"
-            id="subject"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Category:</label>
+          <input
+            type="text"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Subject:</label>
+          <input
+            type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             required
           />
         </div>
-
         <div>
-          <label htmlFor="date">Date:</label>
+          <label>Date:</label>
           <input
             type="date"
-            id="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
           />
         </div>
-
         <div>
-          <label htmlFor="file">File:</label>
+          <label>Diary No:</label>
           <input
-            type="file"
-            id="file"
-            accept=".jpg,.jpeg,.png,.txt"
-            onChange={handleFileChange}
+            type="text"
+            value={diaryNo}
+            onChange={(e) => setDiaryNo(e.target.value)}
             required
           />
         </div>
-
-        <button type="button" onClick={handleSave}>
-          Save
-        </button>
+        <div>
+          <label>From:</label>
+          <input
+            type="text"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Disposal:</label>
+          <input
+            type="text"
+            value={disposal}
+            onChange={(e) => setDisposal(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Status:</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            required
+          >
+            <option value="">Select Status</option>
+            <option value="open">Open</option>
+            <option value="in-progress">In Progress</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        {/* <div>
+          <label>File:</label>
+          <input type="file" onChange={handleFileChange} required />
+          {isProcessing && <p>Extracting text from file... Please wait.</p>}
+        </div> */}
+        <button type="submit">Save</button>
         <button type="button" onClick={onClose}>
           Cancel
         </button>
