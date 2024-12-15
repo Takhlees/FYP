@@ -34,11 +34,11 @@ const ScanUploadSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Disposal is required'],
   },
-//   file: {
-//     data: Buffer,
-//     contentType: String,
-//     name: String
-//   }
+  file: {
+    data: Buffer,
+    contentType: String,
+    name: String
+  }
 }, { timestamps: true })
 
 const ScanUpload = mongoose.models.ScanUpload || mongoose.model('ScanUpload', ScanUploadSchema)

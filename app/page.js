@@ -1,8 +1,16 @@
+"use client"
+import Home from '../components/Home';
 
-export default function Home() {
+const HomePage = () => {
   return (
-    <div className='head_text text-center'>
-     Start here
-         </div>
-  );
-}
+    <div>
+    <Home />
+  
+  </div>
+  )
+  
+  
+  
+};
+
+export default HomePage;

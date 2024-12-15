@@ -1,8 +1,11 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
 
-const DepartmentSchema = new Schema({
+const DepartmentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   categories: [{ type: String }], // Array of category names
 });
 
-export default models.Department || model("Department", DepartmentSchema);
+const Department = mongoose.models.Department || mongoose.model('Department', DepartmentSchema)
+
+export default Department
+
