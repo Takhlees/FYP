@@ -5,7 +5,7 @@ import { PDFDocument } from 'pdf-lib';
 import ScanUpload from "@models/scanUpload";
 import { connectToDB } from "@utils/database";
 import { NextResponse } from 'next/server'; 
-import tesseract from 'tesseract.js';
+//import tesseract from 'tesseract.js';
 
 export async function POST(request) {
   try {
@@ -23,14 +23,13 @@ export async function POST(request) {
     const disposal = formData.get('disposal')
 
     // Validate required fields
-    if ( !file || !diaryNo || !date || !department || !category || !subject || !status || !from || !disposal) {
-      console.error("Missing required fields:", {diaryNo, date, department, category, subject, status, from, disposal })
+    if (!file || !diaryNo || !date || !department || !category || !subject || !status || !from || !disposal) {
+      console.error("Missing required fields:", { diaryNo, date, department, category, subject, status, from, disposal })
       return NextResponse.json({ error: "All fields are required." }, { status: 400 })
     }
 
-
-     // Validate file type
-     if (file.type !== 'application/pdf') {
+    // Validate file type
+    if (file.type !== 'application/pdf') {
       return NextResponse.json({ error: "Only PDF files are allowed." }, { status: 400 })
     }
 
@@ -44,76 +43,37 @@ export async function POST(request) {
       // For example, you could add a watermark, merge pages, etc.
       
       // If you've made changes, get the modified PDF as a buffer
-      
       const modifiedPdfBytes = await pdfDoc.save()
-      const modifiedBuffer = Buffer.from(modifiedPdfBytes)
+      const processedBuffer = Buffer.from(modifiedPdfBytes)
       
-      // For now, we'll just use the original buffer
+      const newScan = new ScanUpload({
+        diaryNo,
+        date,
+        department,
+        category,
+        subject,
+        status,
+        from,
+        disposal,
+        file: {
+          data: processedBuffer,
+          contentType: file.type,
+          name: file.name
+        }
+      })
+
+      await newScan.save()
+      console.log("Scan data saved successfully:", newScan)
+
+      return NextResponse.json({ message: "Scan data saved successfully" }, { status: 200 })
     } catch (error) {
       console.error("Error processing PDF:", error)
       return NextResponse.json({ error: "Invalid PDF file." }, { status: 400 })
     }
-    let ocrSubject = "";
-    if (extractedText) {
-      const subjectMatch = extractedText.match(/(?:subject|subj)[:\-]?\s*(.+)/i);
-      if (subjectMatch && subjectMatch[1]) {
-        ocrSubject = subjectMatch[1].trim();
-      }
-    }
-    const newScan = new ScanUpload({
-      diaryNo,
-      date,
-      department,
-      category,
-      subject: ocrSubject || subject,
-      status,
-      from,
-      disposal,
-      file: {
-        data: fileBuffer,
-        contentType: file.type,
-        name: file.name
-      }
-    })
-
-    await newScan.save()
-    console.log("Scan data saved successfully:", newScan)
-
-    return NextResponse.json({ message: "Scan data saved successfully" }, { status: 200 })
   } catch (error) {
     console.error("Error in API route:", error)
     return NextResponse.json({ error: "Failed to save scan data.", details: error.message }, { status: 500 })
   }
-} 
-async function extractTextFromPdf(pdfBuffer) {
-  const pdfDoc = await PDFDocument.load(pdfBuffer);
-  const pages = pdfDoc.getPages();
-  
-  const pageTextPromises = pages.map(async (page) => {
-    const image = await page.render();
-    const imageBuffer = await image.toBuffer();
-    return await performOcr(imageBuffer);
-  });
-
-  const pageTexts = await Promise.all(pageTextPromises);
-  return pageTexts.join(" "); // Join all the extracted texts from pages
-}
-
-// Function to perform OCR using Tesseract.js
-async function performOcr(imageBuffer) {
-  return new Promise((resolve, reject) => {
-    tesseract.recognize(
-      imageBuffer,
-      'eng',
-      {
-        logger: (m) => console.log(m), // Optional logging
-      }
-    ).then(({ data: { text } }) => {
-      resolve(text);
-    }).catch((error) => {
-      reject(error);
-    });
-  });
 }
 
 
