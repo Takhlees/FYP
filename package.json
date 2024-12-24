@@ -17,6 +17,7 @@
     "next": "^15.1.0",
     "next-connect": "^1.0.0",
     "next-optimized-images": "^2.6.2",
+    "next-transpile-modules": "^10.0.1",
     "node": "^22.12.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.9.155",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.15"
+    "tailwindcss": "^3.4.15",
+    "worker-loader": "^3.0.8"
   }
 }

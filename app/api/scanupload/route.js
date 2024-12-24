@@ -1,52 +1,28 @@
 import { PDFDocument } from 'pdf-lib';
-//import mammoth from 'mammoth';
-//import puppeteer from 'puppeteer';
-//import sharp from 'sharp'; 
 import ScanUpload from "@models/scanUpload";
 import { connectToDB } from "@utils/database";
 import { NextResponse } from 'next/server'; 
-//import tesseract from 'tesseract.js';
+import tesseract from 'tesseract.js';
+
 
 export async function POST(request) {
   try {
-    await connectToDB()
+    await connectToDB();
 
-    const formData = await request.formData()
-    const file = formData.get('file')
-    const diaryNo = formData.get('diaryNo')
-    const date = formData.get('date')
-    const department = formData.get('department')
-    const category = formData.get('category')
-    const subject = formData.get('subject')
-    const status = formData.get('status')
-    const from = formData.get('from')
-    const disposal = formData.get('disposal')
+    const formData = await request.formData();
+    const file = formData.get('file');
+    const diaryNo = formData.get('diaryNo');
+    const date = formData.get('date');
+    const department = formData.get('department');
+    const category = formData.get('category');
+    let subject = formData.get('subject'); // Use `let` since this might be updated
+    const status = formData.get('status');
+    const from = formData.get('from');
+    const disposal = formData.get('disposal');
 
     // Validate required fields
     if (!file || !diaryNo || !date || !department || !category || !subject || !status || !from || !disposal) {
-      console.error("Missing required fields:", { diaryNo, date, department, category, subject, status, from, disposal })
-      return NextResponse.json({ error: "All fields are required." }, { status: 400 })
-    }
-
-    // Validate file type
-    if (file.type !== 'application/pdf') {
-      return NextResponse.json({ error: "Only PDF files are allowed." }, { status: 400 })
-    }
-
-    // Convert file to buffer
-    const fileBuffer = Buffer.from(await file.arrayBuffer())
-
-    // Use pdf-lib to validate and potentially manipulate the PDF
-    try {
-      const pdfDoc = await PDFDocument.load(fileBuffer)
-      // Here you can manipulate the PDF if needed
-      // For example, you could add a watermark, merge pages, etc.
-      
-      // If you've made changes, get the modified PDF as a buffer
-      const modifiedPdfBytes = await pdfDoc.save()
-      const processedBuffer = Buffer.from(modifiedPdfBytes)
-      
-      const newScan = new ScanUpload({
+      console.error('Missing required fields:', {
         diaryNo,
         date,
         department,
@@ -55,27 +31,99 @@ export async function POST(request) {
         status,
         from,
         disposal,
-        file: {
-          data: processedBuffer,
-          contentType: file.type,
-          name: file.name
-        }
-      })
-
-      await newScan.save()
-      console.log("Scan data saved successfully:", newScan)
-
-      return NextResponse.json({ message: "Scan data saved successfully" }, { status: 200 })
-    } catch (error) {
-      console.error("Error processing PDF:", error)
-      return NextResponse.json({ error: "Invalid PDF file." }, { status: 400 })
+      });
+      return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
     }
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      return NextResponse.json({ error: 'Only PDF files are allowed.' }, { status: 400 });
+    }
+
+    // Convert file to buffer
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate the PDF
+    try {
+      const pdfDoc = await PDFDocument.load(fileBuffer);
+      // Optional: Process or manipulate the PDF as needed
+    } catch (error) {
+      console.error('Error processing PDF:', error);
+      return NextResponse.json({ error: 'Invalid PDF file.' }, { status: 400 });
+    }
+
+    // Extract text from the PDF
+    let extractedText;
+    try {
+      extractedText = await extractTextFromPdf(fileBuffer);
+    } catch (error) {
+      console.error('Error extracting text from PDF:', error);
+      extractedText = ''; // Fallback to an empty string if extraction fails
+    }
+
+    // Update the subject from extracted text if available
+    if (extractedText) {
+      const subjectMatch = extractedText.match(/(?:subject|subj)[:\-]?\s*(.+)/i);
+      if (subjectMatch && subjectMatch[1]) {
+        subject = subjectMatch[1].trim();
+      }
+    }
+
+    // Save data to the database
+    const newScan = new ScanUpload({
+      diaryNo,
+      date,
+      department,
+      category,
+      subject,
+      status,
+      from,
+      disposal,
+      file: {
+        data: fileBuffer,
+        contentType: file.type,
+        name: file.name,
+      },
+    });
+
+    await newScan.save();
+    console.log('Scan data saved successfully:', newScan);
+
+    return NextResponse.json({ message: 'Scan data saved successfully' }, { status: 200 });
   } catch (error) {
-    console.error("Error in API route:", error)
-    return NextResponse.json({ error: "Failed to save scan data.", details: error.message }, { status: 500 })
+    console.error('Error in API route:', error);
+    return NextResponse.json({ error: 'Failed to save scan data.', details: error.message }, { status: 500 });
   }
 }
 
+async function extractTextFromPdf(fileBuffer) {
+  // Placeholder for text extraction using Tesseract.js
+  // Replace this with logic using pdfjs-dist to render images if needed
+  const pdfDoc = await PDFDocument.load(fileBuffer);
+  const pages = pdfDoc.getPages();
+
+  const pageTextPromises = pages.map(async (page, index) => {
+    // Render the page to extract text - use pdfjs-dist here if required
+    const text = await performOcr(page.getTextContent());
+    console.log(`Page ${index + 1} text:`, text);
+    return text;
+  });
+
+  const pageTexts = await Promise.all(pageTextPromises);
+  return pageTexts.join(' '); // Join all the extracted texts from pages
+}
+
+async function performOcr(imageBuffer) {
+  try {
+    const { data: { text } } = await tesseract.recognize(imageBuffer, 'eng', {
+      logger: (m) => console.log(m), // Optional logging
+    });
+    return text;
+  } catch (error) {
+    console.error('Error during OCR:', error);
+    throw new Error('OCR failed.');
+  }
+}
 
 export async function GET(req) {
   try {
