@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-
 export default function DepartmentPage() {
+   
   const router = useRouter();
   const { id, name } = router.query;
 
@@ -80,6 +80,7 @@ export default function DepartmentPage() {
 
   return (
     <div>
+      
       <h1>Department : {name}</h1>
       <div>
         <button onClick={() => setShowInput(!showInput)}>
@@ -135,5 +136,7 @@ export default function DepartmentPage() {
         </div>
       </div>
     </div>
+    
   );
+  
 }

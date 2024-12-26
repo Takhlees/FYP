@@ -1,4 +1,8 @@
 /* styles/globals.css */
+ @import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
 .department-block {
     position: relative;
     padding: 20px;
