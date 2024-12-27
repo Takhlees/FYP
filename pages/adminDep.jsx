@@ -1,13 +1,18 @@
-"use client"
-
-import Departments from '@components/Departments';
+"use client";
+import Navbar from "@components/Navbar";
+import Footer from "@components/Footer";
+import Departments from "@components/Departments";
 
 const adminDep = () => {
   return (
-    <div>
-      <Departments/>
-    </div>
-  )
-}
+    <>
+      <Navbar />
+      <div>
+        <Departments />
+      </div>
+      <Footer />
+    </>
+  );
+};
 
-export default adminDep
+export default adminDep;

@@ -1,13 +1,19 @@
-"use client"
+"use client";
 
 // pages/departments.js
-import Departments from '@components/Departments';
+import Departments from "@components/Departments";
+import Navbar from "@components/Navbar";
+import Footer from "@components/Footer";
 
 const DepartmentPage = () => {
   return (
-    <div>
-      <Departments/>
-    </div>
+    <>
+      <Navbar />
+      <div>
+        <Departments />
+      </div>
+      <Footer />
+    </>
   );
 };
 

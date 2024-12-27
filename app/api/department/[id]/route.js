@@ -4,7 +4,7 @@ import { connectToDB } from "@utils/database";
 // GET request handler
 export async function GET(req, { params }) {
   const { id } = await params; // Extract the ID from the route parameters
-  await connectToDB(); // Ensure your DB connection is established before querying
+  await connectToDB(); 
   
   try {
     // Fetch the department using the provided id
@@ -34,7 +34,7 @@ export async function GET(req, { params }) {
   }
 }
 
-// PATCH request handler for adding a category to a department
+// PUT request handler for adding a category to a department or edit department
 export async function PUT(req, { params }) {
     const { id } = await params; // Extract the department ID from the route parameters
     const body = await req.json(); // Parse the request body
