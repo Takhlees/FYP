@@ -1,12 +1,12 @@
 "use client"
 
 // pages/departments.js
-import Department from '../components/Department';
+import Departments from '@components/Departments';
 
 const DepartmentPage = () => {
   return (
     <div>
-      <Department />
+      <Departments/>
     </div>
   );
 };

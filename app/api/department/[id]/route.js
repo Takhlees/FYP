@@ -5,7 +5,7 @@ import { connectToDB } from "@utils/database";
 export async function GET(req, { params }) {
   const { id } = await params; // Extract the ID from the route parameters
   await connectToDB(); // Ensure your DB connection is established before querying
-
+  
   try {
     // Fetch the department using the provided id
     const department = await Department.findById(id);
@@ -16,11 +16,11 @@ export async function GET(req, { params }) {
         { status: 404 }
       );
     }
-
     // Return both the department details and its categories
     return new Response(
       JSON.stringify({
-        department: department.name, // You can return the department's name
+        department: department.name,
+        type: department.type,
         categories: department.categories, // Return the categories
       }),
       { status: 200 }
@@ -35,7 +35,7 @@ export async function GET(req, { params }) {
 }
 
 // PATCH request handler for adding a category to a department
-export async function PATCH(req, { params }) {
+export async function PUT(req, { params }) {
     const { id } = await params; // Extract the department ID from the route parameters
     const body = await req.json(); // Parse the request body
   
@@ -44,11 +44,12 @@ export async function PATCH(req, { params }) {
     try {
       let updatedDepartment;
   
-      if (body.name) {
+      if (body.name && body.type) {
         // Update department name
         updatedDepartment = await Department.findByIdAndUpdate(
           id,
-          { name: body.name },
+          { name: body.name ,
+           type: body.type},
           { new: true } // Return the updated department
         );
       } else if (body.category) {
