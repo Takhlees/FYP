@@ -10,23 +10,24 @@ export async function POST(request) {
     await connectToDB();
 
     const formData = await request.formData();
+    const type = formData.get('type');
     const file = formData.get('file');
     const diaryNo = formData.get('diaryNo');
     const date = formData.get('date');
     const department = formData.get('department');
     const category = formData.get('category');
-    let subject = formData.get('subject'); // Use `let` since this might be updated
+    let subject = formData.get('subject'); 
     const status = formData.get('status');
     const from = formData.get('from');
     const disposal = formData.get('disposal');
 
     // Validate required fields
-    if (!file || !diaryNo || !date || !department || !category || !subject || !status || !from || !disposal) {
+    if (!file || !type || !diaryNo || !date || !department  || !subject || !status || !from || !disposal) {
       console.error('Missing required fields:', {
+        type,
         diaryNo,
         date,
         department,
-        category,
         subject,
         status,
         from,
@@ -71,6 +72,7 @@ export async function POST(request) {
 
     // Save data to the database
     const newScan = new ScanUpload({
+      type,
       diaryNo,
       date,
       department,

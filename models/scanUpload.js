@@ -1,6 +1,11 @@
 import mongoose from 'mongoose'
 
 const ScanUploadSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ["all", "uni", "admin"],
+    required: true
+  },
   diaryNo: {
     type: String,
     required: [true, 'Diary number is required'],
@@ -15,7 +20,6 @@ const ScanUploadSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
   },
   subject: {
     type: String,
@@ -24,7 +28,7 @@ const ScanUploadSchema = new mongoose.Schema({
   status: {
     type: String,
     required: [true, 'Status is required'],
-    enum: ['open', 'in-progress', 'closed'],
+    enum: ['open','closed'],
   },
   from: {
     type: String,
