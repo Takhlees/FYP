@@ -1,13 +1,13 @@
 import { useState } from 'react'
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
-
+   
   const handleSubmit = (e) => {
     e.preventDefault()
     console.log('Forgot password submitted for:', email)
   }
 
-  return (
+  return (  
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold mb-6">Forgot Password</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -32,9 +32,10 @@ export default function ForgotPassword() {
           >
             Reset Password
           </button>
+        
         </div>
       </form>
-
+      
     </div>
   )
 }

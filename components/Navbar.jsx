@@ -17,7 +17,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link href="/" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
+              <Link href="/home" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Home
               </Link>
               <Link href="/departments?type=uni" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
@@ -26,7 +26,9 @@ export default function Navbar() {
               <Link href="/departments?type=admin" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Admin
               </Link>
-             
+              <Link href="/tutorial" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
+                Tutorial
+              </Link>
               <Link href="/about" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 About
               </Link>
@@ -56,6 +58,7 @@ export default function Navbar() {
                   <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Profile</Link>
                   <Link href="/change-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Change Password</Link>
                   <Link href="/forgot-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Forgot Password</Link>
+                  <Link href="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">logout</Link>
                 </div>
               )}
             </div>
@@ -98,6 +101,12 @@ export default function Navbar() {
             <Link href="/about" className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               About
             </Link>
+            <Link href="/tutorial" className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
+              Tutorial
+            </Link>
+          
+          
+
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-4">
@@ -123,6 +132,9 @@ export default function Navbar() {
               <Link href="/forgot-password" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
                 Forgot Password
               </Link>
+              <Link href="/logout" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                Logout
+              </Link>
             </div>
           </div>
         </div>
@@ -130,4 +142,5 @@ export default function Navbar() {
     </nav>
   )
 }
+
 
