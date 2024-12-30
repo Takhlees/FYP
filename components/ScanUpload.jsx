@@ -50,11 +50,12 @@ const ScanUpload = ({ action, onClose }) => {
     setSelectedCategory("");
   };
 
-  const handleCapture = () => {
+  const handleCapture = async() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setCapturedImage(imageSrc);
       setIsScanning(false);
+      await performOCR(imageSrc);
     } else {
       console.error("Webcam reference is null");
     }
@@ -84,11 +85,11 @@ const ScanUpload = ({ action, onClose }) => {
 
       // Step 2: Try to find the subject in the extracted text
       let subject = findSubjectInText(text);
-      if (!subject) {
-        // If no subject found, fallback to OCR using Tesseract.js
-        console.log("No subject found in text. Attempting OCR...");
-        subject = await performOCR(fileBuffer);
-      }
+      // if (!subject) {
+      //   // If no subject found, fallback to OCR using Tesseract.js
+      //   console.log("No subject found in text. Attempting OCR...");
+      //   subject = await performOCR(fileBuffer);
+      // }
 
       // Step 3: Set the extracted subject
       if (subject) {
@@ -126,21 +127,34 @@ const ScanUpload = ({ action, onClose }) => {
   }
 
   // Utility: Perform OCR using Tesseract.js
-  const performOCR = async (fileBuffer) => {
+  const performOCR = async (imageData) => {
     // Convert PDF pages to PNG images
-    const pngImages = await convertPdfToPng(fileBuffer);
+    setIsProcessing(true);
 
-    let extractedText = "";
-    // Process each image with Tesseract.js
-    for (const image of pngImages) {
-      const result = await Tesseract.recognize(image.data, "eng", {
-        logger: (m) => console.log(m), // Log OCR progress
-      });
-      extractedText += result.data.text + "\n";
+  try {
+    // Perform OCR on the scanned image
+    const result = await Tesseract.recognize(imageData, "eng", {
+      logger: (m) => console.log(m), // Log OCR progress
+    });
+
+    const extractedText = result.data.text;
+
+    // Try to find the subject in the extracted text
+    const subject = findSubjectInText(extractedText);
+    if (subject) {
+      setSubject(subject);
+    } else {
+      alert("No subject found in the scanned image.");
+      setSubject("");
     }
-
-    return extractedText;
-  };
+  } catch (error) {
+    console.error("Error performing OCR on scanned image:", error);
+    alert("Failed to extract text from the scanned image.");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+  // };
 
   // Utility: Search for a "subject" in the extracted text
   const findSubjectInText = (text) => {
@@ -339,6 +353,7 @@ const ScanUpload = ({ action, onClose }) => {
                   screenshotFormat="image/jpeg"
                   width="100%"
                   ref={webcamRef}
+                 
                 />
                 <button type="button" onClick={handleCapture}>
                   Capture

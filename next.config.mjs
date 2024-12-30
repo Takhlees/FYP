@@ -4,6 +4,7 @@ import withOptimizedImages from 'next-optimized-images';
 const nextConfig = withOptimizedImages({
   images: {
     disableStaticImages: true, // Optional, disable Next.js built-in image optimization
+   
   },
 });
 
