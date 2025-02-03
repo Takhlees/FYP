@@ -16,7 +16,7 @@ export default function ChangePassword() {
     
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Navbar/>
-      <h1 className="text-3xl font-bold mb-6">Change Password</h1>
+      <h1 className="text-3xl font-bold mb-6">Change Password</h1>n
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">

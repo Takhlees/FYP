@@ -4,7 +4,7 @@ import ScanUpload from "@models/scanUpload";
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;  // The ID parameter from the URL
+    const { id } = await params;  // The ID parameter from the URL
     
     // Connect to the database
     await connectToDB();
@@ -41,4 +41,11 @@ export async function GET(req, { params }) {
       { status: 500 }
     );
   }
+}
+
+
+export async function PUT(req){
+  // This function should update the document in the database
+  
+
 }

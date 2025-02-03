@@ -1,8 +1,9 @@
-
-import Navbar from '@components/Navbar'
+import Navbar from '../components/Navbar'
 import Footer from '@components/Footer'
 import Home from '@components/Home'
+
 export default function home() {
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -11,7 +12,6 @@ export default function home() {
           <h1 className="text-3xl font-bold text-gray-900">
             <Home/>
           </h1>
-          
         </div>
       </main>
       <Footer />

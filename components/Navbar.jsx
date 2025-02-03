@@ -1,10 +1,29 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import '@styles/globals.css'
+import { getSession } from "next-auth/react";
+import { signOut,useSession } from 'next-auth/react'
+
+
 export default function Navbar() {
+  // const {session} = useSession()
+  
   const [isOpen, setIsOpen] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  
+  const [session, setSession] = useState(null);
+  
+  useEffect(() => {
+    const fetchSession = async () => {
+      const sessionData = await getSession();
+      console.log("Session Data:", sessionData); // Check the session data in the console
+      setSession(sessionData);
+    };
+    
+    fetchSession();
+  }, []);
+
 
   return (
     <nav className="bg-white shadow-md">
@@ -117,10 +136,12 @@ export default function Navbar() {
                   </svg>
                 </span>
               </div>
+
               <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">User Name</div>
-                <div className="text-sm font-medium text-gray-500">user@example.com</div>
+                <div className="text-base font-medium text-gray-800">{session?.user?.email}
+                </div>
               </div>
+  
             </div>
             <div className="mt-3 space-y-1">
               <Link href="/profile" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
@@ -132,9 +153,12 @@ export default function Navbar() {
               <Link href="/forgot-password" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
                 Forgot Password
               </Link>
-              <Link href="/logout" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+              {/* <Link href="/logout" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
                 Logout
-              </Link>
+              </Link> */}
+              <button onClick={()=>signOut()} className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -142,5 +166,4 @@ export default function Navbar() {
     </nav>
   )
 }
-
 

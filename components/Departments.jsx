@@ -72,7 +72,7 @@ import { useSearchParams } from "next/navigation";
     if (editedDepartmentName.trim() && editedType.trim()) {
       const response = await fetch(`/api/department/${editingDepartmentId}`, {
         method: "PUT",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name: editedDepartmentName, type:editedType}),
@@ -106,6 +106,8 @@ import { useSearchParams } from "next/navigation";
     }
   };
 
+
+  
   return (
     <div className="p-6">
      <h1 className="text-3xl font-semibold mb-4">{type === "uni" ? "University Departments" : "Admin Departments"}</h1>

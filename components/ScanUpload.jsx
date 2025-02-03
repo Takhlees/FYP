@@ -26,6 +26,17 @@ const ScanUpload = ({ action, onClose }) => {
   const webcamRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+
+  // asking for camera acces
+  const requestCameraAccess = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      console.log("Camera access granted");
+    } catch (error) {
+      console.error("Camera access denied", error);
+    }
+  };
+
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -37,6 +48,7 @@ const ScanUpload = ({ action, onClose }) => {
       } catch (error) {
         console.error("Failed to fetch departments", error);
       }
+      requestCameraAccess();
     };
 
     fetchDepartments();
@@ -50,7 +62,7 @@ const ScanUpload = ({ action, onClose }) => {
     setSelectedCategory("");
   };
 
-  const handleCapture = async() => {
+  const handleCapture = async () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setCapturedImage(imageSrc);
@@ -131,29 +143,29 @@ const ScanUpload = ({ action, onClose }) => {
     // Convert PDF pages to PNG images
     setIsProcessing(true);
 
-  try {
-    // Perform OCR on the scanned image
-    const result = await Tesseract.recognize(imageData, "eng", {
-      logger: (m) => console.log(m), // Log OCR progress
-    });
+    try {
+      // Perform OCR on the scanned image
+      const result = await Tesseract.recognize(imageData, "eng", {
+        logger: (m) => console.log(m), // Log OCR progress
+      });
 
-    const extractedText = result.data.text;
+      const extractedText = result.data.text;
 
-    // Try to find the subject in the extracted text
-    const subject = findSubjectInText(extractedText);
-    if (subject) {
-      setSubject(subject);
-    } else {
-      alert("No subject found in the scanned image.");
-      setSubject("");
+      // Try to find the subject in the extracted text
+      const subject = findSubjectInText(extractedText);
+      if (subject) {
+        setSubject(subject);
+      } else {
+        alert("No subject found in the scanned image.");
+        setSubject("");
+      }
+    } catch (error) {
+      console.error("Error performing OCR on scanned image:", error);
+      alert("Failed to extract text from the scanned image.");
+    } finally {
+      setIsProcessing(false);
     }
-  } catch (error) {
-    console.error("Error performing OCR on scanned image:", error);
-    alert("Failed to extract text from the scanned image.");
-  } finally {
-    setIsProcessing(false);
-  }
-};
+  };
   // };
 
   // Utility: Search for a "subject" in the extracted text
@@ -259,7 +271,8 @@ const ScanUpload = ({ action, onClose }) => {
           <select
             value={selectedDepartment}
             onChange={handleDepartmentChange}
-            required>
+            required
+          >
             <option value="">Select Department</option>
             {departments.map((dept) => (
               <option key={dept._id} value={dept._id}>
@@ -273,7 +286,8 @@ const ScanUpload = ({ action, onClose }) => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            disabled={!categories.length}>
+            disabled={!categories.length}
+          >
             <option value="">Select Category</option>
             {categories.map((cat, index) => (
               <option key={index} value={cat}>
@@ -332,11 +346,22 @@ const ScanUpload = ({ action, onClose }) => {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            required>
+            required
+          >
             <option value="">Select Status</option>
             <option value="open">Open</option>
             <option value="closed">Closed</option>
           </select>
+
+          {/* Edit Button */}
+          {/* <button
+            type="button"
+            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+             // Define this function to handle edit action
+          >
+            Edit
+          </button> */}
         </div>
 
         {action === "Scan" ? (
@@ -353,7 +378,10 @@ const ScanUpload = ({ action, onClose }) => {
                   screenshotFormat="image/jpeg"
                   width="100%"
                   ref={webcamRef}
-                 
+                  playsInline
+                  videoConstraints={{
+                    facingMode: "environment", // This ensures the back camera is used
+                  }}
                 />
                 <button type="button" onClick={handleCapture}>
                   Capture
@@ -385,13 +413,16 @@ const ScanUpload = ({ action, onClose }) => {
             {isProcessing && <p>Extracting text from file... Please wait.</p>}
           </div>
         )}
-       <div className="flex gap-10 justify-center"> 
-        <button type="submit" disabled={isLoading || (!file && !capturedImage)}>
-          {isLoading ? "Saving..." : "Save"}
-        </button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
+        <div className="flex gap-10 justify-center">
+          <button
+            type="submit"
+            disabled={isLoading || (!file && !capturedImage)}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
         </div>
       </form>
     </div>
