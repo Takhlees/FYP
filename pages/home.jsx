@@ -1,20 +1,3 @@
-// import Navbar from '../components/Navbar'
-// import Footer from '@components/Footer'
-// import Home from '@components/Home'
-
-// export default function home() {
-
-//   return (
-//     <>
-//             <Home/>
-//           </h1>
-//         </div>
-//       </main>
-//       <Footer />
-//     </div>
-//   )
-// }
-
 import Navbar from '../components/Navbar'
 import Footer from '@components/Footer'
 import Home from '@components/Home'

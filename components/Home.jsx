@@ -23,7 +23,7 @@ export default function Home() {
     )} </div>) : 
     (
       <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {/* <Navbar /> */}
        <div className="flex-grow w-full flex flex-col items-center p-8">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Welcome to File Management System</h1>
        <div className="flex gap-4">
@@ -42,7 +42,7 @@ export default function Home() {
    </div>
    
      </div>
-     <Footer />
+     {/* <Footer /> */}
      </div>
     )}
     
