@@ -5,47 +5,53 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
+  body, html {
+    height: 100%;
+  }
 
   .options {
     position: absolute;
     top: 5px;
     right: 5px;
     display: flex;
-    gap: 10px;
+    gap: 5px;
   }
   
   button {
     cursor: pointer;
   }
 
-  .suform {
-    @apply space-y-4;
+  .form-group , .form-groupf {
+    @apply flex flex-col mb-2 w-full ;
   }
 
-  .form-group {
-    @apply flex flex-col md:flex-row items-center space-y-2 md:space-y-0;
+ 
+
+  .form-group label, .form-groupf label {
+    @apply text-lg font-medium ;
   }
 
-  .form-group label {
-    @apply text-lg font-medium md:w-2/6;
-  }
-
-  .form-group input
+  .form-group input, .form-groupf input
 {
-  @apply mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md md:w-5/6;
+  @apply block w-full px-2 py-1.5 border border-gray-300 rounded-md text-lg focus:border-zinc-800 outline-none;
 }
 
-.form-group select  {
-  @apply mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md md:w-5/6 cursor-pointer;
+.form-group select , .form-groupf select {
+  @apply block w-full px-2 py-2 border border-gray-300 rounded-md cursor-pointer text-lg focus:border-zinc-800 outline-none;
 }
 
 .form-group input[type="date"],
 .form-group input[type="file"] {
-  @apply cursor-pointer;
+  @apply cursor-pointer ;
 }
 
 .suform button {
-  @apply px-6 py-3 mt-8 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200;
+  @apply px-6 py-3 mt-4 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 cursor-pointer text-xl font-medium;
 }
 
  
