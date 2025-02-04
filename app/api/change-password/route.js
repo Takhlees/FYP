@@ -25,20 +25,13 @@ export async function PUT(req){
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
     // Update user password
-    // user.password = hashedPassword;
+    User.password = hashedPassword;
     
     // Save updated user to database
-    // await user.save();
+    await User.save();
     
     // Return updated user data
-    // return new NextResponse.json(user);
+    return new NextResponse.json(User);
     
-    // Additional requirements:
-    // - Implement password strength validation
-    // - Use environment variables for storing sensitive data like JWT secret key
-    // - Use JWT for authentication and authorization
-    // - Implement password reset token expiration time
-    // - Add password reset link to email verification process
-    // const
 
 } 
