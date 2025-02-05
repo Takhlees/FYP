@@ -8,10 +8,13 @@ export async function GET(req) {
   const type = searchParams.get("type");
   const query = type ? { type } : {};
   try {
-    let departments;
+  
+    let departments ;
+    
     if (type === "all") {
       departments = await Department.find(); // Fetch all departments
-    } else {
+    }
+    else {
       departments = await Department.find(query); // Fetch specific type
     }
     return new Response(JSON.stringify(departments), { status: 200 });

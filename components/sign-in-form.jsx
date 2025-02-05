@@ -1,10 +1,14 @@
-
 'use client'
 
 import { useState, useEffect } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import {signIn} from "next-auth/react"
+import Link from '@node_modules/next/link'
+
 
 export default function SignInForm({ onSignInSuccess }) {
+   
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,6 +19,8 @@ export default function SignInForm({ onSignInSuccess }) {
     email: '',
     password: ''
   })
+  const router = useRouter()
+
   const [signInStatus, setSignInStatus] = useState(null)
 
   useEffect(() => {
@@ -53,21 +59,38 @@ export default function SignInForm({ onSignInSuccess }) {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setErrors({ email: '', password: '', global: '' })
     const newErrors = {}
 
-    if (!validateEmail(formData.email)) {
+    //fetching api
+    try {
+      const res = await signIn("credentials",{
+        email: formData.email,
+        password: formData.password,
+        redirect:false
+      });
+
+
+      if(res.error){
+        setErrors((prev) => ({ ...prev, global: res.error }))
+        return
+      }
+        router.push("/home")
+      
+      
+      if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
     }
-
+    
     if (!validatePassword(formData.password)) {
       newErrors.password = 
-        'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters'
+      'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters'
     }
-
+    
     setErrors(newErrors)
-
+    
     if (Object.keys(newErrors).length === 0) {
       setSignInStatus('signing-in')
       setTimeout(() => {
@@ -81,6 +104,15 @@ export default function SignInForm({ onSignInSuccess }) {
         onSignInSuccess()
       }, 2000)
     }
+  }catch(error){
+    console.error('Sign-in failed:', error);
+          setErrors((prev) => ({
+        ...prev,
+        global: 'An unexpected error occurred. Please try again later.',
+      }))
+  }
+
+
   }
 
   return (
@@ -91,6 +123,12 @@ export default function SignInForm({ onSignInSuccess }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+       {/* Global error message */}
+       {errors.global && (
+          <p className="bg-red-100 text-red-700 border border-red-400 rounded-md px-4 py-3 text-sm text-center mb-4">
+            {errors.global}
+          </p>
+        )}
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email address
@@ -156,9 +194,9 @@ export default function SignInForm({ onSignInSuccess }) {
               Remember me
             </label>
           </div>
-          <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+          <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
             Forgot your password?
-          </a>
+          </Link>
         </div>
 
         <button
@@ -178,4 +216,5 @@ export default function SignInForm({ onSignInSuccess }) {
     </div>
   )
 }
+
 

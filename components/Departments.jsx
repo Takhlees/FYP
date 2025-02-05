@@ -4,6 +4,7 @@ import '@styles/globals.css';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import {Edit, Trash } from "lucide-react";
 
  const Departments = () =>{
   const searchParams = useSearchParams();
@@ -72,7 +73,7 @@ import { useSearchParams } from "next/navigation";
     if (editedDepartmentName.trim() && editedType.trim()) {
       const response = await fetch(`/api/department/${editingDepartmentId}`, {
         method: "PUT",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name: editedDepartmentName, type:editedType}),
@@ -95,17 +96,23 @@ import { useSearchParams } from "next/navigation";
   };
 
   const deleteDepartment = async (id) => {
+    const isConfirmed = confirm("Are you sure you want to delete this item?");
+    if (isConfirmed) {
     const response = await fetch(`/api/department/${id}`, {
       method: "DELETE",
     });
 
     if (response.ok) {
       setDepartments(departments.filter((dept) => dept._id !== id));
+      alert("Item deleted successfully!")
     } else {
       alert("Failed to delete department");
     }
+  }
   };
 
+
+  
   return (
     <div className="p-6">
      <h1 className="text-3xl font-semibold mb-4">{type === "uni" ? "University Departments" : "Admin Departments"}</h1>
@@ -113,22 +120,15 @@ import { useSearchParams } from "next/navigation";
         Add Department
       </button>
       {showInput && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-1 space-y-1">
           <input
             type="text"
             placeholder="Enter Department Name"
             value={newDepartment}
             onChange={(e) => setNewDepartment(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md mb-2"
+            className="px-2 py-2 border border-gray-300 rounded-md "
           />
-          <select 
-            value={departmentType} 
-            onChange={(e) => setDepartmentType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="uni">University Department</option>
-            <option value="admin">Admin Department</option>
-          </select>
+         
           <button onClick={addDepartment} className="ml-2 px-4 py-2 bg-green-500 text-white rounded-md">Add</button>
         </div>
       )}
@@ -136,7 +136,7 @@ import { useSearchParams } from "next/navigation";
         <p className="mt-4 text-gray-500">No departments available</p>
       ) : (
         <div
-         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-10"
+         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-10"
         >
           {departments.map((dept) => (
             <div
@@ -148,9 +148,9 @@ import { useSearchParams } from "next/navigation";
               <div
                 className="flex justify-end gap-2"
               >
-                <button onClick={(e) => startEditing(dept, e)} className="px-2 py-1 bg-yellow-400 text-white rounded-md">Edit</button>
+                <button onClick={(e) => startEditing(dept, e)} className="px-2 py-1 bg-yellow-400 text-white rounded-md"><Edit size={20} /></button>
                 <button onClick={(e) => { e.stopPropagation(); deleteDepartment(dept._id); }} className="px-2 py-1 bg-red-500 text-white rounded-md">
-                  Delete
+                <Trash size={20} />
                 </button>
               </div>
             </div>

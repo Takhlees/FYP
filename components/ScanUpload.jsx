@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import '@styles/globals.css';
+import { useState, useEffect, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { jsPDF } from "jspdf";
+import { useDropzone } from "react-dropzone";
+import { UploadCloud } from "lucide-react";
 import Tesseract from "tesseract.js";
 import * as pdfjsLib from "pdfjs-dist/webpack"; // Use this import for proper webpack handling
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const ScanUpload = ({ action, onClose }) => {
-  const [type, setType] = useState("all");
+  const [type, setType] = useState("");
   const [file, setFile] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -26,6 +29,17 @@ const ScanUpload = ({ action, onClose }) => {
   const webcamRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+
+  // asking for camera acces
+  const requestCameraAccess = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      console.log("Camera access granted");
+    } catch (error) {
+      console.error("Camera access denied", error);
+    }
+  };
+
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -37,10 +51,13 @@ const ScanUpload = ({ action, onClose }) => {
       } catch (error) {
         console.error("Failed to fetch departments", error);
       }
+      requestCameraAccess();
     };
 
     fetchDepartments();
   }, [type]);
+
+  
 
   const handleDepartmentChange = (e) => {
     const departmentId = e.target.value;
@@ -50,7 +67,7 @@ const ScanUpload = ({ action, onClose }) => {
     setSelectedCategory("");
   };
 
-  const handleCapture = async() => {
+  const handleCapture = async () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setCapturedImage(imageSrc);
@@ -66,30 +83,29 @@ const ScanUpload = ({ action, onClose }) => {
     setCapturedImage(null);
   };
 
-  const handleFileChange = async (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile || selectedFile.type !== "application/pdf") {
+  const handleFileChange = async (file) => {
+    setIsProcessing(true);
+
+    
+    if (!file || file.type !== "application/pdf") {
       alert("Please upload a valid PDF file.");
       setSubject("");
+      setIsProcessing(false);
       return;
     }
-    setFile(selectedFile);
-    setIsProcessing(true);
+    setFile(file);
+    
 
     try {
       // Read the PDF as a file buffer
-      const fileBuffer = await selectedFile.arrayBuffer();
+      const fileBuffer = await file.arrayBuffer();
 
       // Step 1: Attempt text extraction using pdfjs-dist
       const text = await extractTextFromPdf(fileBuffer);
 
       // Step 2: Try to find the subject in the extracted text
       let subject = findSubjectInText(text);
-      // if (!subject) {
-      //   // If no subject found, fallback to OCR using Tesseract.js
-      //   console.log("No subject found in text. Attempting OCR...");
-      //   subject = await performOCR(fileBuffer);
-      // }
+    
 
       // Step 3: Set the extracted subject
       if (subject) {
@@ -105,7 +121,22 @@ const ScanUpload = ({ action, onClose }) => {
       setIsProcessing(false); // End processing
     }
   };
+  const onDrop = useCallback((acceptedFiles) => {
+    console.log('Files dropped:', acceptedFiles);
+     const file = acceptedFiles[0];
+    if (file) {
+      setFile(file);
+      handleFileChange(file)
+    }
+  }, []);
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] }, // Accept only PDFs
+    onDragEnter: () => console.log("Drag entered"),
+    onDragLeave: () => console.log("Drag left"), // Accept only PDFs
+  });
+  console.log('isDragActive:', isDragActive);
   async function extractTextFromPdf(fileBuffer) {
     const loadingTask = pdfjsLib.getDocument(fileBuffer);
     const pdf = await loadingTask.promise;
@@ -131,29 +162,29 @@ const ScanUpload = ({ action, onClose }) => {
     // Convert PDF pages to PNG images
     setIsProcessing(true);
 
-  try {
-    // Perform OCR on the scanned image
-    const result = await Tesseract.recognize(imageData, "eng", {
-      logger: (m) => console.log(m), // Log OCR progress
-    });
+    try {
+      // Perform OCR on the scanned image
+      const result = await Tesseract.recognize(imageData, "eng", {
+        logger: (m) => console.log(m), // Log OCR progress
+      });
 
-    const extractedText = result.data.text;
+      const extractedText = result.data.text;
 
-    // Try to find the subject in the extracted text
-    const subject = findSubjectInText(extractedText);
-    if (subject) {
-      setSubject(subject);
-    } else {
-      alert("No subject found in the scanned image.");
-      setSubject("");
+      // Try to find the subject in the extracted text
+      const subject = findSubjectInText(extractedText);
+      if (subject) {
+        setSubject(subject);
+      } else {
+        alert("No subject found in the scanned image.");
+        setSubject("");
+      }
+    } catch (error) {
+      console.error("Error performing OCR on scanned image:", error);
+      alert("Failed to extract text from the scanned image.");
+    } finally {
+      setIsProcessing(false);
     }
-  } catch (error) {
-    console.error("Error performing OCR on scanned image:", error);
-    alert("Failed to extract text from the scanned image.");
-  } finally {
-    setIsProcessing(false);
-  }
-};
+  };
   // };
 
   // Utility: Search for a "subject" in the extracted text
@@ -243,23 +274,26 @@ const ScanUpload = ({ action, onClose }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">{action} Form</h2>
+    <div className = "bg-zinc-800 p-10">
+    <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]">
+      <h2 className="text-3xl text-center font-semibold mb-6">{action} Form</h2>
       <form onSubmit={handleSubmit} className="suform">
         <div className="form-group">
-          <label>Type:</label>
+          <label>Type</label>
           <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="all">All</option>
+          <option value="">Select Type</option>
             <option value="uni">University</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Department:</label>
+        <div className='flex flex-col sm:flex-row sm:gap-4'>
+        <div className="form-groupf">
+          <label>Department</label>
           <select
             value={selectedDepartment}
             onChange={handleDepartmentChange}
-            required>
+            required
+          >
             <option value="">Select Department</option>
             {departments.map((dept) => (
               <option key={dept._id} value={dept._id}>
@@ -268,12 +302,13 @@ const ScanUpload = ({ action, onClose }) => {
             ))}
           </select>
         </div>
-        <div className="form-group">
-          <label>Category:</label>
+        <div className="form-groupf">
+          <label>Category</label>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            disabled={!categories.length}>
+            disabled={!categories.length}
+          >
             <option value="">Select Category</option>
             {categories.map((cat, index) => (
               <option key={index} value={cat}>
@@ -282,8 +317,9 @@ const ScanUpload = ({ action, onClose }) => {
             ))}
           </select>
         </div>
+        </div>
         <div className="form-group">
-          <label>Subject:</label>
+          <label>Subject</label>
           <input
             type="text"
             value={subject}
@@ -291,8 +327,9 @@ const ScanUpload = ({ action, onClose }) => {
             required
           />
         </div>
-        <div className="form-group">
-          <label>Date:</label>
+        <div className='flex flex-col sm:flex-row sm:gap-4'>
+        <div className="form-groupf">
+          <label>Date</label>
           <input
             type="date"
             value={date}
@@ -300,8 +337,8 @@ const ScanUpload = ({ action, onClose }) => {
             required
           />
         </div>
-        <div className="form-group">
-          <label>Diary No:</label>
+        <div className="form-groupf">
+          <label>Diary No</label>
           <input
             type="text"
             value={diaryNo}
@@ -309,8 +346,9 @@ const ScanUpload = ({ action, onClose }) => {
             required
           />
         </div>
+        </div>
         <div className="form-group">
-          <label>From:</label>
+          <label>From</label>
           <input
             type="text"
             value={from}
@@ -319,7 +357,7 @@ const ScanUpload = ({ action, onClose }) => {
           />
         </div>
         <div className="form-group">
-          <label>Disposal:</label>
+          <label>Disposal</label>
           <input
             type="text"
             value={disposal}
@@ -328,19 +366,30 @@ const ScanUpload = ({ action, onClose }) => {
           />
         </div>
         <div className="form-group">
-          <label>Status:</label>
+          <label>Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            required>
+            required
+          >
             <option value="">Select Status</option>
             <option value="open">Open</option>
             <option value="closed">Closed</option>
           </select>
+
+          {/* Edit Button */}
+          {/* <button
+            type="button"
+            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+             // Define this function to handle edit action
+          >
+            Edit
+          </button> */}
         </div>
 
         {action === "Scan" ? (
-          <div>
+          <div className='form-group'>
             {!isScanning && !capturedImage && (
               <button type="button" onClick={handleScanStart}>
                 Start Scanning
@@ -353,7 +402,10 @@ const ScanUpload = ({ action, onClose }) => {
                   screenshotFormat="image/jpeg"
                   width="100%"
                   ref={webcamRef}
-                 
+                  playsInline
+                  videoConstraints={{
+                    facingMode: "environment", // This ensures the back camera is used
+                  }}
                 />
                 <button type="button" onClick={handleCapture}>
                   Capture
@@ -375,25 +427,41 @@ const ScanUpload = ({ action, onClose }) => {
           </div>
         ) : (
           <div className="form-group">
-            <label>File:</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="application/pdf"
-              required
-            />
+            <label>File</label>
+            <div
+        {...getRootProps()}
+        
+        className={`flex flex-col items-center justify-center w-full h-40 p-6 border-2 border-dashed bg-gray-100 rounded-lg cursor-pointer transition-all ${
+          isDragActive ? 'border-blue-500 bg-gray-200' : 'border-gray-400'
+        }`}  >
+        <input {...getInputProps()} />
+        <UploadCloud size={40} className="text-gray-500 mb-3" />
+        {isDragActive ? (
+          <p className="text-lg font-semibold text-blue-600">Drop your file here...</p>
+        ) : (
+          <p className="text-lg text-gray-700">Drag & Drop your PDF here or <span className="text-blue-500 font-medium">click to browse</span></p>
+        )}
+      </div>
+      {file && (
+        <p className="mt-2 text-gray-700">Uploaded File: <strong>{file.name}</strong></p>
+      )}
+
             {isProcessing && <p>Extracting text from file... Please wait.</p>}
           </div>
         )}
-       <div className="flex gap-10 justify-center"> 
-        <button type="submit" disabled={isLoading || (!file && !capturedImage)}>
-          {isLoading ? "Saving..." : "Save"}
-        </button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
+        <div className="flex gap-10 justify-center">
+          <button
+            type="submit"
+            disabled={isLoading || (!file && !capturedImage)}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
         </div>
       </form>
+    </div>
     </div>
   );
 };

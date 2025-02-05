@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/navigation";
 import SignInForm from '@components/sign-in-form'
+import Loading from './loading';
 
 const Page=()=> {
   const router = useRouter();
@@ -28,8 +29,8 @@ const Page=()=> {
             <SignInForm onSignInSuccess={handleSignInSuccess} />
           ) : (
            
-            <p>Redirecting to home...</p> 
-              
+            // <p>Redirecting to home...</p> 
+              <Loading/>
             
           )}
         </div>
