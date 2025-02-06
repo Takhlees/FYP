@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
 
+import mongoose from "mongoose";
 let isConnected = false;
 
 export const connectToDB = async ()=> {
@@ -11,7 +11,7 @@ export const connectToDB = async ()=> {
     }
 
     try {
-        await mongoose.connect(process.env.MONGO_URI, {
+        await mongoose.connect(process.env.MONGODB_URL, {
             dbName: "Mailing_System",
             useNewUrlParser: true,
             useUnifiedTopology: true,

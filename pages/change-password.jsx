@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Navbar from '@components/Navbar'
 import Footer from '@components/Footer'
+
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -9,14 +10,12 @@ export default function ChangePassword() {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    console.log('Password change submitted')
   }
 
   return ( 
-    
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Navbar/>
-      <h1 className="text-3xl font-bold mb-6">Change Password</h1>n
+      <h1 className="text-3xl font-bold mb-6">Change Password</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
