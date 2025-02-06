@@ -77,7 +77,10 @@ export default function Navbar() {
                   <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Profile</Link>
                   <Link href="/change-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Change Password</Link>
                   <Link href="/forgot-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Forgot Password</Link>
-                  <Link href="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">logout</Link>
+                  {/* <Link href="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">logout</Link> */}
+                  <button onClick={()=>signOut()} className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                Logout
+              </button>
                 </div>
               )}
             </div>
