@@ -13,6 +13,7 @@ export async function POST(request) {
     const type = formData.get('type');
     const file = formData.get('file');
     const diaryNo = formData.get('diaryNo');
+    const fileName = formData.get('fileName');
     const date = formData.get('date');
     const department = formData.get('department');
     const category = formData.get('category');
@@ -22,11 +23,12 @@ export async function POST(request) {
     const disposal = formData.get('disposal');
 
     // Validate required fields
-    if (!file || !type || !diaryNo || !date || !department  || !subject || !status || !from || !disposal) {
+    if (!file || !fileName || !type || !diaryNo || !date || !department  || !subject || !status || !from || !disposal) {
       console.error('Missing required fields:', {
         type,
         diaryNo,
         date,
+        fileName,
         department,
         subject,
         status,
@@ -76,6 +78,7 @@ export async function POST(request) {
       diaryNo,
       date,
       department,
+      fileName,
       category,
       subject,
       status,

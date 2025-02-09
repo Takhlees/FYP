@@ -3,6 +3,9 @@
 import '@styles/globals.css';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import ScanUpload from "@components/ScanUpload";
+import {Edit, Download } from "lucide-react";
+
 
 export default function DepartmentPage() {
   const router = useRouter();
@@ -13,6 +16,10 @@ export default function DepartmentPage() {
   const [showInput, setShowInput] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");  // Default to "all"
   const [files, setFiles] = useState([]);
+  const [editingFile, setEditingFile] = useState(null);
+ const [showForm, setShowForm] = useState(false);
+ const [action, setAction] = useState("");
+
 
   // Fetch categories from the backend
   useEffect(() => {
@@ -80,6 +87,13 @@ export default function DepartmentPage() {
       console.error("Error fetching files:", error);
     }
   };
+
+  const handleEdit = (doc) => {
+    setEditingFile(doc);
+    setAction("Edit");
+    setShowForm(true);  // Show the upload form
+  };
+
   const handleDownload = async (doc) => {
     const response = await fetch(`/api/scanupload/${doc._id}`, {
       method: 'GET',
@@ -105,15 +119,17 @@ export default function DepartmentPage() {
   
 
   return (
-    <div className="p-6">
+    <>
+     {showForm ? (
+      <div className="mb-6">
+        <ScanUpload fileData={editingFile} action={action} onClose={() => setShowForm(false)} />
+      </div>
+    ) : (<div className="p-6">
   <h1 className="text-2xl font-semibold mb-4">Department: {name}</h1>
-  <div>
-    <button
-      onClick={() => setShowInput(!showInput)}
-      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-    >
-      Add Category
-    </button>
+  <button onClick={() => setShowInput(!showInput)} className="px-4 py-2 bg-blue-500 text-white rounded-md">
+        Add Category
+      </button>
+    
     {showInput && (
       <div className="mt-4 space-y-2">
         <input
@@ -121,77 +137,97 @@ export default function DepartmentPage() {
           placeholder="Enter Category Name"
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          className="px-2 py-2 border border-gray-300 rounded-md"
         />
         <button
           onClick={addCategory}
-          className="w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+          className="ml-2 px-4 py-2 bg-green-500 text-white rounded-md"
         >
           Add
         </button>
       </div>
     )}
-  </div>
+
   
   <div className="mt-6">
     <h3 className="text-lg font-medium mb-2">Categories:</h3>
+    <div className="relative w-full">
     <select
       value={selectedCategory}
       onChange={(e) => setSelectedCategory(e.target.value)}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 cursor-pointer"
     >
       {Array.isArray(categories) && categories.length > 0 ? (
         categories.map((category, index) => (
-          <option key={index} value={category}>
+          <option className="w-full text-black bg-white" key={index} value={category}>
             {category}
           </option>
         ))
+        
       ) : (
-        <option>No categories available</option>
+        <option className="w-full text-gray-500">No categories available</option>
       )}
     </select>
+    </div>
   </div>
   
+   
   <div className="mt-8">
     <h3 className="text-lg font-medium mb-2">Files:</h3>
-    <div className="space-y-4">
-      {files.length > 0 ? (
-        files.map((doc) => (
-          <div
-            key={doc._id}
-            className="flex flex-row items-center justify-between p-4 border border-gray-300 rounded-md bg-gray-50 shadow hover:shadow-md transition"
-          >
-            <h3 className="text-lg font-semibold">{doc.subject}</h3>
-            <p className="text-sm text-gray-500">
-              {new Date(doc.date).toLocaleDateString("en-GB")}
-            </p>
-            <p className="text-sm text-gray-700">Diary No: {doc.diaryNo}</p>
-            <p className="text-sm text-gray-700">Status: {doc.status}</p>
-            <div className="mt-2 flex gap-4">
+    
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Subject</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Diary No</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">From</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Disposal</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {files.map((doc) => (
+            <tr key={doc._id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               <a
-                href={`/api/scanupload/${doc._id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                View File
-              </a>
-              <a
-                onClick={() => handleDownload(doc)}
-                download
-                className="text-green-500 hover:underline cursor-pointer"
-              >
-                Download File
-              </a>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500">No files available for this category.</p>
-      )}
+                  href={`/api/scanupload/${doc._id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-800 hover:underline focus:outline-none"
+                >
+                  {doc.subject}
+                </a></td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                {new Date(doc.date).toLocaleDateString("en-GB")}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.diaryNo}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.from}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.disposal}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.status}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
+                <a
+                  onClick={() => handleEdit(doc)}
+                  className="text-indigo-600 hover:text-indigo-900 cursor-pointer mr-4"
+                >
+                  <Edit size={20} />
+                </a>
+                
+                <a onClick={() => handleDownload(doc)} className="text-green-600 hover:text-green-900 cursor-pointer">
+                <Download size={20}/>
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
-
+)}
+    </>
+    
   );
 }

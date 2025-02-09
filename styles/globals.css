@@ -13,14 +13,6 @@
   body, html {
     height: 100%;
   }
-
-  .options {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    gap: 5px;
-  }
   
   button {
     cursor: pointer;
@@ -29,8 +21,6 @@
   .form-group , .form-groupf {
     @apply flex flex-col mb-2 w-full ;
   }
-
- 
 
   .form-group label, .form-groupf label {
     @apply text-lg font-medium ;
@@ -50,7 +40,7 @@
   @apply cursor-pointer ;
 }
 
-.suform button {
+.subutton {
   @apply px-6 py-3 mt-4 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 cursor-pointer text-xl font-medium;
 }
 

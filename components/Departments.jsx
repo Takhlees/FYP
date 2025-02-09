@@ -111,8 +111,6 @@ import {Edit, Trash } from "lucide-react";
   }
   };
 
-
-  
   return (
     <div className="p-6">
      <h1 className="text-3xl font-semibold mb-4">{type === "uni" ? "University Departments" : "Admin Departments"}</h1>
