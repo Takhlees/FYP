@@ -1,6 +1,6 @@
 "use client";
 
-import '@styles/globals.css';
+import "@styles/globals.css";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { jsPDF } from "jspdf";
@@ -8,6 +8,7 @@ import { useDropzone } from "react-dropzone";
 import { UploadCloud } from "lucide-react";
 import Tesseract from "tesseract.js";
 import * as pdfjsLib from "pdfjs-dist/webpack"; // Use this import for proper webpack handling
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const ScanUpload = ({ action, onClose }) => {
@@ -28,7 +29,6 @@ const ScanUpload = ({ action, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const webcamRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
 
   // asking for camera acces
   const requestCameraAccess = async () => {
@@ -57,8 +57,6 @@ const ScanUpload = ({ action, onClose }) => {
     fetchDepartments();
   }, [type]);
 
-  
-
   const handleDepartmentChange = (e) => {
     const departmentId = e.target.value;
     setSelectedDepartment(departmentId);
@@ -86,7 +84,6 @@ const ScanUpload = ({ action, onClose }) => {
   const handleFileChange = async (file) => {
     setIsProcessing(true);
 
-    
     if (!file || file.type !== "application/pdf") {
       alert("Please upload a valid PDF file.");
       setSubject("");
@@ -94,7 +91,6 @@ const ScanUpload = ({ action, onClose }) => {
       return;
     }
     setFile(file);
-    
 
     try {
       // Read the PDF as a file buffer
@@ -105,7 +101,6 @@ const ScanUpload = ({ action, onClose }) => {
 
       // Step 2: Try to find the subject in the extracted text
       let subject = findSubjectInText(text);
-    
 
       // Step 3: Set the extracted subject
       if (subject) {
@@ -122,11 +117,11 @@ const ScanUpload = ({ action, onClose }) => {
     }
   };
   const onDrop = useCallback((acceptedFiles) => {
-    console.log('Files dropped:', acceptedFiles);
-     const file = acceptedFiles[0];
+    console.log("Files dropped:", acceptedFiles);
+    const file = acceptedFiles[0];
     if (file) {
       setFile(file);
-      handleFileChange(file)
+      handleFileChange(file);
     }
   }, []);
 
@@ -136,7 +131,7 @@ const ScanUpload = ({ action, onClose }) => {
     onDragEnter: () => console.log("Drag entered"),
     onDragLeave: () => console.log("Drag left"), // Accept only PDFs
   });
-  console.log('isDragActive:', isDragActive);
+  console.log("isDragActive:", isDragActive);
   async function extractTextFromPdf(fileBuffer) {
     const loadingTask = pdfjsLib.getDocument(fileBuffer);
     const pdf = await loadingTask.promise;
@@ -212,6 +207,7 @@ const ScanUpload = ({ action, onClose }) => {
     });
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -272,113 +268,119 @@ const ScanUpload = ({ action, onClose }) => {
       setIsLoading(false);
     }
   };
+  
+  console.log("setType in ScanUploadPage:", setType);
 
+
+  
   return (
-    <div className = "bg-zinc-800 p-10">
-    <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]">
-      <h2 className="text-3xl text-center font-semibold mb-6">{action} Form</h2>
-      <form onSubmit={handleSubmit} className="suform">
-        <div className="form-group">
-          <label>Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">Select Type</option>
-            <option value="uni">University</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <div className='flex flex-col sm:flex-row sm:gap-4'>
-        <div className="form-groupf">
-          <label>Department</label>
-          <select
-            value={selectedDepartment}
-            onChange={handleDepartmentChange}
-            required
-          >
-            <option value="">Select Department</option>
-            {departments.map((dept) => (
-              <option key={dept._id} value={dept._id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-groupf">
-          <label>Category</label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            disabled={!categories.length}
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat, index) => (
-              <option key={index} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-        </div>
-        <div className="form-group">
-          <label>Subject</label>
-          <input
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            required
-          />
-        </div>
-        <div className='flex flex-col sm:flex-row sm:gap-4'>
-        <div className="form-groupf">
-          <label>Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-groupf">
-          <label>Diary No</label>
-          <input
-            type="text"
-            value={diaryNo}
-            onChange={(e) => setDiaryNo(e.target.value)}
-            required
-          />
-        </div>
-        </div>
-        <div className="form-group">
-          <label>From</label>
-          <input
-            type="text"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Disposal</label>
-          <input
-            type="text"
-            value={disposal}
-            onChange={(e) => setDisposal(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            required
-          >
-            <option value="">Select Status</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-          </select>
+    <div className="bg-zinc-800 p-10">
+      <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]">
+        <h2 className="text-3xl text-center font-semibold mb-6">
+          {action} Form
+        </h2>
+        <form onSubmit={handleSubmit} className="suform">
+          <div className="form-group">
+            <label>Type</label>
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="">Select Type</option>
+              <option value="uni">University</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:gap-4">
+            <div className="form-groupf">
+              <label>Department</label>
+              <select
+                value={selectedDepartment}
+                onChange={handleDepartmentChange}
+                required
+              >
+                <option value="">Select Department</option>
+                {departments.map((dept) => (
+                  <option key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-groupf">
+              <label>Category</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                disabled={!categories.length}
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat, index) => (
+                  <option key={index} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Subject</label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row sm:gap-4">
+            <div className="form-groupf">
+              <label>Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-groupf">
+              <label>Diary No</label>
+              <input
+                type="text"
+                value={diaryNo}
+                onChange={(e) => setDiaryNo(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>From</label>
+            <input
+              type="text"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Disposal</label>
+            <input
+              type="text"
+              value={disposal}
+              onChange={(e) => setDisposal(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              required
+            >
+              <option value="">Select Status</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+            </select>
 
-          {/* Edit Button */}
-          {/* <button
+            {/* Edit Button */}
+            {/* <button
             type="button"
             className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600 
                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
@@ -386,82 +388,93 @@ const ScanUpload = ({ action, onClose }) => {
           >
             Edit
           </button> */}
-        </div>
+          </div>
 
-        {action === "Scan" ? (
-          <div className='form-group'>
-            {!isScanning && !capturedImage && (
-              <button type="button" onClick={handleScanStart}>
-                Start Scanning
-              </button>
-            )}
-            {isScanning && (
-              <div>
-                <Webcam
-                  audio={false}
-                  screenshotFormat="image/jpeg"
-                  width="100%"
-                  ref={webcamRef}
-                  playsInline
-                  videoConstraints={{
-                    facingMode: "environment", // This ensures the back camera is used
-                  }}
-                />
-                <button type="button" onClick={handleCapture}>
-                  Capture
-                </button>
-              </div>
-            )}
-            {capturedImage && (
-              <div>
-                <img
-                  src={capturedImage}
-                  alt="Captured"
-                  style={{ maxWidth: "100%", marginTop: "10px" }}
-                />
+          {action === "Scan" ? (
+            <div className="form-group">
+              {!isScanning && !capturedImage && (
                 <button type="button" onClick={handleScanStart}>
-                  Scan Again
+                  Start Scanning
                 </button>
+              )}
+              {isScanning && (
+                <div>
+                  <Webcam
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    width="100%"
+                    ref={webcamRef}
+                    playsInline
+                    videoConstraints={{
+                      facingMode: "environment", // This ensures the back camera is used
+                    }}
+                  />
+                  <button type="button" onClick={handleCapture}>
+                    Capture
+                  </button>
+                </div>
+              )}
+              {capturedImage && (
+                <div>
+                  <img
+                    src={capturedImage}
+                    alt="Captured"
+                    style={{ maxWidth: "100%", marginTop: "10px" }}
+                  />
+                  <button type="button" onClick={handleScanStart}>
+                    Scan Again
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="form-group">
+              <label>File</label>
+              <div
+                {...getRootProps()}
+                className={`flex flex-col items-center justify-center w-full h-40 p-6 border-2 border-dashed bg-gray-100 rounded-lg cursor-pointer transition-all ${
+                  isDragActive
+                    ? "border-blue-500 bg-gray-200"
+                    : "border-gray-400"
+                }`}
+              >
+                <input {...getInputProps()} />
+                <UploadCloud size={40} className="text-gray-500 mb-3" />
+                {isDragActive ? (
+                  <p className="text-lg font-semibold text-blue-600">
+                    Drop your file here...
+                  </p>
+                ) : (
+                  <p className="text-lg text-gray-700">
+                    Drag & Drop your PDF here or{" "}
+                    <span className="text-blue-500 font-medium">
+                      click to browse
+                    </span>
+                  </p>
+                )}
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="form-group">
-            <label>File</label>
-            <div
-        {...getRootProps()}
-        
-        className={`flex flex-col items-center justify-center w-full h-40 p-6 border-2 border-dashed bg-gray-100 rounded-lg cursor-pointer transition-all ${
-          isDragActive ? 'border-blue-500 bg-gray-200' : 'border-gray-400'
-        }`}  >
-        <input {...getInputProps()} />
-        <UploadCloud size={40} className="text-gray-500 mb-3" />
-        {isDragActive ? (
-          <p className="text-lg font-semibold text-blue-600">Drop your file here...</p>
-        ) : (
-          <p className="text-lg text-gray-700">Drag & Drop your PDF here or <span className="text-blue-500 font-medium">click to browse</span></p>
-        )}
-      </div>
-      {file && (
-        <p className="mt-2 text-gray-700">Uploaded File: <strong>{file.name}</strong></p>
-      )}
+              {file && (
+                <p className="mt-2 text-gray-700">
+                  Uploaded File: <strong>{file.name}</strong>
+                </p>
+              )}
 
-            {isProcessing && <p>Extracting text from file... Please wait.</p>}
+              {isProcessing && <p>Extracting text from file... Please wait.</p>}
+            </div>
+          )}
+          <div className="flex gap-10 justify-center">
+            <button
+              type="submit"
+              disabled={isLoading || (!file && !capturedImage)}
+            >
+              {isLoading ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
           </div>
-        )}
-        <div className="flex gap-10 justify-center">
-          <button
-            type="submit"
-            disabled={isLoading || (!file && !capturedImage)}
-          >
-            {isLoading ? "Saving..." : "Save"}
-          </button>
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </div>
   );
 };

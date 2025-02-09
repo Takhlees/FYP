@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import "@styles/globals.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
