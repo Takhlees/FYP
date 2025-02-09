@@ -11,23 +11,33 @@ import * as pdfjsLib from "pdfjs-dist/webpack"; // Use this import for proper we
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-const ScanUpload = ({ action, onClose }) => {
-  const [type, setType] = useState("");
-  const [file, setFile] = useState(null);
+const ScanUpload = ({ fileData, action, onClose }) => {
+  const [type, setType] = useState(fileData?.type || "");
+  const [file, setFile] = useState(fileData?.file || null);
+  const [fileName, setFileName] = useState(fileData?.file?.name || "");
   const [departments, setDepartments] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState(
+    fileData?.department || ""
+  );
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [subject, setSubject] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [diaryNo, setDiaryNo] = useState("");
-  const [from, setFrom] = useState("");
-  const [disposal, setDisposal] = useState("");
-  const [status, setStatus] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(
+    fileData?.category || ""
+  );
+  const [subject, setSubject] = useState(fileData?.subject || "");
+  const [date, setDate] = useState(
+    fileData?.date || new Date().toISOString().split("T")[0]
+  );
+  const [diaryNo, setDiaryNo] = useState(fileData?.diaryNo || "");
+  const [from, setFrom] = useState(fileData?.from || "");
+  const [disposal, setDisposal] = useState(fileData?.disposal || "");
+  const [status, setStatus] = useState(fileData?.status || "");
   const [isScanning, setIsScanning] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(
+    fileData?.capturedImage || null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const webcamRef = useRef(null);
+  const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // asking for camera acces
@@ -39,6 +49,27 @@ const ScanUpload = ({ action, onClose }) => {
       console.error("Camera access denied", error);
     }
   };
+
+  useEffect(() => {
+    if (fileData) {
+      setType(fileData.type || "");
+      setFile(fileData.file || null);
+      setFileName(fileData.file.name || "");
+      setSelectedDepartment(fileData.department || "");
+      setSelectedCategory(fileData.category || "");
+      setSubject(fileData.subject || "");
+      setDate(
+        fileData.date
+          ? fileData.date.split("T")[0]
+          : new Date().toISOString().split("T")[0]
+      );
+      setDiaryNo(fileData.diaryNo || "");
+      setFrom(fileData.from || "");
+      setDisposal(fileData.disposal || "");
+      setStatus(fileData.status || "");
+      setCapturedImage(fileData.capturedImage || null);
+    }
+  }, [fileData]); // Re-run only when fileData changes
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -57,19 +88,25 @@ const ScanUpload = ({ action, onClose }) => {
     fetchDepartments();
   }, [type]);
 
-  const handleDepartmentChange = (e) => {
-    const departmentId = e.target.value;
-    setSelectedDepartment(departmentId);
-    const department = departments.find((dept) => dept._id === departmentId);
-    setCategories(department?.categories || []);
-    setSelectedCategory("");
-  };
+  useEffect(() => {
+    if (selectedDepartment) {
+      const department = departments.find((dept) => dept._id === selectedDepartment)
+      setCategories(department?.categories || [])
+    }
+  }, [selectedDepartment, departments])
 
+  const handleDepartmentChange = (e) => {
+    const departmentId = e.target.value
+    setSelectedDepartment(departmentId)
+    setSelectedCategory("") // Reset category when department changes
+  }
+  
   const handleCapture = async () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setCapturedImage(imageSrc);
       setIsScanning(false);
+      setIsFullScreenScanning(false);
       await performOCR(imageSrc);
     } else {
       console.error("Webcam reference is null");
@@ -78,6 +115,7 @@ const ScanUpload = ({ action, onClose }) => {
 
   const handleScanStart = () => {
     setIsScanning(true);
+    setIsFullScreenScanning(true);
     setCapturedImage(null);
   };
 
@@ -91,6 +129,7 @@ const ScanUpload = ({ action, onClose }) => {
       return;
     }
     setFile(file);
+    setFileName(file.name);
 
     try {
       // Read the PDF as a file buffer
@@ -122,6 +161,7 @@ const ScanUpload = ({ action, onClose }) => {
     if (file) {
       setFile(file);
       handleFileChange(file);
+      setFileName(file.name);
     }
   }, []);
 
@@ -231,6 +271,7 @@ const ScanUpload = ({ action, onClose }) => {
 
     if (file) {
       formData.append("file", file);
+      formData.append("fileName", file.name);
     } else if (capturedImage) {
       const pdfBlob = await convertImageToPdf(capturedImage);
       formData.append("file", pdfBlob, "captured_image.pdf");
@@ -245,9 +286,14 @@ const ScanUpload = ({ action, onClose }) => {
     formData.append("disposal", disposal);
     formData.append("status", status);
 
+    const method = fileData ? "PUT" : "POST"; // Update if editing, create if new
+    const url = fileData
+      ? `/api/scanupload/${fileData._id}`
+      : "/api/scanupload";
+
     try {
-      const response = await fetch("/api/scanupload", {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         body: formData,
       });
 
@@ -274,154 +320,163 @@ const ScanUpload = ({ action, onClose }) => {
 
   
   return (
-    <div className="bg-zinc-800 p-10">
-      <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]">
-        <h2 className="text-3xl text-center font-semibold mb-6">
-          {action} Form
-        </h2>
+    <div
+      className={`${
+        isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 "
+      }`}>
+      <div
+        className={`${
+          isFullScreenScanning
+            ? "h-full max-h-full"
+            : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]"
+        }`}>
+        {!isFullScreenScanning ? (
+          <h2 className="text-3xl text-center font-semibold mb-6">
+            {action} Form
+          </h2>
+        ) : null}
         <form onSubmit={handleSubmit} className="suform">
-          <div className="form-group">
-            <label>Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="">Select Type</option>
-              <option value="uni">University</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:gap-4">
-            <div className="form-groupf">
-              <label>Department</label>
-              <select
-                value={selectedDepartment}
-                onChange={handleDepartmentChange}
-                required
-              >
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-groupf">
-              <label>Category</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                disabled={!categories.length}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat, index) => (
-                  <option key={index} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="form-group">
-            <label>Subject</label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:gap-4">
-            <div className="form-groupf">
-              <label>Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-groupf">
-              <label>Diary No</label>
-              <input
-                type="text"
-                value={diaryNo}
-                onChange={(e) => setDiaryNo(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label>From</label>
-            <input
-              type="text"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Disposal</label>
-            <input
-              type="text"
-              value={disposal}
-              onChange={(e) => setDisposal(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              required
-            >
-              <option value="">Select Status</option>
-              <option value="open">Open</option>
-              <option value="closed">Closed</option>
-            </select>
-
-            {/* Edit Button */}
-            {/* <button
-            type="button"
-            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600 
-               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-             // Define this function to handle edit action
-          >
-            Edit
-          </button> */}
-          </div>
+          {!isFullScreenScanning ? (
+            <>
+              <div className="form-group">
+                <label>Type</label>
+                <select value={type} onChange={(e) => setType(e.target.value)}>
+                  <option value="">Select Type</option>
+                  <option value="uni">University</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <div className="form-groupf">
+                  <label>Department</label>
+                  <select
+                    value={selectedDepartment}
+                    onChange={handleDepartmentChange}
+                    required>
+                    <option value="">Select Department</option>
+                    {departments.map((dept) => (
+                      <option key={dept._id} value={dept._id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-groupf">
+                  <label>Category</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}>
+                    <option value="">Select Category</option>
+                    {categories.map((cat, index) => (
+                      <option key={index} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Subject</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <div className="form-groupf">
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-groupf">
+                  <label>Diary No</label>
+                  <input
+                    type="text"
+                    value={diaryNo}
+                    onChange={(e) => setDiaryNo(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>From</label>
+                <input
+                  type="text"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Disposal</label>
+                <input
+                  type="text"
+                  value={disposal}
+                  onChange={(e) => setDisposal(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  required>
+                  <option value="">Select Status</option>
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+            </>
+          ) : null}
 
           {action === "Scan" ? (
-            <div className="form-group">
+            <div>
               {!isScanning && !capturedImage && (
-                <button type="button" onClick={handleScanStart}>
+                <button
+                  className="subutton"
+                  type="button"
+                  onClick={handleScanStart}>
                   Start Scanning
                 </button>
               )}
               {isScanning && (
-                <div>
+                <div className='bg-zinc-800 absolute inset-0 flex flex-col items-center justify-center bg-black"'>
                   <Webcam
+                    className="w-full h-full object-cover"
                     audio={false}
                     screenshotFormat="image/jpeg"
-                    width="100%"
                     ref={webcamRef}
+                    width="100%"
                     playsInline
                     videoConstraints={{
                       facingMode: "environment", // This ensures the back camera is used
                     }}
                   />
-                  <button type="button" onClick={handleCapture}>
-                    Capture
-                  </button>
+                  <div className="relative mb-2 mt-4 flex justify-center items-center rounded-full w-20 h-20">
+                    <button
+                      className="w-16 h-16 bg-white border-4 border-green-500 rounded-full shadow-lg hover:bg-gray-300 transition duration-200"
+                      onClick={handleCapture}></button>
+                  </div>
                 </div>
               )}
               {capturedImage && (
-                <div>
+                <div className="space-y-4">
                   <img
                     src={capturedImage}
                     alt="Captured"
-                    style={{ maxWidth: "100%", marginTop: "10px" }}
+                    className="w-full rounded-lg shadow-lg"
                   />
-                  <button type="button" onClick={handleScanStart}>
+                  <button
+                    className="subutton"
+                    type="button"
+                    onClick={handleScanStart}>
                     Scan Again
                   </button>
                 </div>
@@ -436,8 +491,7 @@ const ScanUpload = ({ action, onClose }) => {
                   isDragActive
                     ? "border-blue-500 bg-gray-200"
                     : "border-gray-400"
-                }`}
-              >
+                }`}>
                 <input {...getInputProps()} />
                 <UploadCloud size={40} className="text-gray-500 mb-3" />
                 {isDragActive ? (
@@ -455,24 +509,26 @@ const ScanUpload = ({ action, onClose }) => {
               </div>
               {file && (
                 <p className="mt-2 text-gray-700">
-                  Uploaded File: <strong>{file.name}</strong>
+                  Uploaded File: <strong >{fileName}</strong>
                 </p>
               )}
 
               {isProcessing && <p>Extracting text from file... Please wait.</p>}
             </div>
           )}
-          <div className="flex gap-10 justify-center">
-            <button
-              type="submit"
-              disabled={isLoading || (!file && !capturedImage)}
-            >
-              {isLoading ? "Saving..." : "Save"}
-            </button>
-            <button type="button" onClick={onClose}>
-              Cancel
-            </button>
-          </div>
+          {!isFullScreenScanning ? (
+            <div className="flex gap-10 justify-center">
+              <button
+                className="subutton"
+                type="submit"
+                disabled={isLoading || (!file && !capturedImage)}>
+                {isLoading ? "Saving..." : "Save"}
+              </button>
+              <button className="subutton" type="button" onClick={onClose}>
+                Cancel
+              </button>
+            </div>
+          ) : null}
         </form>
       </div>
     </div>
