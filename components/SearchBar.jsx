@@ -1,52 +1,53 @@
-import { NextResponse } from "next/server";
-import Loading from "@pages/loading";
-import React, { useState } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
+import { useState, useEffect } from "react";
+import { debounce } from "lodash";
 
-const SearchBar = () => {
-  const [searchResult, setSearchResult] = useState([]);
-  const [searchQuery, setSearchQuery] = useState();
-  const [loading, setLoading] = useState();
+export default function SearchBar({ searchQuery, setSearchQuery }) {
+  const [localQuery, setLocalQuery] = useState(searchQuery);
 
-  const handlesubmit = async (e) => {
-    e.preventDefault();
+  // Debounce the search query update
+  const debouncedSetSearchQuery = debounce(setSearchQuery, 300);
 
-    if (!searchQuery.trim()) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/search-bar?query=${searchQuery}`);
-      const data = await response.json();
-      setSearchResult(data);
-    } catch (error) {
-      return NextResponse.json({ msg: "some error occurred" }, { status: 500 });
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    debouncedSetSearchQuery(localQuery);
+  }, [localQuery, debouncedSetSearchQuery]);
 
   return (
-    <div className="min-h-screen p-8 mb-0 text-white">
-      <form onSubmit={handlesubmit} className="sm:w-[550px] w-full mx-auto p-4 relative mb-1">
-        <div className="relative">
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Type Here"
-            className="w-full p-4 pl-6 rounded-full bg-slate-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+    <div className="mb-6 flex justify-center">
+      <div className="relative w-full max-w-md">
+        <input
+          type="text"
+          placeholder="Search files by subject, diary no, or from..."
+          value={localQuery}
+          onChange={(e) => setLocalQuery(e.target.value)}
+          className="w-full px-4 py-3 pl-10 text-sm text-gray-700 placeholder-gray-500 bg-white border-2 border-gray-200 rounded-full shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+        />
+        <svg
+          className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
+        </svg>
+        {/* Clear button */}
+        {localQuery && (
           <button
-            type="submit"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2"
+            onClick={() => {
+              setLocalQuery("");
+              setSearchQuery("");
+            }}
+            className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-all duration-200"
           >
-            <AiOutlineSearch className="text-white text-3xl hover:text-blue-400 transition duration-200" />
+            ✕
           </button>
-        </div>
-      </form>
+        )}
+      </div>
     </div>
   );
-};
-
-export default SearchBar;
+}
