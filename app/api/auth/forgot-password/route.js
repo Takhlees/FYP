@@ -1,4 +1,3 @@
-
 import User from "@models/user";
 import { NextResponse } from "next/server";
 import { connectToDB } from "@utils/database";
@@ -32,7 +31,6 @@ export async function POST(req) {
 
     // Reset URL
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    console.log("Reset URL:", resetUrl);
 
     // Email Body
     const body = `Reset password by clicking on the following link: ${resetUrl}`;

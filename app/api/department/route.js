@@ -51,7 +51,7 @@ export async function POST(req) {
 
 // DELETE department
 export async function DELETE(req, { params }) {
-  const { id } = params; // Get the department id from URL params
+  const { id } = await params; // Get the department id from URL params
 
   await connectToDB();
 

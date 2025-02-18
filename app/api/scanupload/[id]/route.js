@@ -44,8 +44,42 @@ export async function GET(req, { params }) {
 }
 
 
-export async function PUT(req){
-  // This function should update the document in the database
+export async function PUT(req, { params }) {
   
+  const { id } = await params; 
+  await connectToDB();
+  try {
+    const formData = await req.formData();
+    
+    if (!id) {
+      return NextResponse.json({ error: "File ID is required for updating" }, { status: 400 });
+    }
 
+    const updateData = {
+      type: formData.get("type"),
+      department: formData.get("department"),
+      category: formData.get("category"),
+      fileName: formData.get("fileName"),
+      subject: formData.get("subject"),
+      date: formData.get("date"),
+      diaryNo: formData.get("diaryNo"),
+      from: formData.get("from"),
+      disposal: formData.get("disposal"),
+      status: formData.get("status"),
+    };
+
+    if (formData.has("file")) {
+      const file = formData.get("file");
+    }
+
+    const updatedFile = await ScanUpload.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updatedFile) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "File updated successfully", file: updatedFile }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
