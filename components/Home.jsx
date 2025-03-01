@@ -50,6 +50,60 @@ export default function Home() {
     setShowForm(true);
   };
 
+
+
+
+const quickActions = [
+  {
+    title: "Recent Files",
+    description: "Access your recently viewed documents",
+    icon: "⏰",
+  },
+  {
+    title: "Favorites",
+    description: "View and manage your starred items",
+    icon: "⭐",
+  },
+  {
+    title: "Folders",
+    description: "Browse through your organized folders",
+    icon: "📁",
+  },
+  {
+    title: "Shared",
+    description: "See files shared with you",
+    icon: "👥",
+  },
+]
+
+const features = [
+  {
+    title: "Smart Organization",
+    description: "AI-powered file categorization and tagging system",
+    icon: "🔧",
+  },
+  {
+    title: "Advanced Analytics",
+    description: "Detailed insights into your document usage and patterns",
+    icon: "📊",
+  },
+  {
+    title: "Secure Sharing",
+    description: "Enterprise-grade security for your sensitive documents",
+    icon: "🛡️",
+  },
+]
+
+
+
+
+
+
+
+
+
+
+
   return (
     <>
       {showForm ? (
