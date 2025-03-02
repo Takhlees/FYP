@@ -3,138 +3,173 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { X, Mail, Briefcase, Pencil, Check, Camera, User } from "lucide-react"
+import Image from "next/image"
 
-const Profile = () => {
+export default function ProfilePage() {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
-  const [profileData, setProfileData] = useState({
-    name: "Huba",
-    cnic: "3510362259362",
-    phone: "0325 8783249",
-    email: "hubaijaz356@gmail.com",
-    address: "cantt",
-  })
+  const [profile, setProfile] = useState(null)
+  const [formData, setFormData] = useState(null)
 
-  const [editedData, setEditedData] = useState({ ...profileData })
-
+  // Load profile data from localStorage on component mount
   useEffect(() => {
-    // Load profile data from localStorage on component mount
-    const storedProfile = localStorage.getItem("profileData")
-    if (storedProfile) {
-      setProfileData(JSON.parse(storedProfile))
-      setEditedData(JSON.parse(storedProfile))
+    const savedProfile = localStorage.getItem("profileData")
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile)
+      setProfile(parsedProfile)
+      setFormData(parsedProfile)
+    } else {
+      // If no saved data, use the default profile
+      const defaultProfile = {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        job: "Software Developer",
+        image: "/background.jpg?height=128&width=128",
+      }
+      setProfile(defaultProfile)
+      setFormData(defaultProfile)
+      localStorage.setItem("profileData", JSON.stringify(defaultProfile))
     }
   }, [])
 
-  const handleEdit = () => {
-    setIsEditing(true)
-    setEditedData({ ...profileData })
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSave = () => {
-    setProfileData({ ...editedData })
+    const updatedProfile = { ...formData }
+    setProfile(updatedProfile)
+    setIsEditing(false)
     // Save to localStorage
-    localStorage.setItem("profileData", JSON.stringify(editedData))
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setIsEditing(false)
-    setEditedData({ ...profileData })
-  }
-
-  const handleChange = (field, value) => {
-    setEditedData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+    localStorage.setItem("profileData", JSON.stringify(updatedProfile))
   }
 
   const handleClose = () => {
-    router.push("/home")
+    router.back() // This will navigate to the previous page
+  }
+
+  if (!profile) {
+    return <div>Loading...</div> // Or any loading indicator
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Blurred background image */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/background.jpg?height=1080&width=1920')",
-          filter: "blur(8px)",
-          transform: "scale(1.1)",
-          zIndex: -1,
-        }}
-      ></div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="relative w-full max-w-md bg-white rounded-lg shadow-md p-8">
+        {/* Cross button in the top-right corner */}
+        <button
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+          onClick={handleClose}
+        >
+          <X className="h-5 w-5" />
+        </button>
 
-      {/* Content */}
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-3xl w-full mx-auto p-6 bg-white rounded-lg shadow-xl relative">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">Profile</h2>
-            {/* Close button */}
+        {isEditing ? (
+          /* Edit Mode */
+          <>
+            <div className="flex flex-col items-center space-y-6 mb-6">
+              <div className="relative">
+                <Image
+                  src={profile.image || "/background.jpg"}
+                  alt="Profile"
+                  width={128}
+                  height={128}
+                  className="rounded-full"
+                />
+                <button className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full">
+                  <Camera className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="w-full space-y-4">
+                <div className="flex items-center">
+                  <span className="text-gray-500 mr-3">
+                    <User className="h-5 w-5" />
+                  </span>
+                  <input
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Name"
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <span className="text-gray-500 mr-3">
+                    <Mail className="h-5 w-5" />
+                  </span>
+                  <input
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Email"
+                    type="email"
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <span className="text-gray-500 mr-3">
+                    <Briefcase className="h-5 w-5" />
+                  </span>
+                  <input
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    name="job"
+                    value={formData.job}
+                    onChange={handleInputChange}
+                    placeholder="Job Title"
+                  />
+                </div>
+              </div>
+            </div>
+
             <button
-              onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors text-2xl font-bold"
-              aria-label="Close profile"
+              className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 flex items-center justify-center"
+              onClick={handleSave}
             >
-              &#x2715;
+              <Check className="mr-2 h-4 w-4" /> Save Changes
             </button>
-          </div>
-          <div className="border rounded-lg overflow-hidden mb-4">
-            <table className="w-full">
-              <tbody>
-                {Object.entries(profileData).map(([key, value]) => (
-                  <tr key={key} className="border-b">
-                    <td className="p-3 bg-gray-50 w-36 text-gray-700 capitalize">{key}</td>
-                    <td className="p-3 w-4 text-gray-600">:</td>
-                    <td className="p-3 text-gray-800">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editedData[key]}
-                          onChange={(e) => handleChange(key, e.target.value)}
-                          className="w-full max-w-md px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      ) : (
-                        value
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex justify-end gap-2">
-            {!isEditing ? (
-              <button
-                onClick={handleEdit}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
-              >
-                Edit Profile
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition duration-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
-                >
-                  Save
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+          </>
+        ) : (
+          /* View Mode */
+          <>
+            <div className="flex flex-col items-center space-y-6 mb-6">
+              <Image
+                src={profile.image || "/background.jpg"}
+                alt="Profile"
+                width={128}
+                height={128}
+                className="rounded-full"
+              />
+
+              <div className="text-center space-y-4">
+                <h2 className="text-2xl font-bold">{profile.name}</h2>
+
+                <div className="flex items-center justify-center text-gray-600">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span>{profile.email}</span>
+                </div>
+
+                <div className="flex items-center justify-center text-gray-600">
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  <span>{profile.job}</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 flex items-center justify-center"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="mr-2 h-4 w-4" /> Edit Profile
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-export default Profile
 
