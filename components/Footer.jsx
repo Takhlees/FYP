@@ -77,6 +77,7 @@ export default function Footer() {
                     />
                   </svg>
                   <a href="mailto:info@gcu.edu.pk" className="hover:text-blue-200">
+                  {/* <a href="mailto:hubaijaz356gmail.com" className="hover:text-blue-200"> */}
                     info@gcu.edu.pk
                   </a>
                 </div>
@@ -120,7 +121,3 @@ export default function Footer() {
 }
 
 
-  
-  
-  
-  

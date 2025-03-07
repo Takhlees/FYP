@@ -1,29 +1,28 @@
-"use client"
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import '@styles/globals.css'
-import { getSession } from "next-auth/react";
-import { signOut,useSession } from 'next-auth/react'
 
+
+ "use client"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import "@styles/globals.css"
+import { getSession, signOut } from "next-auth/react"
 
 export default function Navbar() {
-  // const {session} = useSession()
-  
   const [isOpen, setIsOpen] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
-  
-  const [session, setSession] = useState(null);
-  
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
+
+  const [session, setSession] = useState(null)
+
   useEffect(() => {
     const fetchSession = async () => {
-      const sessionData = await getSession();
-      console.log("Session Data:", sessionData); // Check the session data in the console
-      setSession(sessionData);
-    };
-    
-    fetchSession();
-  }, []);
+      const sessionData = await getSession()
+      console.log("Session Data:", sessionData) // Check the session data in the console
+      setSession(sessionData)
+    }
 
+    fetchSession()
+  }, [])
 
   return (
     <nav className="bg-secondary text-white shadow-md">
@@ -31,7 +30,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="#" className="text-xl font-bold">
+              <Link href="#" className="text-xl font-bold text-white">
                 Doculus
               </Link>
             </div>
@@ -51,7 +50,6 @@ export default function Navbar() {
               <Link href="/about" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 About
               </Link>
-             
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -73,14 +71,40 @@ export default function Navbar() {
                 </button>
               </div>
               {showDropdown && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu">
-                  <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Profile</Link>
-                  <Link href="/change-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Change Password</Link>
-                  <Link href="/forgot-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Forgot Password</Link>
-                  {/* <Link href="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">logout</Link> */}
-                  <button onClick={()=>signOut()} className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Logout
-              </button>
+                <div
+                  className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-[#061A40] ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby="user-menu"
+                >
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-2 text-sm text-white hover:bg-[#006DAA]"
+                    role="menuitem"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/change-password"
+                    className="block px-4 py-2 text-sm text-white hover:bg-[#006DAA]"
+                    role="menuitem"
+                  >
+                    Change Password
+                  </Link>
+                  {/* <Link
+                    href="/forgot-password"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Forgot Password
+                  </Link> */}
+                  <button
+                    onClick={() => signOut()}
+                    className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#006DAA]"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
             </div>
@@ -95,11 +119,25 @@ export default function Navbar() {
             >
               <span className="sr-only">Open main menu</span>
               {!isOpen ? (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               ) : (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}
@@ -109,7 +147,7 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="sm:hidden" id="mobile-menu">
+        <div className="sm:hidden bg-[#0353A4]" id="mobile-menu">
           <div className="pt-2 pb-3 space-y-1">
             <Link href="/home" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Home
@@ -126,9 +164,6 @@ export default function Navbar() {
             <Link href="/tutorial" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Tutorial
             </Link>
-          
-          
-
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-4">
@@ -139,34 +174,56 @@ export default function Navbar() {
                   </svg>
                 </span>
               </div>
-
               <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">{session?.user?.email}
-                </div>
+                <div className="text-base font-medium text-white">{session?.user?.email}</div>
               </div>
-  
-            </div>
-            <div className="mt-3 space-y-1">
-              <Link href="/profile" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Profile
-              </Link>
-              <Link href="/change-password" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Change Password
-              </Link>
-              <Link href="/forgot-password" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Forgot Password
-              </Link>
-              {/* <Link href="/logout" className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Logout
-              </Link> */}
-              <button onClick={()=>signOut()} className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
-                Logout
+              <button
+                onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                className="ml-auto flex-shrink-0 bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <span className="sr-only">Open user menu</span>
+                <svg
+                  className={`h-6 w-6 transition-transform ${mobileDropdownOpen ? "rotate-180" : ""}`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
             </div>
+            {mobileDropdownOpen && (
+              <div className="mt-3 space-y-1">
+                <Link href="/profile" className="block px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]">
+                  Profile
+                </Link>
+                <Link
+                  href="/change-password"
+                  className="block px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
+                >
+                  Change Password
+                </Link>
+                {/* <Link
+                  href="/forgot-password"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  Forgot Password
+                </Link> */}
+                <button
+                  onClick={() => signOut()}
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
     </nav>
   )
 }
+
+
 
