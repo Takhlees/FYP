@@ -29,13 +29,13 @@ export default function Home() {
        <div className="flex gap-4">
        <button
            onClick={() => handleOpenForm("Scan")}
-           className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200 block lg:hidden text-lg font-medium"
+           className="px-6 py-3 bg-secondary text-white rounded-lg shadow-md hover:bg-dark transition duration-200 block lg:hidden text-lg font-medium"
          >
            Scan
          </button>
      <button
        onClick={() => handleOpenForm("Upload")}
-       className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 text-lg font-medium"
+       className="px-6 py-3 bg-mid text-white rounded-lg shadow-md hover:bg-secondary transition duration-200 text-lg font-medium"
      >
        Upload
      </button>

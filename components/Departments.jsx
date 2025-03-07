@@ -112,21 +112,22 @@ import {Edit, Trash } from "lucide-react";
   };
 
   return (
-    <div className="p-6">
-     <h1 className="text-3xl font-semibold mb-4">{type === "uni" ? "University Departments" : "Admin Departments"}</h1>
-      <button onClick={() => setShowInput(!showInput)} className="px-4 py-2 bg-blue-500 text-white rounded-md">
+    <div className="p-5 ">
+      <div className='flex justify-between items-center mb-4'>
+     <h1 className="text-3xl font-semibold">{type === "uni" ? "University Departments" : "Admin Departments"}</h1>
+      <button onClick={() => setShowInput(!showInput)} className="px-4 py-2 bg-mid text-white rounded-md hover:bg-secondary">
         Add Department
       </button>
+      </div>
       {showInput && (
-        <div className="mt-1 space-y-1">
+        <div className="mt-1 flex space-x-2 w-full">
           <input
             type="text"
             placeholder="Enter Department Name"
             value={newDepartment}
             onChange={(e) => setNewDepartment(e.target.value)}
-            className="px-2 py-2 border border-gray-300 rounded-md "
+            className="px-2 py-2 w-full border border-gray-300 rounded-md "
           />
-         
           <button onClick={addDepartment} className="ml-2 px-4 py-2 bg-green-500 text-white rounded-md">Add</button>
         </div>
       )}
@@ -139,15 +140,15 @@ import {Edit, Trash } from "lucide-react";
           {departments.map((dept) => (
             <div
               key={dept._id}
-              className="relative p-4 h-32 border border-gray-300 rounded-md bg-gray-100 shadow hover:shadow-lg transition cursor-pointer flex flex-col justify-between"
+              className="relative p-4 h-36 border border-gray-400 rounded-md shadow-md hover:shadow-lg transition cursor-pointer flex flex-col justify-between"
               onClick={() => goToDepartment(dept)}
             >
                <h2 className="text-lg font-medium">{dept.name}</h2>
               <div
                 className="flex justify-end gap-2"
               >
-                <button onClick={(e) => startEditing(dept, e)} className="px-2 py-1 bg-yellow-400 text-white rounded-md"><Edit size={20} /></button>
-                <button onClick={(e) => { e.stopPropagation(); deleteDepartment(dept._id); }} className="px-2 py-1 bg-red-500 text-white rounded-md">
+                <button onClick={(e) => startEditing(dept, e)} className="px-1 py-1 rounded-md hover:text-yellow-500"><Edit size={20} /></button>
+                <button onClick={(e) => { e.stopPropagation(); deleteDepartment(dept._id); }} className="px-1 py-1 rounded-md hover:text-red-600">
                 <Trash size={20} />
                 </button>
               </div>

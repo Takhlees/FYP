@@ -8,4 +8,6 @@ const nextConfig = withOptimizedImages({
   },
 });
 
+  
+
 export default nextConfig;
