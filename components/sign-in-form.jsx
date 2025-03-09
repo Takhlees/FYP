@@ -228,7 +228,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn, signOut } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function SignInForm({ onSignInSuccess }) {
@@ -246,27 +246,31 @@ export default function SignInForm({ onSignInSuccess }) {
   const [signInStatus, setSignInStatus] = useState(null);
   const router = useRouter();
 
+  // Load remembered email and password from localStorage on component mount
   useEffect(() => {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const rememberedPassword = localStorage.getItem('rememberedPassword');
     if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail, rememberMe: true }));
+      setFormData((prev) => ({ ...prev, email: rememberedEmail }));
     }
-    // signOut({callbackUrl: '/'})
-  }, [router]);
+    if (rememberedPassword) {
+      setFormData((prev) => ({ ...prev, password: rememberedPassword }));
+    }
+  }, []);
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  // Handle input focus to show remembered email and password
+  const handleEmailFocus = () => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: rememberedEmail }));
+    }
   };
 
-  const validatePassword = (password) => {
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    const isLongEnough = password.length >= 8;
-
-    return hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar && isLongEnough;
+  const handlePasswordFocus = () => {
+    const rememberedPassword = localStorage.getItem('rememberedPassword');
+    if (rememberedPassword && !formData.password) {
+      setFormData((prev) => ({ ...prev, password: rememberedPassword }));
+    }
   };
 
   const handleChange = (e) => {
@@ -280,20 +284,13 @@ export default function SignInForm({ onSignInSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({ email: '', password: '', global: '' });
-    const newErrors = {};
 
-    // Validate email and password
-    if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.email.includes('@')) {
+      setErrors((prev) => ({ ...prev, email: 'Please enter a valid email' }));
+      return;
     }
-
-    if (!validatePassword(formData.password)) {
-      newErrors.password =
-        'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (formData.password.length < 8) {
+      setErrors((prev) => ({ ...prev, password: 'Password must be at least 8 characters long' }));
       return;
     }
 
@@ -315,126 +312,102 @@ export default function SignInForm({ onSignInSuccess }) {
       // Handle "Remember Me" functionality
       if (formData.rememberMe) {
         localStorage.setItem('rememberedEmail', formData.email);
+        localStorage.setItem('rememberedPassword', formData.password);
       } else {
         localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
       }
 
-      // Redirect to the home page on successful sign-in
       router.push('/home');
     } catch (error) {
-      console.error('Sign-in failed:', error);
-      setErrors((prev) => ({
-        ...prev,
-        global: 'An unexpected error occurred. Please try again later.',
-      }));
+      setErrors((prev) => ({ ...prev, global: 'An error occurred. Please try again.' }));
       setSignInStatus(null);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">Welcome to GCU Mailbox</h1>
-        <p className="text-gray-600">Sign in to access your university email</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Global error message */}
-        {errors.global && (
-          <p className="bg-red-100 text-red-700 border border-red-400 rounded-md px-4 py-3 text-sm text-center mb-4">
-            {errors.global}
-          </p>
-        )}
-
-        {/* Email field */}
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            aria-describedby="email-error"
-          />
-          {errors.email && (
-            <p id="email-error" className="text-red-500 text-sm mt-1">
-              {errors.email}
-            </p>
-          )}
+    // <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="w-full max-w-md p-12 bg-white rounded-xl shadow-lg">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold mb-2 text-black">Welcome to GCU Mailbox</h1>
+          <p className="text-gray-600">Sign in to access your university email</p>
         </div>
 
-        {/* Password field */}
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10`}
-              aria-describedby="password-error"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-gray-500" />
-              ) : (
-                <Eye className="h-4 w-4 text-gray-500" />
-              )}
-            </button>
-          </div>
-          {errors.password && (
-            <p id="password-error" className="text-red-500 text-sm mt-1">
-              {errors.password}
-            </p>
-          )}
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {errors.global && <p className="text-red-600">{errors.global}</p>}
 
-        {/* Remember Me and Forgot Password */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember"
-              name="rememberMe"
-              type="checkbox"
-              checked={formData.rememberMe}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
-              Remember me
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
             </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              onFocus={handleEmailFocus} // Show remembered email on focus
+              autoComplete="email"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 bg-white"
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
-          <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
-            Forgot your password?
-          </Link>
-        </div>
 
-        {/* Submit button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          disabled={signInStatus === 'signing-in'}
-        >
-          {signInStatus === 'signing-in' ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
-    </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange}
+                onFocus={handlePasswordFocus} // Show remembered password on focus
+                autoComplete="new-password"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 pr-10 bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
+              </button>
+            </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          </div>
+
+          {/* Remember Me */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center bg-white">
+              <input
+                id="remember"
+                name="rememberMe"
+                type="checkbox"
+                checked={formData.rememberMe}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded bg-white"
+              />
+              <label htmlFor="remember" className="ml-2 text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
+              Forgot your password?
+            </Link>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2"
+            disabled={signInStatus === 'signing-in'}
+          >
+            {signInStatus === 'signing-in' ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
+      </div>
   );
 }
