@@ -598,19 +598,20 @@ export default function DepartmentPage() {
         </div>
       ) : (
         <div className="p-6">
+          <div className="flex justify-between">
           <h1 className="text-2xl font-semibold mb-4">Department: {name}</h1>
-          <button onClick={() => setShowInput(!showInput)} className="px-4 py-2 bg-blue-500 text-white rounded-md">
+          <button onClick={() => setShowInput(!showInput)} className="px-4 bg-mid text-white rounded-md hover:bg-secondary">
             Add Category
           </button>
-
+          </div>
           {showInput && (
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-x-2 flex w-full">
               <input
                 type="text"
                 placeholder="Enter Category Name"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="px-2 py-2 border border-gray-300 rounded-md"
+                className="px-2 py-2 w-full border border-gray-300 rounded-md"
               />
               <button
                 onClick={addCategory}
@@ -623,7 +624,7 @@ export default function DepartmentPage() {
 
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-2">Categories:</h3>
-            <div className="relative w-full">
+            <div className="w-full">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -631,7 +632,7 @@ export default function DepartmentPage() {
               >
                 {Array.isArray(categories) && categories.length > 0 ? (
                   categories.map((category, index) => (
-                    <option className="w-full text-black bg-white" key={index} value={category}>
+                    <option key={index} value={category}>
                       {category}
                     </option>
                   ))

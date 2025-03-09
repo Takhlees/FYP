@@ -25,7 +25,7 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav className="bg-[#003559] shadow-md sticky top-0 z-50">
+    <nav className="bg-secondary text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -35,34 +35,19 @@ export default function Navbar() {
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/home"
-                className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-[#061A40]"
-              >
+              <Link href="/home" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Home
               </Link>
-              <Link
-                href="/departments?type=uni"
-                className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-[#006DAA]"
-              >
+              <Link href="/departments?type=uni" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Department
               </Link>
-              <Link
-                href="/departments?type=admin"
-                className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-[#006DAA]"
-              >
+              <Link href="/departments?type=admin" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Admin
               </Link>
-              <Link
-                href="/tutorial"
-                className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-[#006DAA]"
-              >
+              <Link href="/tutorial" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 Tutorial
               </Link>
-              <Link
-                href="/about"
-                className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-[#006DAA]"
-              >
+              <Link href="/about" className="text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
                 About
               </Link>
             </div>
@@ -72,7 +57,7 @@ export default function Navbar() {
               <div>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="bg-primary flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   id="user-menu"
                   aria-expanded="false"
                   aria-haspopup="true"
@@ -164,34 +149,19 @@ export default function Navbar() {
       {isOpen && (
         <div className="sm:hidden bg-[#0353A4]" id="mobile-menu">
           <div className="pt-2 pb-3 space-y-1">
-            <Link
-              href="/home"
-              className="text-white hover:bg-[#006DAA] block px-3 py-2 rounded-md text-base font-medium"
-            >
+            <Link href="/home" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Home
             </Link>
-            <Link
-              href="/departments?type=uni"
-              className="text-white hover:bg-[#006DAA] block px-3 py-2 rounded-md text-base font-medium"
-            >
+            <Link href="/departments?type=uni" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Department
             </Link>
-            <Link
-              href="/departments?type=admin"
-              className="text-white hover:bg-[#006DAA] block px-3 py-2 rounded-md text-base font-medium"
-            >
+            <Link href="/departments?type=admin" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Admin
             </Link>
-            <Link
-              href="/about"
-              className="text-white hover:bg-[#006DAA] block px-3 py-2 rounded-md text-base font-medium"
-            >
+            <Link href="/about" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               About
             </Link>
-            <Link
-              href="/tutorial"
-              className="text-white hover:bg-[#006DAA] block px-3 py-2 rounded-md text-base font-medium"
-            >
+            <Link href="/tutorial" className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium">
               Tutorial
             </Link>
           </div>

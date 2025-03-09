@@ -7,7 +7,7 @@ const adminDep = () => {
   return (
     <>
       <Navbar />
-      <div>
+      <div >
         <Departments />
       </div>
       <Footer />
