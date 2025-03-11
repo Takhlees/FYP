@@ -5,6 +5,35 @@
 @tailwind components;
 @tailwind utilities;
 
+
+ /* :root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+.dark {
+  --background: #1a202c;
+  --foreground: #f7fafc;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+} */
+
+/* globals.css */
+[data-theme="light"] {
+  --icon-color: #000000; /* Dark color for light theme */
+  --background-color: #ffffff;
+  --text-color: #000000;
+}
+
+[data-theme="dark"] {
+  --icon-color: #ffffff; /* Light color for dark theme */
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -44,4 +73,3 @@
   @apply px-6 py-3 mt-4 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 cursor-pointer text-xl font-medium;
 }
 
- 

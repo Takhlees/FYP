@@ -1,10 +1,8 @@
 import { Inter } from "next/font/google";
-import "@styles/globals.css";
-import AuthProvider from "./AuthProvider";
-// import { SessionProvider } from "@node_modules/next-auth/react";
-import { ToastContainer } from 'react-toastify';
+import "../styles/globals.css";
+import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,14 +14,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning={true} className={inter.className}>
-      <AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="light">
         {children}
-      </AuthProvider>
        <ToastContainer theme="dark"/>
+      </ThemeProvider> 
       </body>
     </html>
   );
 }
 
+
+{/* <AuthProvider> */}
+{/* </AuthProvider> */}
