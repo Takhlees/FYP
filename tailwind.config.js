@@ -26,7 +26,7 @@ export const content = [
 export const theme = {
   extend: {
     colors: {
-      primary: "#00474E",  
+      primary: "rgb(0, 71, 78)",  
       secondary: "#006D77", 
       mid: "#1E7D84",
       dark: "#532B88",

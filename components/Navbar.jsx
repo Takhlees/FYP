@@ -299,16 +299,12 @@
 //   );
 // }
 
-
-
-
 "use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import "@styles/globals.css"
 import { getSession, signOut } from "next-auth/react"
-import { Moon, Sun } from "react-feather" // Assuming you're using react-feather for icons
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)

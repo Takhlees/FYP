@@ -119,6 +119,7 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { Scan, Upload } from "lucide-react";
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
@@ -404,15 +405,17 @@ export default function Home() {
             <div className="flex gap-4">
               <button
                 onClick={() => handleOpenForm("Scan")}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200 block lg:hidden text-lg font-medium"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200 block lg:hidden text-lg font-medium"
               >
-                Scan
+                <Scan size={20} /> Scan
+                
               </button>
               <button
                 onClick={() => handleOpenForm("Upload")}
-                className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 text-lg font-medium"
+                className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 text-lg font-medium"
               >
-                Upload
+                <Upload size={20} /> Upload
+                
               </button>
             </div>
           </div>
