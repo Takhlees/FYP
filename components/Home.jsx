@@ -111,9 +111,329 @@
 
 
 
+
+
+
+
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import ScanUpload from "./ScanUpload";
+// import Navbar from "@components/Navbar";
+// import Footer from "@components/Footer";
+// import { getSession } from "next-auth/react";
+// import { useRouter } from "next/router";
+
+// export default function Home() {
+//   const [showForm, setShowForm] = useState(false);
+//   const [action, setAction] = useState("");
+//   const [selectedMail, setSelectedMail] = useState(null);
+//   const [overDueMails, setOverDueMails] = useState([]);
+//   const [showOverdueMails, setShowOverdueMails] = useState(false);
+//   const router = useRouter();
+
+//   // Check session and redirect if not authenticated
+//   useEffect(() => {
+//     const checkSession = async () => {
+//       try {
+//         const session = await getSession();
+//         if (!session) {
+//           router.push("/"); // Redirect to home if no session
+//         }
+//       } catch (error) {
+//         console.error("Session check failed:", error);
+//       }
+//     };
+//     checkSession();
+
+//     // Fetch overdue mails
+//     async function fetchOverdueMails() {
+//       try {
+//         console.log("Fetching overdue mails...");
+//         const response = await fetch("http://localhost:3000/api/reminder", {
+//           method: "GET",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//         });
+
+//         console.log("Response Status:", response.status);
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! Status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log("API Data:", data); // Debugging line
+//         setOverDueMails(data.overdueMails || []); // Ensure it's an array
+//       } catch (error) {
+//         console.error("Failed to fetch overdue mails", error);
+//       }
+//     }
+
+//     fetchOverdueMails();
+//   }, [router]);
+
+//   const handleMailClick = (mail) => {
+//     setSelectedMail(mail); // Set the selected mail
+//   };
+
+//   const handleStatusChange = async (e) => {
+//     const newStatus = e.target.value;
+
+//     try {
+//       const response = await fetch(
+//         `http://localhost:3000/api/reminder/${selectedMail._id}`,
+//         {
+//           method: "PUT",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify({ status: newStatus }),
+//         }
+//       );
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+
+//       // Update the local state with the updated mail
+//       const updatedMail = await response.json();
+//       setOverDueMails((prevMails) =>
+//         prevMails.map((mail) =>
+//           mail._id === updatedMail._id ? updatedMail : mail
+//         )
+//       );
+
+//       setSelectedMail(null);
+//     } catch (error) {
+//       console.error("Failed to update mail status:", error);
+//     }
+//   };
+
+//   const handleViewPDF = () => {
+//     if (selectedMail?.pdfUrl) {
+//       window.open(selectedMail.pdfUrl, "_blank"); // Open PDF in a new tab
+//     } else {
+//       alert("No PDF available for this mail.");
+//     }
+//   };
+
+//   const handleOpenForm = (actionType) => {
+//     setAction(actionType);
+//     setShowForm(true);
+//   };
+
+//   return (
+//     <>
+//       {showForm ? (
+//         <div>
+//           {showForm && (
+//             <div>
+//               <ScanUpload action={action} onClose={() => setShowForm(false)} />
+//             </div>
+//           )}
+//         </div>
+//       ) : (
+//         <div className="flex flex-col min-h-screen">
+//           <Navbar />
+//           {/* Floating Box for Overdue Mails */}
+//           <div
+//             style={{
+//               position: "fixed",
+//               bottom: "20px",
+//               right: "20px",
+//               zIndex: 1000,
+//             }}
+//           >
+//             <div
+//               style={{
+//                 backgroundColor: "#fff",
+//                 border: "1px solid #ccc",
+//                 borderRadius: "8px",
+//                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+//                 cursor: "pointer",
+//                 position: "relative", // Ensures the close button is positioned inside
+//               }}
+//               onClick={() => setShowOverdueMails(!showOverdueMails)} // Toggle visibility
+//             >
+//               {/* Header Section with Close Button */}
+//               <div
+//                 style={{
+//                   padding: "25px 30px",
+//                   fontSize: "large",
+//                   fontWeight: "bold",
+//                   borderBottom: showOverdueMails ? "1px solid #eee" : "none",
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <span>Overdue Mails</span>
+//                 {showOverdueMails && (
+//                   <button
+//                     onClick={(e) => {
+//                       e.stopPropagation(); // Prevent parent onClick from triggering
+//                       setShowOverdueMails(false);
+//                     }}
+//                     style={{
+//                       background: "none",
+//                       border: "none",
+//                       fontSize: "20px",
+//                       cursor: "pointer",
+//                       color: "gray",
+//                     }}
+//                   >
+//                     ✖
+//                   </button>
+//                 )}
+//               </div>
+
+//               {/* List of Overdue Mails */}
+//               {showOverdueMails && (
+//                 <div
+//                   style={{
+//                     maxHeight: "300px",
+//                     overflowY: "auto",
+//                     padding: "8px",
+//                   }}
+//                 >
+//                   {overDueMails.length > 0 ? (
+//                     <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+//                       {overDueMails.map((mail) => (
+//                         <li
+//                           key={mail._id}
+//                           style={{
+//                             marginBottom: "8px",
+//                             padding: "8px",
+//                             borderBottom: "1px solid #eee",
+//                             cursor: "pointer",
+//                           }}
+//                           onClick={() => handleMailClick(mail)} // Handle click on mail
+//                         >
+//                           <div style={{ fontWeight: "500" }}>
+//                             {mail.subject}
+//                           </div>
+//                           <div style={{ fontSize: "14px", color: "#666" }}>
+//                             Status: {mail.status}
+//                           </div>
+//                         </li>
+//                       ))}
+//                     </ul>
+//                   ) : (
+//                     <p>No overdue mails found.</p>
+//                   )}
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+
+//           {selectedMail && (
+//             <div
+//               style={{
+//                 position: "fixed",
+//                 top: "50%",
+//                 left: "50%",
+//                 transform: "translate(-50%, -50%)",
+//                 backgroundColor: "#fff",
+//                 border: "1px solid #ccc",
+//                 borderRadius: "8px",
+//                 padding: "20px",
+//                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+//                 zIndex: 1001,
+//                 width: "300px",
+//               }}
+//             >
+//               <h2
+//                 style={{
+//                   fontSize: "18px",
+//                   fontWeight: "bold",
+//                   marginBottom: "12px",
+//                 }}
+//               >
+//                 Mail Details
+//               </h2>
+//               <div style={{ marginBottom: "12px" }}>
+//                 <strong>Subject:</strong> {selectedMail.subject}
+//               </div>
+//               <div style={{ marginBottom: "12px" }}>
+//                 <strong>Status:</strong>
+//                 <select
+//                   value={selectedMail.status}
+//                   onChange={handleStatusChange}
+//                   style={{
+//                     marginLeft: "8px",
+//                     padding: "4px",
+//                     borderRadius: "4px",
+//                     border: "1px solid #ccc",
+//                   }}
+//                 >
+//                   <option value="open">Open</option>
+//                   <option value="closed">Closed</option>
+//                   <option value="in-progress">In Progress</option>
+//                 </select>
+//               </div>
+//               <button
+//                 onClick={handleViewPDF}
+//                 style={{
+//                   padding: "8px 16px",
+//                   backgroundColor: "#007bff",
+//                   color: "#fff",
+//                   border: "none",
+//                   borderRadius: "4px",
+//                   cursor: "pointer",
+//                   marginRight: "8px",
+//                 }}
+//               >
+//                 View PDF
+//               </button>
+//               <button
+//                 onClick={() => setSelectedMail(null)} // Close the modal
+//                 style={{
+//                   padding: "8px 16px",
+//                   backgroundColor: "#ccc",
+//                   border: "none",
+//                   borderRadius: "4px",
+//                   cursor: "pointer",
+//                 }}
+//               >
+//                 Close
+//               </button>
+//             </div>
+//           )}
+
+//           <div className="flex-grow w-full flex flex-col items-center p-8">
+//             <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+//               Welcome to File Management System
+//             </h1>
+//             <div className="flex gap-4">
+//               <button
+//                 onClick={() => handleOpenForm("Scan")}
+//                 className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200 block lg:hidden text-lg font-medium"
+//               >
+//                 Scan
+//               </button>
+//               <button
+//                 onClick={() => handleOpenForm("Upload")}
+//                 className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 text-lg font-medium"
+//               >
+//                 Upload
+//               </button>
+//             </div>
+//           </div>
+//           <Footer />
+//         </div>
+//       )}
+//     </>
+//   );
+// }
+
+
+
+
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ScanUpload from "./ScanUpload";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
@@ -128,8 +448,11 @@ export default function Home() {
   const [overDueMails, setOverDueMails] = useState([]);
   const [showOverdueMails, setShowOverdueMails] = useState(false);
   const router = useRouter();
+  const [displayText, setDisplayText] = useState("");
+  const credibilityWords = ["Simple", "Efficient", "Secure"];
+  const timeoutRef = useRef(null); // To store the timeout ID for cleanup
 
-  // Check session and redirect if not authenticated
+  // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -168,7 +491,57 @@ export default function Home() {
     }
 
     fetchOverdueMails();
-  }, [router]);
+  }, [router]); // Only re-run if router changes
+
+  // Effect for typing animation
+  useEffect(() => {
+    const typingSpeed = 100; // Speed of typing each character (ms)
+    const deletingSpeed = 50; // Speed of deleting each character (ms)
+    const pauseDuration = 1500; // Pause duration after typing (ms)
+
+    let currentIndex = 0; // Current word index
+    let charIndex = 0; // Current character index
+    let isTyping = true; // Typing or deleting phase
+
+    const typeOrDelete = () => {
+      const currentWord = credibilityWords[currentIndex];
+
+      if (isTyping) {
+        if (charIndex < currentWord.length) {
+          setDisplayText(currentWord.slice(0, charIndex + 1));
+          charIndex++;
+          timeoutRef.current = setTimeout(typeOrDelete, typingSpeed);
+        } else {
+          // Finished typing, pause before deleting
+          timeoutRef.current = setTimeout(() => {
+            isTyping = false;
+            typeOrDelete();
+          }, pauseDuration);
+        }
+      } else {
+        if (charIndex > 0) {
+          setDisplayText(currentWord.slice(0, charIndex - 1));
+          charIndex--;
+          timeoutRef.current = setTimeout(typeOrDelete, deletingSpeed);
+        } else {
+          // Finished deleting, move to the next word
+          currentIndex = (currentIndex + 1) % credibilityWords.length;
+          isTyping = true;
+          typeOrDelete();
+        }
+      }
+    };
+
+    // Start the typing effect
+    typeOrDelete();
+
+    // Cleanup on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []); // No dependencies, runs once on mount
 
   const handleMailClick = (mail) => {
     setSelectedMail(mail); // Set the selected mail
@@ -193,7 +566,6 @@ export default function Home() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Update the local state with the updated mail
       const updatedMail = await response.json();
       setOverDueMails((prevMails) =>
         prevMails.map((mail) =>
@@ -231,7 +603,7 @@ export default function Home() {
           )}
         </div>
       ) : (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
           {/* Floating Box for Overdue Mails */}
           <div
@@ -249,11 +621,10 @@ export default function Home() {
                 borderRadius: "8px",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 cursor: "pointer",
-                position: "relative", // Ensures the close button is positioned inside
+                position: "relative",
               }}
-              onClick={() => setShowOverdueMails(!showOverdueMails)} // Toggle visibility
+              onClick={() => setShowOverdueMails(!showOverdueMails)}
             >
-              {/* Header Section with Close Button */}
               <div
                 style={{
                   padding: "25px 30px",
@@ -269,7 +640,7 @@ export default function Home() {
                 {showOverdueMails && (
                   <button
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent parent onClick from triggering
+                      e.stopPropagation();
                       setShowOverdueMails(false);
                     }}
                     style={{
@@ -284,8 +655,6 @@ export default function Home() {
                   </button>
                 )}
               </div>
-
-              {/* List of Overdue Mails */}
               {showOverdueMails && (
                 <div
                   style={{
@@ -305,11 +674,9 @@ export default function Home() {
                             borderBottom: "1px solid #eee",
                             cursor: "pointer",
                           }}
-                          onClick={() => handleMailClick(mail)} // Handle click on mail
+                          onClick={() => handleMailClick(mail)}
                         >
-                          <div style={{ fontWeight: "500" }}>
-                            {mail.subject}
-                          </div>
+                          <div style={{ fontWeight: "500" }}>{mail.subject}</div>
                           <div style={{ fontSize: "14px", color: "#666" }}>
                             Status: {mail.status}
                           </div>
@@ -384,7 +751,7 @@ export default function Home() {
                 View PDF
               </button>
               <button
-                onClick={() => setSelectedMail(null)} // Close the modal
+                onClick={() => setSelectedMail(null)}
                 style={{
                   padding: "8px 16px",
                   backgroundColor: "#ccc",
@@ -398,25 +765,236 @@ export default function Home() {
             </div>
           )}
 
-          <div className="flex-grow w-full flex flex-col items-center p-8">
-            <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-              Welcome to File Management System
-            </h1>
-            <div className="flex gap-4">
-              <button
-                onClick={() => handleOpenForm("Scan")}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200 block lg:hidden text-lg font-medium"
-              >
-                <Scan size={20} /> Scan
-                
-              </button>
-              <button
-                onClick={() => handleOpenForm("Upload")}
-                className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 text-lg font-medium"
-              >
-                <Upload size={20} /> Upload
-                
-              </button>
+          <div className="flex-grow w-full flex flex-col items-center p-16">
+            {/* Header Section */}
+            <div className="text-center mb-12">
+              <h1 className="text-3xl font-bold text-gray-800 mb-4 leading-tight">
+                <span className="inline-block">Modern Document</span>
+                <br />
+                <span className="inline-block">Management Made</span>{" "}
+                <span
+                  className="inline-block text-blue-600"
+                  style={{ minWidth: "120px", textAlign: "left" }}
+                >
+                  {displayText}
+                </span>
+              </h1>
+              <p className="text-lg text-gray-600">
+                Streamline your workflow with our intelligent <br /> file
+                management system.
+              </p>
+              <div className="mt-6 flex justify-center gap-4">
+                <button
+                  onClick={() => handleOpenForm("Upload")}
+                  className="px-6 py-3 bg-blue-700 text-white rounded-lg shadow-md hover:bg-blue-800 transition duration-200 text-lg font-medium"
+                >
+                  Upload Files
+                </button>
+                <button
+                  onClick={() => handleOpenForm("Scan")}
+                  className="px-6 py-3 bg-gray-200 text-blue-700 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 text-lg font-medium"
+                >
+                  Scan
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Actions Section */}
+            <div className="w-full max-w-6xl mb-12">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                Quick Actions
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Recent Files
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    Access your recently viewed documents
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">Favorites</h3>
+                  <p className="text-gray-500 text-sm">
+                    View and manage your starred items
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">Folders</h3>
+                  <p className="text-gray-500 text-sm">
+                    Browse through your organized folders
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">Shared</h3>
+                  <p className="text-gray-500 text-sm">
+                    See files shared with you
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Powerful Features Section */}
+            <div className="w-full max-w-6xl mb-12">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                Powerful Features
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Smart Organization
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    AI-powered file categorization and tagging system
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 3.055A9.001 9.001 0 1019.945 13H11V3.055z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Advanced Analytics
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    Detailed insights into your document usage and patterns
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Secure Sharing
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    Enterprise-grade security for your sensitive documents
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity Section */}
+            <div className="w-full max-w-6xl mb-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  Recent Activity
+                </h2>
+                <button
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  View All
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-700 font-medium">Q4 Report.pdf</p>
+                    <p className="text-gray-500 text-sm">You uploaded this file</p>
+                  </div>
+                  <p className="text-gray-500 text-sm">2 minutes ago</p>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-700 font-medium">
+                      Project Proposal.docx
+                    </p>
+                    <p className="text-gray-500 text-sm">Josh K. shared this file</p>
+                  </div>
+                  <p className="text-gray-500 text-sm">1 hour ago</p>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-700 font-medium">Meeting Notes.md</p>
+                    <p className="text-gray-500 text-sm">Mike R. edited this file</p>
+                  </div>
+                  <p className="text-gray-500 text-sm">3 hours ago</p>
+                </div>
+              </div>
             </div>
           </div>
           <Footer />
