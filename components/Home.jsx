@@ -767,41 +767,43 @@ export default function Home() {
 
           <div className="flex-grow w-full flex flex-col items-center p-16">
             {/* Header Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4 leading-tight">
-                <span className="inline-block">Modern Document</span>
+            <div className="flex items-center justify-center h-screen">
+            <div className="text-center mx-auto mb-12 transform -translate-y-20">
+              <h1 className="text-5xl font-bold text-gray-800 mb-4 leading-tight bg-gradient-to-r from-dark via-secondary to-light bg-clip-text text-transparent">
+                <span className="inline-block">Modern Document Management</span>
                 <br />
-                <span className="inline-block">Management Made</span>{" "}
+                <span className="inline-block"> Made</span>{" "}
                 <span
-                  className="inline-block text-blue-600"
+                  className="inline-block text-secondary"
                   style={{ minWidth: "120px", textAlign: "left" }}
                 >
                   {displayText}
                 </span>
               </h1>
-              <p className="text-lg text-gray-600">
-                Streamline your workflow with our intelligent <br /> file
+              <p className="text-lg text-gray-600 mt-10">
+                Streamline your document workflow and boost your productivity with our intelligent file
                 management system.
               </p>
-              <div className="mt-6 flex justify-center gap-4">
+              <div className="mt-10 flex justify-center gap-4">
                 <button
                   onClick={() => handleOpenForm("Upload")}
-                  className="px-6 py-3 bg-blue-700 text-white rounded-lg shadow-md hover:bg-blue-800 transition duration-200 text-lg font-medium"
+                  className="flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-lg shadow-md hover:bg-blue-800 transition duration-200 text-lg font-medium"
                 >
-                  Upload Files
+                 <Upload size={20} /> Upload 
                 </button>
                 <button
                   onClick={() => handleOpenForm("Scan")}
-                  className="px-6 py-3 bg-gray-200 text-blue-700 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 text-lg font-medium"
+                  className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-secondary rounded-lg shadow-md hover:bg-gray-300 transition duration-200 text-lg font-medium"
                 >
-                  Scan
+                  <Scan size={20} /> Scan
                 </button>
               </div>
             </div>
+            </div>
 
             {/* Quick Actions Section */}
-            <div className="w-full max-w-6xl mb-12">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+            <div className="w-full max-w-6xl flex flex-col items-center justify-center mb-24">
+              <h2 className="text-3xl font-semibold text-gray-800 mb-10 text-center bg-gradient-to-r from-dark via-secondary to-light bg-clip-text text-transparent inline-block min-w-[300px]">
                 Quick Actions
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -887,10 +889,10 @@ export default function Home() {
             </div>
 
             {/* Powerful Features Section */}
-            <div className="w-full max-w-6xl mb-12">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+            <div className="w-full max-w-6xl flex flex-col items-center justify-center mb-32">
+              <h1 className="text-3xl font-semibold text-gray-800 mb-10 text-center bg-gradient-to-r from-dark via-secondary to-light bg-clip-text text-transparent inline-block min-w-[300px]">
                 Powerful Features
-              </h2>
+              </h1>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                   <svg
