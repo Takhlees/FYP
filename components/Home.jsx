@@ -1043,6 +1043,8 @@ import { useState, useEffect, useRef } from "react"
 import ScanUpload from "./ScanUpload"
 import Navbar from "@components/Navbar"
 import Footer from "@components/Footer"
+import { Upload } from 'lucide-react';
+import { Scan } from 'lucide-react';
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 
