@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 let isConnected = false;
 
@@ -13,8 +12,8 @@ export const connectToDB = async ()=> {
     try {
         await mongoose.connect(process.env.MONGODB_URL, {
             dbName: "Mailing_System",
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000, // Increase timeout for server selection
+            socketTimeoutMS: 45000, // Increase socket timeout
         })
         isConnected=true;
         console.log('MongoDB connected')

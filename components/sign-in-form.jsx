@@ -256,6 +256,8 @@ export default function SignInForm({ onSignInSuccess }) {
     if (rememberedPassword) {
       setFormData((prev) => ({ ...prev, password: rememberedPassword }));
     }
+
+
   }, []);
 
   // Handle input focus to show remembered email and password
@@ -301,6 +303,7 @@ export default function SignInForm({ onSignInSuccess }) {
         email: formData.email,
         password: formData.password,
         redirect: false,
+        callbackUrl:"/home"
       });
 
       if (res.error) {
@@ -394,7 +397,7 @@ export default function SignInForm({ onSignInSuccess }) {
                 Remember me
               </label>
             </div>
-            <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
+            <Link href="/forget-password" className="text-sm text-blue-600 hover:text-blue-800">
               Forgot your password?
             </Link>
           </div>
@@ -411,3 +414,4 @@ export default function SignInForm({ onSignInSuccess }) {
       </div>
   );
 }
+

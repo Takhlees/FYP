@@ -109,12 +109,6 @@
 //   );
 // }
 
-
-
-
-
-
-
 // "use client";
 
 // import { useState, useEffect } from "react";
@@ -427,10 +421,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -439,12 +429,15 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { HashLoader } from "react-spinners";
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [action, setAction] = useState("");
   const [selectedMail, setSelectedMail] = useState(null);
+  const [pdfError, setPdfError] = useState(null);
   const [overDueMails, setOverDueMails] = useState([]);
+  const [isLoading, setIsLoading] = useState();
   const [showOverdueMails, setShowOverdueMails] = useState(false);
   const router = useRouter();
   const [displayText, setDisplayText] = useState("");
@@ -454,13 +447,16 @@ export default function Home() {
   // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
+      setIsLoading(true);
       try {
         const session = await getSession();
         if (!session) {
-          router.push("/"); // Redirect to home if no session
+          router.push("/login"); // Redirect to home if no session
         }
       } catch (error) {
         console.error("Session check failed:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     checkSession();
@@ -468,8 +464,9 @@ export default function Home() {
     // Fetch overdue mails
     async function fetchOverdueMails() {
       try {
+        setIsLoading(true);
         console.log("Fetching overdue mails...");
-        const response = await fetch("http://localhost:3000/api/reminder", {
+        const response = await fetch("http://localhost:3000/api/mail", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -486,6 +483,8 @@ export default function Home() {
         setOverDueMails(data.overdueMails || []); // Ensure it's an array
       } catch (error) {
         console.error("Failed to fetch overdue mails", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -543,15 +542,16 @@ export default function Home() {
   }, []); // No dependencies, runs once on mount
 
   const handleMailClick = (mail) => {
+    console.log("mail:", mail);
     setSelectedMail(mail); // Set the selected mail
   };
 
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
-
+    setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3000/api/reminder/${selectedMail._id}`,
+        `http://localhost:3000/api/mail/${selectedMail._id}`,
         {
           method: "PUT",
           headers: {
@@ -560,29 +560,65 @@ export default function Home() {
           body: JSON.stringify({ status: newStatus }),
         }
       );
-
+      
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const updatedMail = await response.json();
+
+      // Debug: log the updated mail to see what fields are available
+      console.log("Updated mail:", updatedMail);
+
       setOverDueMails((prevMails) =>
         prevMails.map((mail) =>
           mail._id === updatedMail._id ? updatedMail : mail
-        )
+    )
       );
 
-      setSelectedMail(null);
+      // Update the selected mail with the new data
+      setSelectedMail(updatedMail);
     } catch (error) {
       console.error("Failed to update mail status:", error);
+    }finally{
+      setIsLoading(false);
     }
   };
 
-  const handleViewPDF = () => {
-    if (selectedMail?.pdfUrl) {
-      window.open(selectedMail.pdfUrl, "_blank"); // Open PDF in a new tab
-    } else {
-      alert("No PDF available for this mail.");
+  const handleViewPDF = async () => {
+    setPdfError(null);
+
+    if (!selectedMail) {
+      setPdfError("No mail selected");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      let pdfUrl = selectedMail.pdfUrl;
+
+      // If no direct URL, use API endpoint
+      if (!pdfUrl) {
+        pdfUrl = `/api/mail/${selectedMail._id}/file`;
+      }
+
+      // Convert relative URLs to absolute
+      if (pdfUrl.startsWith("/")) {
+        pdfUrl = window.location.origin + pdfUrl;
+      }
+
+      // Verify the URL exists
+      const response = await fetch(pdfUrl, { method: "HEAD" });
+      if (!response.ok) {
+        throw new Error("PDF not found (404)");
+      }
+
+      window.open(pdfUrl, "_blank");
+    } catch (error) {
+      console.error("PDF error:", error);
+      setPdfError(`Failed to open PDF: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -593,6 +629,11 @@ export default function Home() {
 
   return (
     <>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <HashLoader color="#ffffff" size={80} speedMultiplier={1.5} />
+        </div>
+      )}
       {showForm ? (
         <div>
           {showForm && (
@@ -675,7 +716,9 @@ export default function Home() {
                           }}
                           onClick={() => handleMailClick(mail)}
                         >
-                          <div style={{ fontWeight: "500" }}>{mail.subject}</div>
+                          <div style={{ fontWeight: "500" }}>
+                            {mail.subject}
+                          </div>
                           <div style={{ fontSize: "14px", color: "#666" }}>
                             Status: {mail.status}
                           </div>
@@ -839,7 +882,9 @@ export default function Home() {
                       d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                     />
                   </svg>
-                  <h3 className="text-lg font-medium text-gray-700">Favorites</h3>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Favorites
+                  </h3>
                   <p className="text-gray-500 text-sm">
                     View and manage your starred items
                   </p>
@@ -963,9 +1008,7 @@ export default function Home() {
                 <h2 className="text-2xl font-semibold text-gray-800">
                   Recent Activity
                 </h2>
-                <button
-                  className="text-blue-600 hover:underline text-sm font-medium"
-                >
+                <button className="text-blue-600 hover:underline text-sm font-medium">
                   View All
                 </button>
               </div>
@@ -973,7 +1016,9 @@ export default function Home() {
                 <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
                   <div>
                     <p className="text-gray-700 font-medium">Q4 Report.pdf</p>
-                    <p className="text-gray-500 text-sm">You uploaded this file</p>
+                    <p className="text-gray-500 text-sm">
+                      You uploaded this file
+                    </p>
                   </div>
                   <p className="text-gray-500 text-sm">2 minutes ago</p>
                 </div>
@@ -982,20 +1027,39 @@ export default function Home() {
                     <p className="text-gray-700 font-medium">
                       Project Proposal.docx
                     </p>
-                    <p className="text-gray-500 text-sm">Josh K. shared this file</p>
+                    <p className="text-gray-500 text-sm">
+                      Josh K. shared this file
+                    </p>
                   </div>
                   <p className="text-gray-500 text-sm">1 hour ago</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
                   <div>
-                    <p className="text-gray-700 font-medium">Meeting Notes.md</p>
-                    <p className="text-gray-500 text-sm">Mike R. edited this file</p>
+                    <p className="text-gray-700 font-medium">
+                      Meeting Notes.md
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Mike R. edited this file
+                    </p>
                   </div>
                   <p className="text-gray-500 text-sm">3 hours ago</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {pdfError && (
+            <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <span className="block sm:inline">{pdfError}</span>
+              <button
+                className="absolute top-0 right-0 px-2 py-1"
+                onClick={() => setPdfError(null)}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           <Footer />
         </div>
       )}
