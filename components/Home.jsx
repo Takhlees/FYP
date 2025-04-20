@@ -1003,6 +1003,7 @@ import { Upload } from "lucide-react";
 import { Scan } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import HashLoader from 'react-spinners/HashLoader';
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
@@ -1014,6 +1015,8 @@ export default function Home() {
   const [displayText, setDisplayText] = useState("");
   const credibilityWords = ["Simple", "Efficient", "Secure"];
   const timeoutRef = useRef(null); // To store the timeout ID for cleanup
+  const [isLoading, setIsLoading] = useState(true);
+  const [pdfError, setPdfError] = useState(null);
 
   // Effect for session check and fetching overdue mails
   useEffect(() => {
