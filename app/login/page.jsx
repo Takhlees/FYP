@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/navigation";
-import SignInForm from '@components/sign-in-form'
-import Loading from './loading';
+import SignInForm from '../../components/sign-in-form'
+import Loading from '../loading';
 
 const Page=()=> {
   const router = useRouter();
@@ -42,17 +42,3 @@ const Page=()=> {
 export default Page;
 
 
-
-// 'use client';
-// import { useEffect } from 'react';
-// import { useRouter } from 'next/navigation';
-
-// export default function Home() {
-//   const router = useRouter();
-  
-//   useEffect(() => {
-//     router.push('/login');
-//   }, []);
-
-//   return null;
-// }

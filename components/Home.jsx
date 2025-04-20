@@ -1018,6 +1018,7 @@ export default function Home() {
   // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
+      setIsLoading(true);
       try {
         const session = await getSession();
         if (!session) {
@@ -1168,6 +1169,11 @@ export default function Home() {
 
   return (
     <>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <HashLoader color="#ffffff" size={80} speedMultiplier={1.5} />
+        </div>
+      )}
       <div className=" absolute inset-0 overflow-hidden z-0">
         <div className="animate-bubble bg-gray-300 rounded-full opacity-30 w-60 h-60 absolute"></div>
         <div className="animate-bubble bg-gray-300 rounded-full opacity-30 w-72 h-72 absolute"></div>
@@ -1518,6 +1524,10 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="bg-white p-4 flex items-center justify-between relative group rounded-lg shadow-md text-center transition-transform transform hover:scale-105 duration-300 cursor-pointer">
                   <div>
+                    <p className="text-gray-700 font-medium">Q4 Report.pdf</p>
+                    <p className="text-gray-500 text-sm">
+                      You uploaded this file
+                    </p>
                     <p className="text-black font-medium">Q4 Report.pdf</p>
                     <p className="text-gray-500 text-sm">
                       You uploaded this file
@@ -1538,6 +1548,12 @@ export default function Home() {
                 </div>
                 <div className="bg-white p-4 flex items-center justify-between relative group rounded-lg shadow-md text-center transition-transform transform hover:scale-105 duration-300 cursor-pointer">
                   <div>
+                    <p className="text-gray-700 font-medium">
+                      Meeting Notes.md
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Mike R. edited this file
+                    </p>
                     <p className="text-black font-medium">Meeting Notes.md</p>
                     <p className="text-gray-500 text-sm">
                       Mike R. edited this file
@@ -1548,6 +1564,19 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {pdfError && (
+            <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <span className="block sm:inline">{pdfError}</span>
+              <button
+                className="absolute top-0 right-0 px-2 py-1"
+                onClick={() => setPdfError(null)}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           <Footer />
         </div>
       )}
