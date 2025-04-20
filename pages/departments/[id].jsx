@@ -454,69 +454,71 @@
 
 
 
-"use client";
 
-import "@styles/globals.css";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import ScanUpload from "@components/ScanUpload";
-import { Edit, Download } from "lucide-react";
-import SearchBar from "@components/SearchBar";
+"use client"
+
+import "@styles/globals.css"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/router"
+import ScanUpload from "@components/ScanUpload"
+import { Edit, Download } from "lucide-react"
+import SearchBar from "@components/SearchBar"
 
 export default function DepartmentPage() {
-  const router = useRouter();
-  const { id, name } = router.query;
+  const router = useRouter()
+  const { id, name } = router.query
 
-  const [categories, setCategories] = useState(["All"]);
-  const [newCategory, setNewCategory] = useState("");
-  const [showInput, setShowInput] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All"); // Default to "all"
-  const [files, setFiles] = useState([]);
-  const [editingFile, setEditingFile] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [action, setAction] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredFiles, setFilteredFiles] = useState([]);
+  const [categories, setCategories] = useState(["All"])
+  const [newCategory, setNewCategory] = useState("")
+  const [showInput, setShowInput] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState("All") // Default to "all"
+  const [files, setFiles] = useState([])
+  const [editingFile, setEditingFile] = useState(null)
+  const [showForm, setShowForm] = useState(false)
+  const [action, setAction] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredFiles, setFilteredFiles] = useState([])
 
+
+  const fetchCategories = async () => {
+    const response = await fetch(`/api/department/${id}`, {
+      method: "GET",
+    })
+    if (response.ok) {
+      const data = await response.json()
+      setCategories(["All", ...data.categories]) // Add "all" as default option
+    } else {
+      console.error("Failed to fetch categories")
+    }
+  }
+  
   // Fetch categories from the backend
   useEffect(() => {
-    if (!id) return; // Wait for department id from query
-
-    const fetchCategories = async () => {
-      const response = await fetch(`/api/department/${id}`, {
-        method: "GET",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(["All", ...data.categories]); // Add "all" as default option
-      } else {
-        console.error("Failed to fetch categories");
-      }
-    };
-
-    fetchCategories();
-  }, [id]);
+    if (!id) return // Wait for department id from query
+    fetchCategories()
+  }, [id])
 
   // Fetch files based on selected category
   useEffect(() => {
-    if (!selectedCategory || !id) return;
-    fetchFiles(id, selectedCategory);
-  }, [selectedCategory, id]);
+    if (!selectedCategory || !id) return
+    fetchFiles(id, selectedCategory)
+  }, [selectedCategory, id])
 
   // Filter files based on search query
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredFiles(files); // Show all files if search query is empty
+      setFilteredFiles(files) // Show all files if search query is empty
     } else {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      const filtered = files.filter((file) =>
-        file.subject.toLowerCase().includes(lowercasedQuery) ||
-        file.diaryNo.toLowerCase().includes(lowercasedQuery) ||
-        file.from.toLowerCase().includes(lowercasedQuery)
-      );
-      setFilteredFiles(filtered); // Filter the files based on the search query
+      const lowercasedQuery = searchQuery.toLowerCase()
+      const filtered = files.filter(
+        (file) =>
+          file.subject.toLowerCase().includes(lowercasedQuery) ||
+          file.diaryNo.toLowerCase().includes(lowercasedQuery) ||
+          file.from.toLowerCase().includes(lowercasedQuery),
+      )
+      setFilteredFiles(filtered) // Filter the files based on the search query
     }
-  }, [searchQuery, files]);
+  }, [searchQuery, files])
 
   const addCategory = async () => {
     if (newCategory.trim()) {
@@ -526,46 +528,47 @@ export default function DepartmentPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ category: newCategory }),
-      });
+      })
 
       if (response.ok) {
-        const updatedCategories = await response.json();
+        const updatedCategories = await response.json()
         if (Array.isArray(updatedCategories)) {
-          setCategories(["All", ...updatedCategories]);
+          setCategories(["All", ...updatedCategories])
         }
-        setNewCategory("");
-        setShowInput(false);
+        setNewCategory("")
+        setShowInput(false)
+        fetchCategories()
       } else {
-        console.error("Failed to add category");
+        console.error("Failed to add category")
       }
     }
-  };
+  }
 
   const fetchFiles = async (department, category) => {
     try {
-      let url = `/api/scanupload?department=${department}`;
+      let url = `/api/scanupload?department=${department}`
       if (category && category !== "All") {
-        url += `&category=${category}`; // Add category filter if it's not "all"
+        url += `&category=${category}` // Add category filter if it's not "all"
       }
 
-      const response = await fetch(url);
+      const response = await fetch(url)
       if (response.ok) {
-        const data = await response.json();
-        setFiles(data); // Store in state
-        setFilteredFiles(data); // Initially show all files
+        const data = await response.json()
+        setFiles(data) // Store in state
+        setFilteredFiles(data) // Initially show all files
       } else {
-        alert("Failed to fetch files");
+        alert("Failed to fetch files")
       }
     } catch (error) {
-      console.error("Error fetching files:", error);
+      console.error("Error fetching files:", error)
     }
-  };
+  }
 
   const handleEdit = (doc) => {
-    setEditingFile(doc);
-    setAction("Edit");
-    setShowForm(true);  // Show the upload form
-  };
+    setEditingFile(doc)
+    setAction("Edit")
+    setShowForm(true) // Show the upload form
+  }
 
   const handleDownload = async (doc) => {
     const response = await fetch(`/api/scanupload/${doc._id}`, {
@@ -573,22 +576,22 @@ export default function DepartmentPage() {
       headers: {
         "Content-Disposition": "attachment", // Trigger the download in the backend
       },
-    });
+    })
 
     if (!response.ok) {
-      console.error("Failed to download file");
-      return;
+      console.error("Failed to download file")
+      return
     }
 
     // Create a Blob from the response and trigger download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${doc.subject}.pdf`; // You can set this dynamically if needed
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${doc.subject}.pdf` // You can set this dynamically if needed
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }
 
   return (
     <>
@@ -597,12 +600,15 @@ export default function DepartmentPage() {
           <ScanUpload fileData={editingFile} action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
-        <div className="p-6">
+        <div className="p-6 bg-white">
           <div className="flex justify-between">
-          <h1 className="text-2xl font-semibold mb-4">Department: {name}</h1>
-          <button onClick={() => setShowInput(!showInput)} className="px-4 bg-mid text-white rounded-md hover:bg-secondary">
-            Add Category
-          </button>
+            <h1 className="text-2xl font-semibold mb-4 text-[#111827]">Department: {name}</h1>
+            <button
+              onClick={() => setShowInput(!showInput)}
+              className="px-4 bg-black text-white rounded-md relative group text-center transition-transform transform hover:scale-110 duration-300"
+            >
+              Add Category
+            </button>
           </div>
           {showInput && (
             <div className="mt-4 space-x-2 flex w-full">
@@ -611,11 +617,11 @@ export default function DepartmentPage() {
                 placeholder="Enter Category Name"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="px-2 py-2 w-full border border-gray-300 rounded-md"
+                className="px-2 py-2 w-full border border-[#F3F4F6] rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none"
               />
               <button
                 onClick={addCategory}
-                className="ml-2 px-4 py-2 bg-green-500 text-white rounded-md"
+                className="ml-2 px-4 py-2 bg-[#3B5FE3] text-white rounded-md hover:bg-[#3051C6] transition-colors"
               >
                 Add
               </button>
@@ -623,12 +629,12 @@ export default function DepartmentPage() {
           )}
 
           <div className="mt-6">
-            <h3 className="text-lg font-medium mb-2">Categories:</h3>
+            <h3 className="text-lg font-medium mb-2 text-[#111827]">Categories:</h3>
             <div className="w-full">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="w-full px-3 py-2 border border-[#F3F4F6] rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] cursor-pointer outline-none"
               >
                 {Array.isArray(categories) && categories.length > 0 ? (
                   categories.map((category, index) => (
@@ -637,7 +643,7 @@ export default function DepartmentPage() {
                     </option>
                   ))
                 ) : (
-                  <option className="w-full text-gray-500">No categories available</option>
+                  <option className="w-full text-[#6B7280]">No categories available</option>
                 )}
               </select>
             </div>
@@ -648,48 +654,65 @@ export default function DepartmentPage() {
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
             {/* Files table */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto mt-4 rounded-lg border border-[#F3F4F6]">
               <table className="min-w-full bg-white">
-                <thead className="bg-gray-100">
+                <thead className="bg-[#F3F4F6]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Subject</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Diary No</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">From</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Disposal</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Subject
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Diary No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      From
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Disposal
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#111827] uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-[#F3F4F6]">
                   {filteredFiles.map((doc) => (
-                    <tr key={doc._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={doc._id} className="hover:bg-[#F3F4F6] transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">
                         <a
                           href={`/api/scanupload/${doc._id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-800 hover:underline focus:outline-none"
+                          className="text-[#3B5FE3] hover:text-[#3051C6] hover:underline focus:outline-none"
                         >
                           {doc.subject}
                         </a>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
                         {new Date(doc.date).toLocaleDateString("en-GB")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.diaryNo}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.from}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.disposal}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{doc.status}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.diaryNo}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.from}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.disposal}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.status}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
                         <a
                           onClick={() => handleEdit(doc)}
-                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer mr-4"
+                          className="text-[#3B5FE3] hover:text-[#3051C6] cursor-pointer mr-4"
                         >
                           <Edit size={20} />
                         </a>
 
-                        <a onClick={() => handleDownload(doc)} className="text-green-600 hover:text-green-900 cursor-pointer">
+                        <a
+                          onClick={() => handleDownload(doc)}
+                          className="text-[#3B5FE3] hover:text-[#3051C6] cursor-pointer"
+                        >
                           <Download size={20} />
                         </a>
                       </td>
@@ -702,5 +725,5 @@ export default function DepartmentPage() {
         </div>
       )}
     </>
-  );
+  )
 }

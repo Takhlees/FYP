@@ -25,15 +25,26 @@ export const content = [
 ];
 export const theme = {
   extend: {
+    animation: {
+      bubble: 'bubble 20s infinite',
+    },
+    keyframes: {
+      bubble: {
+        '0%': { transform: 'translateY(0) scale(1)' },
+        '50%': { transform: 'translateY(-100px) scale(1.1)' },
+        '100%': { transform: 'translateY(0) scale(1)' },
+      },
+    },
     colors: {
       dark: "rgb(0, 35, 38)" ,
       primary: "rgb(0, 61, 67)",  
       accent: "rgb(0, 85, 93)" ,
-      secondary: "rgb(0, 109, 119)", 
-      deep: "rgb(15, 117, 126)",
-      mid: "rgb(30, 125, 132)",
-      light: "rgb(73, 156, 164)"
+      secondary: "rgb(101, 117, 138)", 
+      deep: "rgb(243, 243, 244)",
+      mid: "rgb(31,70, 152)",
+      light: "rgb(41, 95, 223)"
     }
-  }
+  },
+  plugins: [],
 };
-export const plugins = [];
+

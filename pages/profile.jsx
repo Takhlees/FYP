@@ -303,6 +303,7 @@
 
 "use client"
 
+import "@styles/globals.css";
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { X, Mail, Briefcase, Pencil, Check, Camera, User } from "lucide-react"
@@ -377,7 +378,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="relative w-full max-w-md bg-white rounded-lg shadow-md p-8">
+      <div className="relative w-full max-w-md bg-white rounded-lg shadow-md p-20">
         {/* Cross button in the top-right corner */}
         <button
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
@@ -390,14 +391,14 @@ export default function ProfilePage() {
           /* Edit Mode */
           <>
             <div className="flex flex-col items-center space-y-6 mb-6">
-              <div className="relative">
+              <div className="relative w-32 h-32">
                 {formData.image ? (
                   <Image
                     src={formData.image || "/placeholder.svg"}
                     alt="Profile"
-                    width={128}
-                    height={128}
-                    className="rounded-full object-cover"
+                    layout="fill" // Ensures the image fills the container
+    objectFit="cover" // Ensures the image doesn't stretch
+    className="rounded-full"
                   />
                 ) : (
                   <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
@@ -473,20 +474,21 @@ export default function ProfilePage() {
           /* View Mode */
           <>
             <div className="flex flex-col items-center space-y-6 mb-6">
-              {profile.image ? (
-                <Image
-                  src={profile.image || "/placeholder.svg"}
-                  alt="Profile"
-                  width={128}
-                  height={128}
-                  className="rounded-full object-cover"
-                />
+            <div className="relative w-32 h-32">
+                {formData.image ? (
+                  <Image
+                    src={formData.image || "/placeholder.svg"}
+                    alt="Profile"
+                    layout="fill" // Ensures the image fills the container
+    objectFit="cover" // Ensures the image doesn't stretch
+    className="rounded-full"
+                  />
               ) : (
                 <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
                   <User className="h-16 w-16 text-gray-400" />
                 </div>
               )}
-
+</div>
               <div className="text-center space-y-4">
                 <h2 className="text-2xl font-bold">{profile.name}</h2>
 
