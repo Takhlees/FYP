@@ -1,12 +1,12 @@
-import { HashLoader } from '@node_modules/react-spinners'
 import React from 'react'
+import { DotLoader } from 'react-spinners'
 
 
 const Loading = () => {
   return (
     <>
     <div className='my-52 px-52 text-center'>
-      <HashLoader
+      <DotLoader
     size={100}
     />
     </div>

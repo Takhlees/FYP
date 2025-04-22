@@ -444,14 +444,25 @@ export default function SignInForm({ onSignInSuccess }) {
   // Load remembered email and password from localStorage on component mount
   useEffect(() => {
     const rememberedEmail = localStorage.getItem("rememberedEmail")
-    const rememberedPassword = localStorage.getItem("rememberedPassword")
+    // const rememberedPassword = localStorage.getItem("rememberedPassword")
     if (rememberedEmail) {
       setFormData((prev) => ({ ...prev, email: rememberedEmail }))
     }
-    if (rememberedPassword) {
-      setFormData((prev) => ({ ...prev, password: rememberedPassword }))
-    }
+    // if (rememberedPassword) {
+    //   setFormData((prev) => ({ ...prev, password: rememberedPassword }))
+    // }
   }, [])
+
+  useEffect(() => {
+    localStorage.removeItem("rememberedEmail")
+    localStorage.removeItem("rememberedPassword")
+    setFormData({
+      email: "",
+      password: "",
+      rememberMe: false,
+    })
+  }, [])
+  
 
   // Handle input focus to show remembered email and password
   const handleEmailFocus = () => {
@@ -496,6 +507,7 @@ export default function SignInForm({ onSignInSuccess }) {
         email: formData.email,
         password: formData.password,
         redirect: false,
+        callbackUrl:"/home"
       })
 
       if (res.error) {
@@ -590,7 +602,7 @@ export default function SignInForm({ onSignInSuccess }) {
                     value={formData.email}
                     onChange={handleChange}
                     onFocus={handleEmailFocus}
-                    autoComplete="email"
+                    autoComplete="new-email"
                     placeholder="your.email@gcu.edu"
                     className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
                   />
@@ -621,7 +633,7 @@ export default function SignInForm({ onSignInSuccess }) {
                     value={formData.password}
                     onChange={handleChange}
                     onFocus={handlePasswordFocus}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     className="w-full pl-9 pr-9 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
                   />

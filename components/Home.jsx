@@ -1040,6 +1040,7 @@ import Footer from "@components/Footer"
 import { Upload } from 'lucide-react';
 import { Scan } from 'lucide-react';
 import { getSession } from "next-auth/react"
+import { PulseLoader } from "react-spinners"
 import { useRouter } from "next/router"
 
 export default function Home() {
@@ -1047,6 +1048,8 @@ export default function Home() {
   const [action, setAction] = useState("")
   const [selectedMail, setSelectedMail] = useState(null)
   const [overDueMails, setOverDueMails] = useState([])
+  const [isLoading, setIsLoading] = useState()
+  const [pdfError, setPdfError] = useState()
   const [showOverdueMails, setShowOverdueMails] = useState(false)
   const router = useRouter()
   const [displayText, setDisplayText] = useState("")
@@ -1064,6 +1067,9 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Session check failed:", error)
+      }finally{
+        setIsLoading(false);
+
       }
     }
     checkSession()
@@ -1191,7 +1197,7 @@ export default function Home() {
     <>
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <HashLoader color="#ffffff" size={80} speedMultiplier={1.5} />
+          <PulseLoader color="#ffffff" size={17} speedMultiplier={1} />
         </div>
       )}
       {showForm ? (
@@ -1549,18 +1555,4 @@ export default function Home() {
     </>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

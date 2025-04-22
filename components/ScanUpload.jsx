@@ -954,10 +954,6 @@
 
 // export default ScanUpload
 
-
-
-
-
 // test code
 
 // "use client";
@@ -1826,15 +1822,6 @@
 // };
 
 // export default ScanUpload;
-
-
-
-
-
-
-
-
-
 
 // "use client"
 
@@ -3895,19 +3882,1565 @@
 
 // export default ScanUpload
 
+// "use client"
 
+// import { useState, useEffect, useRef, useCallback } from "react"
+// import Webcam from "react-webcam"
+// import { jsPDF } from "jspdf"
+// import { useDropzone } from "react-dropzone"
+// import {
+//   UploadCloud,
+//   ZoomIn,
+//   ZoomOut,
+//   RefreshCw,
+//   Camera,
+//   Focus,
+//   Crop,
+//   X,
+//   Check,
+//   SlidersHorizontal,
+// } from "lucide-react"
+// import Tesseract from "tesseract.js"
+// import * as pdfjsLib from "pdfjs-dist/webpack"
+// import ReactCrop from "react-image-crop"
+// import "react-image-crop/dist/ReactCrop.css"
 
+// pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
+// // Image processing functions
+// const preprocessImageForOCR = async (imageData, filterType) => {
+//   return new Promise((resolve) => {
+//     const img = new Image()
+//     img.onload = () => {
+//       const canvas = document.createElement("canvas")
+//       canvas.width = img.width
+//       canvas.height = img.height
+//       const ctx = canvas.getContext("2d")
+//       ctx.drawImage(img, 0, 0)
 
+//       let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
+//       // Apply filters based on type
+//       switch (filterType) {
+//         case "bw":
+//           imgData = convertToBlackAndWhite(imgData)
+//           break
+//         case "grayscale":
+//           imgData = convertToGrayscale(imgData)
+//           break
+//         case "high-contrast":
+//           imgData = enhanceContrast(imgData)
+//           break
+//         case "enhanced":
+//           imgData = enhanceImage(imgData)
+//           break
+//         case "color-enhance":
+//           imgData = enhanceColorDocument(imgData)
+//           break
+//         default:
+//           // Keep original
+//           break
+//       }
 
+//       ctx.putImageData(imgData, 0, 0)
+//       resolve(canvas.toDataURL("image/jpeg", 0.9))
+//     }
+//     img.src = imageData
+//   })
+// }
 
-"use client"
+// const enhanceColorDocument = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data);
+//   const width = imageData.width;
+//   const height = imageData.height;
 
-import { useState, useEffect, useRef, useCallback } from "react"
-import Webcam from "react-webcam"
-import { jsPDF } from "jspdf"
-import { useDropzone } from "react-dropzone"
+//   // Enhance saturation and contrast while preserving colors
+//   for (let i = 0; i < data.length; i += 4) {
+//     const r = data[i];
+//     const g = data[i + 1];
+//     const b = data[i + 2];
+
+//     // Convert RGB to HSL
+//     const [h, s, l] = rgbToHsl(r, g, b);
+
+//     // Enhance saturation and lightness
+//     const newS = Math.min(s * 1.2, 1.0); // Increase saturation by 20%
+//     let newL = l;
+
+//     // Adjust lightness based on current value
+//     if (l < 0.4) {
+//       newL = l * 1.1; // Brighten dark areas
+//     } else if (l > 0.7) {
+//       newL = l * 0.95; // Slightly darken very bright areas
+//     }
+
+//     // Convert back to RGB
+//     const [newR, newG, newB] = hslToRgb(h, newS, newL);
+
+//     data[i] = newR;
+//     data[i + 1] = newG;
+//     data[i + 2] = newB;
+//   }
+
+//   // Apply subtle sharpening
+//   const result = applySharpening(data, width, height);
+
+//   return new ImageData(result, width, height);
+// };
+
+// // Helper: RGB to HSL conversion
+// const rgbToHsl = (r, g, b) => {
+//   r /= 255;
+//   g /= 255;
+//   b /= 255;
+
+//   const max = Math.max(r, g, b);
+//   const min = Math.min(r, g, b);
+//   let h, s, l = (max + min) / 2;
+
+//   if (max === min) {
+//     h = s = 0; // achromatic
+//   } else {
+//     const d = max - min;
+//     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+//     switch (max) {
+//       case r:
+//         h = (g - b) / d + (g < b ? 6 : 0);
+//         break;
+//       case g:
+//         h = (b - r) / d + 2;
+//         break;
+//       case b:
+//         h = (r - g) / d + 4;
+//         break;
+//     }
+
+//     h /= 6;
+//   }
+
+//   return [h, s, l];
+// };
+
+// // Helper: HSL to RGB conversion
+// const hslToRgb = (h, s, l) => {
+//   let r, g, b;
+
+//   if (s === 0) {
+//     r = g = b = l; // achromatic
+//   } else {
+//     const hue2rgb = (p, q, t) => {
+//       if (t < 0) t += 1;
+//       if (t > 1) t -= 1;
+//       if (t < 1 / 6) return p + (q - p) * 6 * t;
+//       if (t < 1 / 2) return q;
+//       if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+//       return p;
+//     };
+
+//     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+//     const p = 2 * l - q;
+
+//     r = hue2rgb(p, q, h + 1 / 3);
+//     g = hue2rgb(p, q, h);
+//     b = hue2rgb(p, q, h - 1 / 3);
+//   }
+
+//   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+// };
+
+// // Helper: Apply sharpening filter
+// const applySharpening = (data, width, height) => {
+//   const result = new Uint8ClampedArray(data.length);
+
+//   // Copy original data
+//   for (let i = 0; i < data.length; i++) {
+//     result[i] = data[i];
+//   }
+
+//   // Apply sharpening kernel (simplified unsharp mask)
+//   for (let y = 1; y < height - 1; y++) {
+//     for (let x = 1; x < width - 1; x++) {
+//       const idx = (y * width + x) * 4;
+
+//       for (let c = 0; c < 3; c++) { // For each color channel (R,G,B)
+//         // Simple sharpening kernel
+//         const sharpened =
+//           data[idx + c] * 5 -
+//           data[((y-1) * width + x) * 4 + c] -
+//           data[((y+1) * width + x) * 4 + c] -
+//           data[(y * width + (x-1)) * 4 + c] -
+//           data[(y * width + (x+1)) * 4 + c];
+
+//         // Clamp values between 0-255
+//         result[idx + c] = Math.min(255, Math.max(0, sharpened));
+//       }
+//     }
+//   }
+
+//   return result;
+// };
+
+// const convertToGrayscale = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data)
+//   for (let i = 0; i < data.length; i += 4) {
+//     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+//     data[i] = data[i + 1] = data[i + 2] = gray
+//   }
+//   return new ImageData(data, imageData.width, imageData.height)
+// }
+
+// const convertToBlackAndWhite = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data)
+//   // First convert to grayscale
+//   for (let i = 0; i < data.length; i += 4) {
+//     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+//     data[i] = data[i + 1] = data[i + 2] = gray
+//   }
+
+//   // Apply threshold
+//   const threshold = 128
+//   for (let i = 0; i < data.length; i += 4) {
+//     const value = data[i] > threshold ? 255 : 0
+//     data[i] = data[i + 1] = data[i + 2] = value
+//   }
+
+//   return new ImageData(data, imageData.width, imageData.height)
+// }
+
+// const enhanceContrast = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data)
+//   let min = 255
+//   let max = 0
+
+//   // Find min and max values
+//   for (let i = 0; i < data.length; i += 4) {
+//     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+//     min = Math.min(min, gray)
+//     max = Math.max(max, gray)
+//   }
+
+//   // Apply contrast stretching
+//   const range = max - min
+//   if (range === 0) return imageData
+
+//   for (let i = 0; i < data.length; i += 4) {
+//     for (let j = 0; j < 3; j++) {
+//       data[i + j] = (255 * (data[i + j] - min)) / range
+//     }
+//   }
+
+//   return new ImageData(data, imageData.width, imageData.height)
+// }
+
+// const enhanceImage = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data)
+//   const width = imageData.width
+//   const height = imageData.height
+
+//   // Convert to grayscale
+//   for (let i = 0; i < data.length; i += 4) {
+//     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+//     data[i] = data[i + 1] = data[i + 2] = gray
+//   }
+
+//   // Apply adaptive thresholding
+//   const blockSize = Math.max(3, Math.floor(Math.min(width, height) / 50)) * 2 + 1
+//   const C = 10
+
+//   const result = new Uint8ClampedArray(data.length)
+//   for (let y = 0; y < height; y++) {
+//     for (let x = 0; x < width; x++) {
+//       const idx = (y * width + x) * 4
+
+//       // Calculate local mean
+//       let sum = 0
+//       let count = 0
+
+//       const halfBlock = Math.floor(blockSize / 2)
+//       for (let j = Math.max(0, y - halfBlock); j <= Math.min(height - 1, y + halfBlock); j++) {
+//         for (let i = Math.max(0, x - halfBlock); i <= Math.min(width - 1, x + halfBlock); i++) {
+//           sum += data[(j * width + i) * 4]
+//           count++
+//         }
+//       }
+
+//       const mean = sum / count
+//       const threshold = mean - C
+
+//       // Apply threshold
+//       const value = data[idx] > threshold ? 255 : 0
+//       result[idx] = result[idx + 1] = result[idx + 2] = value
+//       result[idx + 3] = 255
+//     }
+//   }
+
+//   return new ImageData(result, width, height)
+// }
+
+// const detectDocumentEdges = (imageData) => {
+//   return new Promise((resolve) => {
+//     const img = new Image()
+//     img.onload = () => {
+//       const canvas = document.createElement("canvas")
+//       const ctx = canvas.getContext("2d")
+
+//       canvas.width = img.width
+//       canvas.height = img.height
+//       ctx.drawImage(img, 0, 0)
+
+//       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+//       const { width, height, data } = imgData
+
+//       // Convert to grayscale for edge detection
+//       const grayscale = new Uint8ClampedArray(width * height)
+//       for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+//         grayscale[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+//       }
+
+//       // Apply Gaussian blur to reduce noise
+//       const blurred = new Uint8ClampedArray(width * height)
+//       const blurRadius = 2
+
+//       for (let y = 0; y < height; y++) {
+//         for (let x = 0; x < width; x++) {
+//           let sum = 0
+//           let count = 0
+
+//           for (let dy = -blurRadius; dy <= blurRadius; dy++) {
+//             for (let dx = -blurRadius; dx <= blurRadius; dx++) {
+//               const nx = x + dx
+//               const ny = y + dy
+
+//               if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+//                 sum += grayscale[ny * width + nx]
+//                 count++
+//               }
+//             }
+//           }
+
+//           blurred[y * width + x] = sum / count
+//         }
+//       }
+
+//       // Apply Sobel operator for edge detection
+//       const edges = new Uint8ClampedArray(width * height)
+//       const threshold = 40
+
+//       for (let y = 1; y < height - 1; y++) {
+//         for (let x = 1; x < width - 1; x++) {
+//           const idx = y * width + x
+
+//           // Sobel kernels
+//           const gx =
+//             -1 * blurred[(y - 1) * width + (x - 1)] +
+//             0 * blurred[(y - 1) * width + x] +
+//             1 * blurred[(y - 1) * width + (x + 1)] +
+//             -2 * blurred[y * width + (x - 1)] +
+//             0 * blurred[y * width + x] +
+//             2 * blurred[y * width + (x + 1)] +
+//             -1 * blurred[(y + 1) * width + (x - 1)] +
+//             0 * blurred[(y + 1) * width + x] +
+//             1 * blurred[(y + 1) * width + (x + 1)]
+
+//           const gy =
+//             -1 * blurred[(y - 1) * width + (x - 1)] +
+//             -2 * blurred[(y - 1) * width + x] +
+//             -1 * blurred[(y - 1) * width + (x + 1)] +
+//             0 * blurred[y * width + (x - 1)] +
+//             0 * blurred[y * width + x] +
+//             0 * blurred[y * width + (x + 1)] +
+//             1 * blurred[(y + 1) * width + (x - 1)] +
+//             2 * blurred[(y + 1) * width + x] +
+//             1 * blurred[(y + 1) * width + (x + 1)]
+
+//           // Gradient magnitude
+//           const magnitude = Math.sqrt(gx * gx + gy * gy)
+
+//           // Thresholding
+//           edges[idx] = magnitude > threshold ? 255 : 0
+//         }
+//       }
+
+//       // Find document boundaries using contour detection
+//       const visited = new Set()
+//       const contours = []
+
+//       for (let y = 0; y < height; y++) {
+//         for (let x = 0; x < width; x++) {
+//           const idx = y * width + x
+
+//           if (edges[idx] > 0 && !visited.has(idx)) {
+//             const contour = []
+//             const stack = [{ x, y }]
+//             visited.add(idx)
+
+//             while (stack.length > 0) {
+//               const { x: cx, y: cy } = stack.pop()
+//               contour.push({ x: cx, y: cy })
+
+//               // Check 8 neighbors
+//               for (let dy = -1; dy <= 1; dy++) {
+//                 for (let dx = -1; dx <= 1; dx++) {
+//                   if (dx === 0 && dy === 0) continue
+
+//                   const nx = cx + dx
+//                   const ny = cy + dy
+
+//                   if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+//                     const nidx = ny * width + nx
+//                     if (edges[nidx] > 0 && !visited.has(nidx)) {
+//                       stack.push({ x: nx, y: ny })
+//                       visited.add(nidx)
+//                     }
+//                   }
+//                 }
+//               }
+//             }
+
+//             if (contour.length > 100) {
+//               contours.push(contour)
+//             }
+//           }
+//         }
+//       }
+
+//       // If we found contours, find the largest one that could be a document
+//       if (contours.length > 0) {
+//         contours.sort((a, b) => b.length - a.length)
+
+//         const largestContour = contours[0]
+//         let minX = width,
+//           minY = height,
+//           maxX = 0,
+//           maxY = 0
+
+//         for (const { x, y } of largestContour) {
+//           minX = Math.min(minX, x)
+//           minY = Math.min(minY, y)
+//           maxX = Math.max(maxX, x)
+//           maxY = Math.max(maxY, y)
+//         }
+
+//         // Check if the bounding box is a reasonable size for a document
+//         if (maxX - minX > width * 0.2 && maxY - minY > height * 0.2) {
+//           // Add some padding
+//           const padding = Math.max(10, Math.min(width, height) * 0.02)
+//           minX = Math.max(0, minX - padding)
+//           minY = Math.max(0, minY - padding)
+//           maxX = Math.min(width, maxX + padding)
+//           maxY = Math.min(height, maxY + padding)
+
+//           // Crop to the bounding box
+//           const croppedCanvas = document.createElement("canvas")
+//           const croppedCtx = croppedCanvas.getContext("2d")
+
+//           const cropWidth = maxX - minX
+//           const cropHeight = maxY - minY
+
+//           croppedCanvas.width = cropWidth
+//           croppedCanvas.height = cropHeight
+
+//           croppedCtx.drawImage(img, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight)
+
+//           resolve(croppedCanvas.toDataURL("image/jpeg", 0.9))
+//           return
+//         }
+//       }
+
+//       // If no suitable document contour was found, return the original
+//       resolve(imageData)
+//     }
+
+//     img.src = imageData
+//   })
+// }
+
+// const determineBestFilter = async (imageData) => {
+//   return new Promise((resolve) => {
+//     const img = new Image()
+//     img.onload = () => {
+//       const canvas = document.createElement("canvas")
+//       canvas.width = img.width
+//       canvas.height = img.height
+//       const ctx = canvas.getContext("2d")
+
+//       ctx.drawImage(img, 0, 0)
+//       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+//       const { data, width, height } = imgData
+
+//       // Calculate image characteristics
+//       let brightness = 0
+//       let contrast = 0
+//       let darknessCount = 0
+//       let colorCount = 0
+
+//       // Sample pixels for analysis
+//       const sampleStep = 4
+//       const samples = []
+
+//       for (let i = 0; i < data.length; i += 4 * sampleStep) {
+//         const r = data[i]
+//         const g = data[i + 1]
+//         const b = data[i + 2]
+
+//         samples.push({ r, g, b })
+
+//         const pixelBrightness = 0.299 * r + 0.587 * g + 0.114 * b
+//         brightness += pixelBrightness
+
+//         if (pixelBrightness < 50) darknessCount++
+
+//         if (Math.abs(r - g) > 20 || Math.abs(g - b) > 20 || Math.abs(r - b) > 20) {
+//           colorCount++
+//         }
+//       }
+
+//       const totalSamples = samples.length
+//       brightness /= totalSamples
+
+//       // Calculate variance (for contrast)
+//       let variance = 0
+//       for (const { r, g, b } of samples) {
+//         const pixelBrightness = 0.299 * r + 0.587 * g + 0.114 * b
+//         variance += Math.pow(pixelBrightness - brightness, 2)
+//       }
+//       contrast = Math.sqrt(variance / totalSamples)
+
+//       // Normalize metrics
+//       const darkRatio = darknessCount / totalSamples
+//       const colorRatio = colorCount / totalSamples
+//       const isLowContrast = contrast < 40
+//       const isDark = brightness < 100
+//       const isColorful = colorRatio > 0.3
+
+//       // Decision tree for best filter
+//       if (isColorful) {
+//         if (isDark) {
+//           resolve("color-enhance")
+//         } else if (isLowContrast) {
+//           resolve("high-contrast")
+//         } else {
+//           resolve("color-enhance")
+//         }
+//       } else {
+//         if (isDark) {
+//           resolve("enhanced")
+//         } else if (isLowContrast) {
+//           resolve("high-contrast")
+//         } else {
+//           resolve("bw")
+//         }
+//       }
+//     }
+
+//     img.onerror = () => {
+//       resolve("enhanced")
+//     }
+
+//     img.src = imageData
+//   })
+// }
+
+// const ScanUpload = ({ fileData, action, onClose }) => {
+//   const [type, setType] = useState(fileData?.type || "")
+//   const [file, setFile] = useState(fileData?.file || null)
+//   const [fileName, setFileName] = useState(fileData?.file?.name || "")
+//   const [departments, setDepartments] = useState([])
+//   const [selectedDepartment, setSelectedDepartment] = useState(fileData?.department || "")
+//   const [categories, setCategories] = useState([])
+//   const [selectedCategory, setSelectedCategory] = useState(fileData?.category || "")
+//   const [subject, setSubject] = useState(fileData?.subject || "")
+//   const [date, setDate] = useState(fileData?.date || new Date().toISOString().split("T")[0])
+//   const [diaryNo, setDiaryNo] = useState(fileData?.diaryNo || "")
+//   const [from, setFrom] = useState(fileData?.from || "")
+//   const [disposal, setDisposal] = useState(fileData?.disposal || "")
+//   const [status, setStatus] = useState(fileData?.status || "")
+//   const [isScanning, setIsScanning] = useState(false)
+//   const [capturedImage, setCapturedImage] = useState(null)
+//   const [processedImage, setProcessedImage] = useState(null)
+//   const [isLoading, setIsLoading] = useState(false)
+//   const webcamRef = useRef(null)
+//   const [isFullScreenScanning, setIsFullScreenScanning] = useState(false)
+//   const [isProcessing, setIsProcessing] = useState(false)
+//   const [zoomLevel, setZoomLevel] = useState(1)
+//   const [cameraFacingMode, setCameraFacingMode] = useState("environment")
+//   const [isFocusing, setIsFocusing] = useState(false)
+//   const videoRef = useRef(null)
+//   const [hasCameraPermission, setHasCameraPermission] = useState(null)
+//   const [isCropping, setIsCropping] = useState(false)
+//   const [crop, setCrop] = useState({ unit: "%", width: 80, height: 80, x: 10, y: 10 })
+//   const [completedCrop, setCompletedCrop] = useState(null)
+//   const [currentFilter, setCurrentFilter] = useState("enhanced")
+//   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
+//   const [isApproved, setIsApproved] = useState(false)
+//   const [extractedText, setExtractedText] = useState("")
+//   const [autoFilterApplied, setAutoFilterApplied] = useState(false)
+
+//   // Request camera permission
+//   const requestCameraAccess = async () => {
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+//       stream.getTracks().forEach((track) => track.stop())
+//       setHasCameraPermission(true)
+//     } catch (error) {
+//       setHasCameraPermission(false)
+//       alert("Camera access is required for scanning. Please allow camera access and try again.")
+//     }
+//   }
+
+//   // Handle document capture
+//   const handleCapture = async () => {
+//     if (webcamRef.current) {
+//       setIsProcessing(true)
+//       try {
+//         const imageSrc = webcamRef.current.getScreenshot()
+//         if (!imageSrc) throw new Error("Failed to capture image")
+
+//         setCapturedImage(imageSrc)
+
+//         // Step 1: Detect and crop document boundaries
+//         let processedImage = imageSrc
+//         try {
+//           const croppedImage = await detectDocumentEdges(imageSrc)
+//           if (croppedImage) {
+//             processedImage = croppedImage
+//           }
+//         } catch (cropError) {
+//           console.error("Error in document detection:", cropError)
+//         }
+
+//         // Step 2: Automatically apply the best filter
+//         try {
+//           const bestFilter = await determineBestFilter(processedImage)
+//           const enhancedImage = await preprocessImageForOCR(processedImage, bestFilter)
+//           setProcessedImage(enhancedImage)
+//           setCurrentFilter(bestFilter)
+//           setAutoFilterApplied(true)
+//         } catch (filterError) {
+//           console.error("Error applying auto filter:", filterError)
+//           setProcessedImage(processedImage)
+//         }
+
+//         setIsScanning(false)
+//         setIsFullScreenScanning(false)
+//       } catch (error) {
+//         console.error("Error processing captured image:", error)
+//       } finally {
+//         setIsProcessing(false)
+//       }
+//     }
+//   }
+
+//   // Start scanning
+//   const handleScanStart = async () => {
+//     if (hasCameraPermission === null) {
+//       try {
+//         await requestCameraAccess()
+//         setIsScanning(true)
+//         setIsFullScreenScanning(true)
+//         setCapturedImage(null)
+//         setProcessedImage(null)
+//         setIsApproved(false)
+//         setAutoFilterApplied(false)
+//       } catch (error) {
+//         console.error("Error requesting camera access:", error)
+//       }
+//     } else if (hasCameraPermission === true) {
+//       setIsScanning(true)
+//       setIsFullScreenScanning(true)
+//       setCapturedImage(null)
+//       setProcessedImage(null)
+//       setIsApproved(false)
+//       setAutoFilterApplied(false)
+//     } else {
+//       alert("Camera access is required for scanning. Please allow camera access in your browser settings and try again.")
+//     }
+//   }
+
+//   // Close camera
+//   const handleCloseCamera = () => {
+//     setIsScanning(false)
+//     setIsFullScreenScanning(false)
+//     setCapturedImage(null)
+//     setProcessedImage(null)
+//   }
+
+//   // Toggle camera facing mode
+//   const toggleCameraFacing = () => {
+//     setCameraFacingMode((prev) => (prev === "environment" ? "user" : "environment"))
+//   }
+
+//   // Zoom controls
+//   const increaseZoom = () => setZoomLevel((prev) => Math.min(prev + 0.25, 3))
+//   const decreaseZoom = () => setZoomLevel((prev) => Math.max(prev - 0.25, 1))
+
+//   // Crop functions
+//   const startCropping = () => setIsCropping(true)
+//   const cancelCropping = () => setIsCropping(false)
+
+//   const confirmCrop = async () => {
+//     if (completedCrop && processedImage) {
+//       try {
+//         const croppedImage = await applyCrop(processedImage, completedCrop)
+//         setProcessedImage(croppedImage)
+//         setIsCropping(false)
+//       } catch (error) {
+//         console.error("Error applying crop:", error)
+//       }
+//     }
+//   }
+
+//   // Apply filter
+//   const applyFilter = async (filterType) => {
+//     if (processedImage) {
+//       setIsProcessing(true)
+//       try {
+//         const filteredImage = await preprocessImageForOCR(processedImage, filterType)
+//         setProcessedImage(filteredImage)
+//         setCurrentFilter(filterType)
+//         setIsFilterMenuOpen(false)
+//         setAutoFilterApplied(false)
+//       } catch (error) {
+//         console.error("Error applying filter:", error)
+//       } finally {
+//         setIsProcessing(false)
+//       }
+//     }
+//   }
+
+//   // Approve document
+//   const approveDocument = () => {
+//     setIsApproved(true)
+//     applyFilter(currentFilter)
+//   }
+
+//   // Handle file upload
+//   const handleFileChange = useCallback(async (file) => {
+//     setIsProcessing(true)
+//     setFile(file)
+//     setFileName(file.name)
+
+//     try {
+//       if (file.type === "application/pdf") {
+//         const fileBuffer = await file.arrayBuffer()
+//         const text = await extractTextFromPdf(fileBuffer)
+//         setExtractedText(text)
+//       } else if (file.type.startsWith("image/")) {
+//         const reader = new FileReader()
+//         reader.onload = async (e) => {
+//           const imageData = e.target?.result
+//           setCapturedImage(imageData)
+
+//           try {
+//             const croppedImage = await detectDocumentEdges(imageData)
+//             const processedImg = croppedImage || imageData
+//             const bestFilter = await determineBestFilter(processedImg)
+//             const enhancedImage = await preprocessImageForOCR(processedImg, bestFilter)
+//             setProcessedImage(enhancedImage)
+//             setCurrentFilter(bestFilter)
+//             setAutoFilterApplied(true)
+//           } catch (error) {
+//             console.error("Error processing image:", error)
+//             setProcessedImage(imageData)
+//           }
+//         }
+//         reader.readAsDataURL(file)
+//       }
+//     } catch (error) {
+//       console.error("Error processing file:", error)
+//     } finally {
+//       setIsProcessing(false)
+//     }
+//   }, [])
+
+//   // Dropzone config
+//   const { getRootProps, getInputProps, isDragActive } = useDropzone({
+//     onDrop: (acceptedFiles) => {
+//       const file = acceptedFiles[0]
+//       if (file) handleFileChange(file)
+//     },
+//     accept: {
+//       "application/pdf": [".pdf"],
+//       "image/*": [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"],
+//     },
+//   })
+
+//   const enhanceColorDocument = (imageData) => {
+//   const data = new Uint8ClampedArray(imageData.data);
+//   const width = imageData.width;
+//   const height = imageData.height;
+
+//   // Enhance saturation and contrast while preserving colors
+//   for (let i = 0; i < data.length; i += 4) {
+//     const r = data[i];
+//     const g = data[i + 1];
+//     const b = data[i + 2];
+
+//     // Convert RGB to HSL
+//     const [h, s, l] = rgbToHsl(r, g, b);
+
+//     // Enhance saturation and lightness
+//     const newS = Math.min(s * 1.2, 1.0); // Increase saturation by 20%
+//     let newL = l;
+
+//     // Adjust lightness based on current value
+//     if (l < 0.4) {
+//       newL = l * 1.1; // Brighten dark areas
+//     } else if (l > 0.7) {
+//       newL = l * 0.95; // Slightly darken very bright areas
+//     }
+
+//     // Convert back to RGB
+//     const [newR, newG, newB] = hslToRgb(h, newS, newL);
+
+//     data[i] = newR;
+//     data[i + 1] = newG;
+//     data[i + 2] = newB;
+//   }
+
+//   // Apply subtle sharpening
+//   const result = applySharpening(data, width, height);
+
+//   return new ImageData(result, width, height);
+// };
+
+// // Helper: RGB to HSL conversion
+// const rgbToHsl = (r, g, b) => {
+//   r /= 255;
+//   g /= 255;
+//   b /= 255;
+
+//   const max = Math.max(r, g, b);
+//   const min = Math.min(r, g, b);
+//   let h, s, l = (max + min) / 2;
+
+//   if (max === min) {
+//     h = s = 0; // achromatic
+//   } else {
+//     const d = max - min;
+//     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+//     switch (max) {
+//       case r:
+//         h = (g - b) / d + (g < b ? 6 : 0);
+//         break;
+//       case g:
+//         h = (b - r) / d + 2;
+//         break;
+//       case b:
+//         h = (r - g) / d + 4;
+//         break;
+//     }
+
+//     h /= 6;
+//   }
+
+//   return [h, s, l];
+// };
+
+// // Helper: HSL to RGB conversion
+// const hslToRgb = (h, s, l) => {
+//   let r, g, b;
+
+//   if (s === 0) {
+//     r = g = b = l; // achromatic
+//   } else {
+//     const hue2rgb = (p, q, t) => {
+//       if (t < 0) t += 1;
+//       if (t > 1) t -= 1;
+//       if (t < 1 / 6) return p + (q - p) * 6 * t;
+//       if (t < 1 / 2) return q;
+//       if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+//       return p;
+//     };
+
+//     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+//     const p = 2 * l - q;
+
+//     r = hue2rgb(p, q, h + 1 / 3);
+//     g = hue2rgb(p, q, h);
+//     b = hue2rgb(p, q, h - 1 / 3);
+//   }
+
+//   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+// };
+
+// // Helper: Apply sharpening filter
+// const applySharpening = (data, width, height) => {
+//   const result = new Uint8ClampedArray(data.length);
+
+//   // Copy original data
+//   for (let i = 0; i < data.length; i++) {
+//     result[i] = data[i];
+//   }
+
+//   // Apply sharpening kernel (simplified unsharp mask)
+//   for (let y = 1; y < height - 1; y++) {
+//     for (let x = 1; x < width - 1; x++) {
+//       const idx = (y * width + x) * 4;
+
+//       for (let c = 0; c < 3; c++) { // For each color channel (R,G,B)
+//         // Simple sharpening kernel
+//         const sharpened =
+//           data[idx + c] * 5 -
+//           data[((y-1) * width + x) * 4 + c] -
+//           data[((y+1) * width + x) * 4 + c] -
+//           data[(y * width + (x-1)) * 4 + c] -
+//           data[(y * width + (x+1)) * 4 + c];
+
+//         // Clamp values between 0-255
+//         result[idx + c] = Math.min(255, Math.max(0, sharpened));
+//       }
+//     }
+//   }
+
+//   return result;
+// };
+
+//   // Extract text from PDF
+//   async function extractTextFromPdf(fileBuffer) {
+//     try {
+//       const loadingTask = pdfjsLib.getDocument(fileBuffer)
+//       const pdf = await loadingTask.promise
+
+//       let textContent = ""
+//       for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex++) {
+//         const page = await pdf.getPage(pageIndex)
+//         const text = await page.getTextContent()
+//         textContent += text.items.map((item) => item.str).join(" ")
+//       }
+
+//       return textContent
+//     } catch (error) {
+//       console.error("Error extracting text from PDF:", error)
+//       return ""
+//     }
+//   }
+
+//   // Convert image to PDF
+//   const convertImageToPdf = async (imageData) => {
+//     return new Promise((resolve) => {
+//       const img = new Image()
+//       img.onload = () => {
+//         const pdf = new jsPDF({
+//           orientation: img.width > img.height ? "l" : "p",
+//           unit: "px",
+//           format: [img.width, img.height],
+//         })
+//         pdf.addImage(imageData, "JPEG", 0, 0, img.width, img.height)
+//         resolve(pdf.output("blob"))
+//       }
+//       img.src = imageData
+//     })
+//   }
+
+//   // Apply crop to image
+//   const applyCrop = (image, crop) => {
+//     return new Promise((resolve) => {
+//       const img = new Image()
+//       img.onload = () => {
+//         const canvas = document.createElement("canvas")
+//         const ctx = canvas.getContext("2d")
+
+//         const scaleX = img.naturalWidth / img.width
+//         const scaleY = img.naturalHeight / img.height
+
+//         const pixelCrop = {
+//           x: crop.x * scaleX,
+//           y: crop.y * scaleY,
+//           width: crop.width * scaleX,
+//           height: crop.height * scaleY,
+//         }
+
+//         canvas.width = pixelCrop.width
+//         canvas.height = pixelCrop.height
+
+//         ctx.drawImage(
+//           img,
+//           pixelCrop.x,
+//           pixelCrop.y,
+//           pixelCrop.width,
+//           pixelCrop.height,
+//           0,
+//           0,
+//           pixelCrop.width,
+//           pixelCrop.height,
+//         )
+
+//         resolve(canvas.toDataURL("image/jpeg", 0.9))
+//       }
+//       img.src = image
+//     })
+//   }
+
+//   const handleFocus = useCallback(
+//     async (event) => {
+//       if (videoRef.current && "mediaDevices" in navigator) {
+//         setIsFocusing(true);
+
+//         try {
+//           const stream = await navigator.mediaDevices.getUserMedia({
+//             video: {
+//               facingMode: cameraFacingMode,
+//               advanced: [{ zoom: zoomLevel }]
+//             }
+//           });
+
+//           const track = stream.getVideoTracks()[0];
+
+//           if (track.getCapabilities && "focusMode" in track.getCapabilities()) {
+//             // Get click position relative to video element
+//             const rect = videoRef.current.getBoundingClientRect();
+//             const x = event.clientX - rect.left;
+//             const y = event.clientY - rect.top;
+
+//             // Normalize coordinates (0-1)
+//             const focusX = x / rect.width;
+//             const focusY = y / rect.height;
+
+//             // Try to set focus (implementation varies by browser/device)
+//             try {
+//               await track.applyConstraints({
+//                 advanced: [{
+//                   focusMode: "manual",
+//                   focusDistance: 0, // Focus on the clicked point
+//                   pointsOfInterest: [{x: focusX, y: focusY}]
+//                 }]
+//               });
+//             } catch (focusError) {
+//               console.log("Precise focus not supported, using center focus");
+//               // Fallback to center focus if precise focus isn't supported
+//               await track.applyConstraints({
+//                 advanced: [{
+//                   focusMode: "auto"
+//                 }]
+//               });
+//             }
+//           }
+//         } catch (error) {
+//           console.error("Error setting focus:", error);
+//         } finally {
+//           setIsFocusing(false);
+//         }
+//       }
+//     },
+//     [cameraFacingMode, zoomLevel]
+//   );
+
+//   // Form submission
+//   const handleSubmit = async (e) => {
+//     e.preventDefault()
+//     setIsLoading(true)
+
+//     if ((!file && !processedImage) || !selectedDepartment || !subject || !diaryNo || !from || !disposal || !status) {
+//       alert("Please fill out all fields and either upload a file or capture an image.")
+//       setIsLoading(false)
+//       return
+//     }
+
+//     const formData = new FormData()
+
+//     if (file) {
+//       formData.append("file", file)
+//       formData.append("fileName", fileName || subject)
+//     } else if (processedImage) {
+//       const pdfBlob = await convertImageToPdf(processedImage)
+//       const finalFileName = fileName || subject || "captured_image"
+//       formData.append("file", pdfBlob, `${finalFileName}.pdf`)
+//       formData.append("fileName", finalFileName)
+//     }
+
+//     formData.append("type", type)
+//     formData.append("department", selectedDepartment)
+//     formData.append("category", selectedCategory)
+//     formData.append("subject", subject)
+//     formData.append("date", date)
+//     formData.append("diaryNo", diaryNo)
+//     formData.append("from", from)
+//     formData.append("disposal", disposal)
+//     formData.append("status", status)
+
+//     const method = fileData ? "PUT" : "POST"
+//     const url = fileData ? `/api/scanupload/${fileData._id}` : "/api/scanupload"
+
+//     try {
+//       const response = await fetch(url, { method, body: formData })
+//       if (!response.ok) {
+//         const errorData = await response.json()
+//         throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+//       }
+
+//       const data = await response.json()
+//       alert(data.message)
+//       onClose()
+//     } catch (error) {
+//       console.error("Upload error:", error)
+//       alert(`An error occurred during upload: ${error.message}`)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   // Fetch departments when type changes
+//   useEffect(() => {
+//     const fetchDepartments = async () => {
+//       try {
+//         const response = await fetch(`/api/department?type=${type}`, { method: "GET" })
+//         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+//         const data = await response.json()
+//         setDepartments(data)
+//       } catch (error) {
+//         console.error("Failed to fetch departments", error)
+//       }
+//     }
+
+//     if (type) fetchDepartments()
+//   }, [type])
+
+//   // Update categories when department changes
+//   useEffect(() => {
+//     if (selectedDepartment) {
+//       const department = departments.find((dept) => dept._id === selectedDepartment)
+//       setCategories(department?.categories || [])
+//     }
+//   }, [selectedDepartment, departments])
+
+//   return (
+//     <div className={`${isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 "}`}>
+//       <div
+//         className={`${
+//           isFullScreenScanning
+//             ? "h-full max-h-full"
+//             : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]"
+//         }`}
+//       >
+//         {!isFullScreenScanning && <h2 className="text-3xl text-center font-semibold mb-6">{action} Form</h2>}
+
+//         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+//           {!isFullScreenScanning ? (
+//             <>
+//               <div className="flex flex-col gap-2 w-full">
+//                 <label className="font-medium">Type</label>
+//                 <select
+//                   value={type}
+//                   onChange={(e) => setType(e.target.value)}
+//                   className="p-2 border border-gray-300 rounded-md"
+//                 >
+//                   <option value="">Select Type</option>
+//                   <option value="uni">University</option>
+//                   <option value="admin">Admin</option>
+//                 </select>
+//               </div>
+
+//               <div className="flex flex-col sm:flex-row sm:gap-4">
+//                 <div className="flex flex-col gap-2 w-full">
+//                   <label className="font-medium">Department</label>
+//                   <select
+//                     value={selectedDepartment}
+//                     onChange={(e) => setSelectedDepartment(e.target.value)}
+//                     required
+//                     className="p-2 border border-gray-300 rounded-md"
+//                   >
+//                     <option value="">Select Department</option>
+//                     {departments.map((dept) => (
+//                       <option key={dept._id} value={dept._id}>
+//                         {dept.name}
+//                       </option>
+//                     ))}
+//                   </select>
+//                 </div>
+
+//                 <div className="flex flex-col gap-2 w-full">
+//                   <label className="font-medium">Category</label>
+//                   <select
+//                     value={selectedCategory}
+//                     onChange={(e) => setSelectedCategory(e.target.value)}
+//                     className="p-2 border border-gray-300 rounded-md"
+//                   >
+//                     <option value="">Select Category</option>
+//                     {categories.map((cat, index) => (
+//                       <option key={index} value={cat}>
+//                         {cat}
+//                       </option>
+//                     ))}
+//                   </select>
+//                 </div>
+//               </div>
+
+//               <div className="flex flex-col gap-2 w-full">
+//                 <label className="font-medium">Subject</label>
+//                 <input
+//                   type="text"
+//                   value={subject}
+//                   onChange={(e) => setSubject(e.target.value)}
+//                   required
+//                   className="p-2 border border-gray-300 rounded-md"
+//                 />
+//               </div>
+
+//               <div className="flex flex-col sm:flex-row sm:gap-4">
+//                 <div className="flex flex-col gap-2 w-full">
+//                   <label className="font-medium">Date</label>
+//                   <input
+//                     type="date"
+//                     value={date}
+//                     onChange={(e) => setDate(e.target.value)}
+//                     required
+//                     className="p-2 border border-gray-300 rounded-md"
+//                   />
+//                 </div>
+
+//                 <div className="flex flex-col gap-2 w-full">
+//                   <label className="font-medium">Diary No</label>
+//                   <input
+//                     type="text"
+//                     value={diaryNo}
+//                     onChange={(e) => setDiaryNo(e.target.value)}
+//                     required
+//                     className="p-2 border border-gray-300 rounded-md"
+//                   />
+//                 </div>
+//               </div>
+
+//               <div className="flex flex-col gap-2 w-full">
+//                 <label className="font-medium">From</label>
+//                 <input
+//                   type="text"
+//                   value={from}
+//                   onChange={(e) => setFrom(e.target.value)}
+//                   required
+//                   className="p-2 border border-gray-300 rounded-md"
+//                 />
+//               </div>
+
+//               <div className="flex flex-col gap-2 w-full">
+//                 <label className="font-medium">Disposal</label>
+//                 <input
+//                   type="text"
+//                   value={disposal}
+//                   onChange={(e) => setDisposal(e.target.value)}
+//                   required
+//                   className="p-2 border border-gray-300 rounded-md"
+//                 />
+//               </div>
+
+//               <div className="flex flex-col gap-2 w-full">
+//                 <label className="font-medium">Status</label>
+//                 <select
+//                   value={status}
+//                   onChange={(e) => setStatus(e.target.value)}
+//                   required
+//                   className="p-2 border border-gray-300 rounded-md"
+//                 >
+//                   <option value="">Select Status</option>
+//                   <option value="open">Open</option>
+//                   <option value="closed">Closed</option>
+//                 </select>
+//               </div>
+//             </>
+//           ) : null}
+
+//           {action === "Scan" ? (
+//             <div className="mb-6">
+//               <h3 className="text-lg font-semibold mb-2">Document Scanning</h3>
+
+//               {!isScanning && !processedImage && (
+//                 <button
+//                   className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                   type="button"
+//                   onClick={handleScanStart}
+//                 >
+//                   Start Scanning
+//                 </button>
+//               )}
+
+//               {isScanning && (
+//                 <div className="bg-zinc-800 absolute inset-0 flex flex-col items-center justify-center">
+//                   <div className="relative w-full h-full" onClick={handleFocus}>
+//                     <Webcam
+//                       className="w-full h-full object-cover"
+//                       audio={false}
+//                       screenshotFormat="image/jpeg"
+//                       ref={(ref) => {
+//                         webcamRef.current = ref
+//                         videoRef.current = ref && ref.video
+//                       }}
+//                       width="100%"
+//                       playsInline
+//                       videoConstraints={{
+//                         facingMode: cameraFacingMode,
+//                         width: { ideal: 1920 },
+//                         height: { ideal: 1080 },
+//                         advanced: [{ zoom: zoomLevel }],
+//                       }}
+//                     />
+
+//                     {isFocusing && (
+//                       <div className="absolute inset-0 flex items-center justify-center">
+//                         <Focus className="w-12 h-12 text-white animate-pulse" />
+//                       </div>
+//                     )}
+
+//                     {isProcessing && (
+//                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+//                         <div className="text-white flex flex-col items-center">
+//                           <RefreshCw className="w-12 h-12 animate-spin mb-2" />
+//                           <p>Processing image...</p>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {/* Document frame guide */}
+//                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+//                       <div className="border-2 border-dashed border-white w-4/5 h-3/5 opacity-70 rounded-md"></div>
+//                     </div>
+//                   </div>
+
+//                   <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+//                     <button className="p-3 bg-white rounded-full shadow-lg" onClick={decreaseZoom} type="button">
+//                       <ZoomOut className="w-6 h-6" />
+//                     </button>
+//                     <button
+//                       className="w-16 h-16 bg-white border-4 border-blue-500 rounded-full shadow-lg hover:bg-gray-100 transition duration-200"
+//                       onClick={handleCapture}
+//                       type="button"
+//                     >
+//                       <Camera className="w-8 h-8 mx-auto text-blue-600" />
+//                     </button>
+//                     <button className="p-3 bg-white rounded-full shadow-lg" onClick={increaseZoom} type="button">
+//                       <ZoomIn className="w-6 h-6" />
+//                     </button>
+//                   </div>
+
+//                   <button
+//                     className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg"
+//                     onClick={handleCloseCamera}
+//                     type="button"
+//                   >
+//                     <X className="w-6 h-6" />
+//                   </button>
+
+//                   <button
+//                     className="absolute top-4 left-4 p-3 bg-white rounded-full shadow-lg"
+//                     onClick={toggleCameraFacing}
+//                     type="button"
+//                   >
+//                     <RefreshCw className="w-6 h-6" />
+//                   </button>
+//                 </div>
+//               )}
+
+//               {processedImage && !isCropping && (
+//                 <div className="space-y-4">
+//                   <div className="relative">
+//                     <img
+//                       src={processedImage || "/placeholder.svg"}
+//                       alt="Captured"
+//                       className="w-full rounded-lg shadow-lg"
+//                     />
+
+//                     {isProcessing && (
+//                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+//                         <div className="text-white flex flex-col items-center">
+//                           <RefreshCw className="w-12 h-12 animate-spin mb-2" />
+//                           <p>Processing image...</p>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {autoFilterApplied && (
+//                       <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md opacity-80">
+//                         Auto-enhanced
+//                       </div>
+//                     )}
+//                   </div>
+
+//                   <div className="flex flex-wrap gap-2 justify-center">
+//                     {!isApproved ? (
+//                       <button
+//                         className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                         type="button"
+//                         onClick={approveDocument}
+//                       >
+//                         <Check className="w-4 h-4 mr-1 inline-block" /> Approve Document
+//                       </button>
+//                     ) : (
+//                       <div className="w-full p-3 bg-green-100 border border-green-300 rounded-lg text-center text-green-800">
+//                         Document approved and ready for submission
+//                       </div>
+//                     )}
+
+//                     <button
+//                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                       type="button"
+//                       onClick={handleScanStart}
+//                     >
+//                       Scan Again
+//                     </button>
+
+//                     <button
+//                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                       type="button"
+//                       onClick={startCropping}
+//                     >
+//                       <Crop className="w-4 h-4 mr-1 inline-block" /> Crop
+//                     </button>
+
+//                     <div className="relative">
+//                       <button
+//                         className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                         type="button"
+//                         onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+//                       >
+//                         <SlidersHorizontal className="w-4 h-4 mr-1 inline-block" /> Filters
+//                       </button>
+
+//                       {isFilterMenuOpen && (
+//                         <div className="absolute z-10 mt-2 w-48 bg-white rounded-md shadow-lg p-2 border">
+//                           <button
+//                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+//                             onClick={() => applyFilter("original")}
+//                           >
+//                             Original
+//                           </button>
+//                           <button
+//                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+//                             onClick={() => applyFilter("enhanced")}
+//                           >
+//                             Enhanced
+//                           </button>
+//                           <button
+//                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+//                             onClick={() => applyFilter("bw")}
+//                           >
+//                             Black & White
+//                           </button>
+//                           <button
+//                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+//                             onClick={() => applyFilter("grayscale")}
+//                           >
+//                             Grayscale
+//                           </button>
+//                           <button
+//                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+//                             onClick={() => applyFilter("high-contrast")}
+//                           >
+//                             High Contrast
+//                           </button>
+//                         </div>
+//                       )}
+//                     </div>
+//                   </div>
+//                 </div>
+//               )}
+
+//               {processedImage && isCropping && (
+//                 <div className="space-y-4">
+//                   <ReactCrop
+//                     crop={crop}
+//                     onChange={(c) => setCrop(c)}
+//                     onComplete={(c) => setCompletedCrop(c)}
+//                     aspect={undefined}
+//                   >
+//                     <img src={processedImage || "/placeholder.svg"} alt="To crop" />
+//                   </ReactCrop>
+
+//                   <div className="flex justify-center gap-4">
+//                     <button
+//                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                       type="button"
+//                       onClick={confirmCrop}
+//                     >
+//                       <Check className="w-4 h-4 mr-1 inline-block" /> Apply Crop
+//                     </button>
+
+//                     <button
+//                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                       type="button"
+//                       onClick={cancelCropping}
+//                     >
+//                       <X className="w-4 h-4 mr-1 inline-block" /> Cancel
+//                     </button>
+//                   </div>
+//                 </div>
+//               )}
+//             </div>
+//           ) : (
+//             <div className="flex flex-col gap-2 w-full">
+//               <label className="font-medium">File</label>
+//               <div
+//                 {...getRootProps()}
+//                 className={`flex flex-col items-center justify-center w-full h-40 p-6 border-2 border-dashed bg-gray-100 rounded-lg cursor-pointer transition-all ${
+//                   isDragActive ? "border-blue-500 bg-gray-200" : "border-gray-400"
+//                 }`}
+//               >
+//                 <input {...getInputProps()} />
+//                 <UploadCloud size={40} className="text-gray-500 mb-3" />
+//                 {isDragActive ? (
+//                   <p className="text-lg font-semibold text-blue-600">Drop your file here...</p>
+//                 ) : (
+//                   <p className="text-lg text-gray-700">
+//                     Drag & Drop your PDF or Image here or{" "}
+//                     <span className="text-blue-500 font-medium">click to browse</span>
+//                   </p>
+//                 )}
+//               </div>
+
+//               {file && (
+//                 <p className="mt-2 text-gray-700">
+//                   Uploaded File: <strong>{fileName}</strong>
+//                 </p>
+//               )}
+
+//               {isProcessing && <p>Extracting text from file... Please wait.</p>}
+
+//               {processedImage && !file && (
+//                 <div className="mt-4">
+//                   <h4 className="font-medium mb-2">Processed Document:</h4>
+//                   <img
+//                     src={processedImage || "/placeholder.svg"}
+//                     alt="Processed document"
+//                     className="w-full max-h-64 object-contain border border-gray-300 rounded-lg"
+//                   />
+//                 </div>
+//               )}
+//             </div>
+//           )}
+
+//           {!isFullScreenScanning && (
+//             <div className="flex gap-10 justify-center">
+//               <button
+//                 className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                 type="submit"
+//                 disabled={isLoading || (!file && !processedImage)}
+//               >
+//                 {isLoading ? "Saving..." : "Save"}
+//               </button>
+
+//               <button
+//                 className="bg-gray-600 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+//                 type="button"
+//                 onClick={onClose}
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           )}
+//         </form>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default ScanUpload
+
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import Webcam from "react-webcam";
+import { jsPDF } from "jspdf";
+import { useDropzone } from "react-dropzone";
 import {
   UploadCloud,
   ZoomIn,
@@ -3919,57 +5452,89 @@ import {
   X,
   Check,
   SlidersHorizontal,
-  RotateCw,
-} from "lucide-react"
-import Tesseract from "tesseract.js"
-import * as pdfjsLib from "pdfjs-dist/webpack"
-import ReactCrop from "react-image-crop"
-import "react-image-crop/dist/ReactCrop.css"
+  FlashlightOffIcon as FlashOff,
+  FlashlightIcon as Flash,
+  ImageIcon,
+} from "lucide-react";
+import Tesseract from "tesseract.js";
+import * as pdfjsLib from "pdfjs-dist/webpack";
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // Image processing functions
 const preprocessImageForOCR = async (imageData, filterType) => {
   return new Promise((resolve) => {
-    const img = new Image()
+    const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement("canvas")
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext("2d")
-      ctx.drawImage(img, 0, 0)
-      
-      let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
       // Apply filters based on type
       switch (filterType) {
         case "bw":
-          imgData = convertToBlackAndWhite(imgData)
-          break
+          imgData = convertToBlackAndWhite(imgData);
+          break;
         case "grayscale":
-          imgData = convertToGrayscale(imgData)
-          break
+          imgData = convertToGrayscale(imgData);
+          break;
         case "high-contrast":
-          imgData = enhanceContrast(imgData)
-          break
+          imgData = enhanceContrast(imgData);
+          break;
         case "enhanced":
-          imgData = enhanceImage(imgData)
-          break
+          imgData = enhanceImage(imgData);
+          break;
         case "color-enhance":
-          imgData = enhanceColorDocument(imgData)
-          break
+          imgData = enhanceColorDocument(imgData);
+          break;
+        case "document":
+          imgData = enhanceDocumentScan(imgData);
+          break;
         default:
           // Keep original
-          break
+          break;
       }
-      
-      ctx.putImageData(imgData, 0, 0)
-      resolve(canvas.toDataURL("image/jpeg", 0.9))
-    }
-    img.src = imageData
-  })
-}
 
+      ctx.putImageData(imgData, 0, 0);
+      resolve(canvas.toDataURL("image/jpeg", 0.9));
+    };
+    img.src = imageData;
+  });
+};
+
+// New document-specific enhancement filter
+const enhanceDocumentScan = (imageData) => {
+  const data = new Uint8ClampedArray(imageData.data);
+  const width = imageData.width;
+  const height = imageData.height;
+
+  // First apply color enhancement
+  const colorEnhanced = enhanceColorDocument(imageData);
+  const enhancedData = colorEnhanced.data;
+
+  // Then apply sharpening for text clarity
+  const result = applySharpening(enhancedData, width, height, 1.5); // Increased sharpening factor
+
+  // Boost contrast slightly for better readability
+  const finalData = new Uint8ClampedArray(result.length);
+  for (let i = 0; i < result.length; i += 4) {
+    // Apply a slight contrast boost
+    for (let j = 0; j < 3; j++) {
+      const value = result[i + j];
+      // Boost contrast by pushing values away from middle gray
+      finalData[i + j] = Math.min(255, Math.max(0, 128 + (value - 128) * 1.2));
+    }
+    finalData[i + 3] = result[i + 3]; // Copy alpha channel
+  }
+
+  return new ImageData(finalData, width, height);
+};
 
 const enhanceColorDocument = (imageData) => {
   const data = new Uint8ClampedArray(imageData.data);
@@ -4018,7 +5583,9 @@ const rgbToHsl = (r, g, b) => {
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  let h,
+    s,
+    l = (max + min) / 2;
 
   if (max === min) {
     h = s = 0; // achromatic
@@ -4072,7 +5639,7 @@ const hslToRgb = (h, s, l) => {
 };
 
 // Helper: Apply sharpening filter
-const applySharpening = (data, width, height) => {
+const applySharpening = (data, width, height, factor = 1.0) => {
   const result = new Uint8ClampedArray(data.length);
 
   // Copy original data
@@ -4085,14 +5652,17 @@ const applySharpening = (data, width, height) => {
     for (let x = 1; x < width - 1; x++) {
       const idx = (y * width + x) * 4;
 
-      for (let c = 0; c < 3; c++) { // For each color channel (R,G,B)
+      for (let c = 0; c < 3; c++) {
+        // For each color channel (R,G,B)
         // Simple sharpening kernel
-        const sharpened = 
-          data[idx + c] * 5 - 
-          data[((y-1) * width + x) * 4 + c] - 
-          data[((y+1) * width + x) * 4 + c] - 
-          data[(y * width + (x-1)) * 4 + c] - 
-          data[(y * width + (x+1)) * 4 + c];
+        const center = data[idx + c] * 5;
+        const neighbors =
+          data[((y - 1) * width + x) * 4 + c] +
+          data[((y + 1) * width + x) * 4 + c] +
+          data[(y * width + (x - 1)) * 4 + c] +
+          data[(y * width + (x + 1)) * 4 + c];
+
+        const sharpened = center - neighbors * factor;
 
         // Clamp values between 0-255
         result[idx + c] = Math.min(255, Math.max(0, sharpened));
@@ -4103,157 +5673,166 @@ const applySharpening = (data, width, height) => {
   return result;
 };
 
-
-
 const convertToGrayscale = (imageData) => {
-  const data = new Uint8ClampedArray(imageData.data)
+  const data = new Uint8ClampedArray(imageData.data);
   for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-    data[i] = data[i + 1] = data[i + 2] = gray
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    data[i] = data[i + 1] = data[i + 2] = gray;
   }
-  return new ImageData(data, imageData.width, imageData.height)
-}
+  return new ImageData(data, imageData.width, imageData.height);
+};
 
 const convertToBlackAndWhite = (imageData) => {
-  const data = new Uint8ClampedArray(imageData.data)
+  const data = new Uint8ClampedArray(imageData.data);
   // First convert to grayscale
   for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-    data[i] = data[i + 1] = data[i + 2] = gray
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    data[i] = data[i + 1] = data[i + 2] = gray;
   }
 
   // Apply threshold
-  const threshold = 128
+  const threshold = 128;
   for (let i = 0; i < data.length; i += 4) {
-    const value = data[i] > threshold ? 255 : 0
-    data[i] = data[i + 1] = data[i + 2] = value
+    const value = data[i] > threshold ? 255 : 0;
+    data[i] = data[i + 1] = data[i + 2] = value;
   }
 
-  return new ImageData(data, imageData.width, imageData.height)
-}
+  return new ImageData(data, imageData.width, imageData.height);
+};
 
 const enhanceContrast = (imageData) => {
-  const data = new Uint8ClampedArray(imageData.data)
-  let min = 255
-  let max = 0
+  const data = new Uint8ClampedArray(imageData.data);
+  let min = 255;
+  let max = 0;
 
   // Find min and max values
   for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-    min = Math.min(min, gray)
-    max = Math.max(max, gray)
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    min = Math.min(min, gray);
+    max = Math.max(max, gray);
   }
 
   // Apply contrast stretching
-  const range = max - min
-  if (range === 0) return imageData
+  const range = max - min;
+  if (range === 0) return imageData;
 
   for (let i = 0; i < data.length; i += 4) {
     for (let j = 0; j < 3; j++) {
-      data[i + j] = (255 * (data[i + j] - min)) / range
+      data[i + j] = (255 * (data[i + j] - min)) / range;
     }
   }
 
-  return new ImageData(data, imageData.width, imageData.height)
-}
+  return new ImageData(data, imageData.width, imageData.height);
+};
 
 const enhanceImage = (imageData) => {
-  const data = new Uint8ClampedArray(imageData.data)
-  const width = imageData.width
-  const height = imageData.height
+  const data = new Uint8ClampedArray(imageData.data);
+  const width = imageData.width;
+  const height = imageData.height;
 
   // Convert to grayscale
   for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-    data[i] = data[i + 1] = data[i + 2] = gray
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    data[i] = data[i + 1] = data[i + 2] = gray;
   }
 
   // Apply adaptive thresholding
-  const blockSize = Math.max(3, Math.floor(Math.min(width, height) / 50)) * 2 + 1
-  const C = 10
+  const blockSize =
+    Math.max(3, Math.floor(Math.min(width, height) / 50)) * 2 + 1;
+  const C = 10;
 
-  const result = new Uint8ClampedArray(data.length)
+  const result = new Uint8ClampedArray(data.length);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4
+      const idx = (y * width + x) * 4;
 
       // Calculate local mean
-      let sum = 0
-      let count = 0
+      let sum = 0;
+      let count = 0;
 
-      const halfBlock = Math.floor(blockSize / 2)
-      for (let j = Math.max(0, y - halfBlock); j <= Math.min(height - 1, y + halfBlock); j++) {
-        for (let i = Math.max(0, x - halfBlock); i <= Math.min(width - 1, x + halfBlock); i++) {
-          sum += data[(j * width + i) * 4]
-          count++
+      const halfBlock = Math.floor(blockSize / 2);
+      for (
+        let j = Math.max(0, y - halfBlock);
+        j <= Math.min(height - 1, y + halfBlock);
+        j++
+      ) {
+        for (
+          let i = Math.max(0, x - halfBlock);
+          i <= Math.min(width - 1, x + halfBlock);
+          i++
+        ) {
+          sum += data[(j * width + i) * 4];
+          count++;
         }
       }
 
-      const mean = sum / count
-      const threshold = mean - C
+      const mean = sum / count;
+      const threshold = mean - C;
 
       // Apply threshold
-      const value = data[idx] > threshold ? 255 : 0
-      result[idx] = result[idx + 1] = result[idx + 2] = value
-      result[idx + 3] = 255
+      const value = data[idx] > threshold ? 255 : 0;
+      result[idx] = result[idx + 1] = result[idx + 2] = value;
+      result[idx + 3] = 255;
     }
   }
 
-  return new ImageData(result, width, height)
-}
+  return new ImageData(result, width, height);
+};
 
+// Improved document edge detection
 const detectDocumentEdges = (imageData) => {
   return new Promise((resolve) => {
-    const img = new Image()
+    const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-      canvas.width = img.width
-      canvas.height = img.height
-      ctx.drawImage(img, 0, 0)
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const { width, height, data } = imgData
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const { width, height, data } = imgData;
 
       // Convert to grayscale for edge detection
-      const grayscale = new Uint8ClampedArray(width * height)
+      const grayscale = new Uint8ClampedArray(width * height);
       for (let i = 0, j = 0; i < data.length; i += 4, j++) {
-        grayscale[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+        grayscale[j] =
+          0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
       }
 
       // Apply Gaussian blur to reduce noise
-      const blurred = new Uint8ClampedArray(width * height)
-      const blurRadius = 2
+      const blurred = new Uint8ClampedArray(width * height);
+      const blurRadius = 2;
 
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          let sum = 0
-          let count = 0
+          let sum = 0;
+          let count = 0;
 
           for (let dy = -blurRadius; dy <= blurRadius; dy++) {
             for (let dx = -blurRadius; dx <= blurRadius; dx++) {
-              const nx = x + dx
-              const ny = y + dy
+              const nx = x + dx;
+              const ny = y + dy;
 
               if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                sum += grayscale[ny * width + nx]
-                count++
+                sum += grayscale[ny * width + nx];
+                count++;
               }
             }
           }
 
-          blurred[y * width + x] = sum / count
+          blurred[y * width + x] = sum / count;
         }
       }
 
       // Apply Sobel operator for edge detection
-      const edges = new Uint8ClampedArray(width * height)
-      const threshold = 40
+      const edges = new Uint8ClampedArray(width * height);
+      const threshold = 30; // More sensitive for document detection
 
       for (let y = 1; y < height - 1; y++) {
         for (let x = 1; x < width - 1; x++) {
-          const idx = y * width + x
+          const idx = y * width + x;
 
           // Sobel kernels
           const gx =
@@ -4265,7 +5844,7 @@ const detectDocumentEdges = (imageData) => {
             2 * blurred[y * width + (x + 1)] +
             -1 * blurred[(y + 1) * width + (x - 1)] +
             0 * blurred[(y + 1) * width + x] +
-            1 * blurred[(y + 1) * width + (x + 1)]
+            1 * blurred[(y + 1) * width + (x + 1)];
 
           const gy =
             -1 * blurred[(y - 1) * width + (x - 1)] +
@@ -4273,49 +5852,49 @@ const detectDocumentEdges = (imageData) => {
             -1 * blurred[(y - 1) * width + (x + 1)] +
             0 * blurred[y * width + (x - 1)] +
             0 * blurred[y * width + x] +
-            0 * blurred[y * width + (x + 1)] +
+            0 * blurred[(y + 1) * width + (x + 1)] +
             1 * blurred[(y + 1) * width + (x - 1)] +
             2 * blurred[(y + 1) * width + x] +
-            1 * blurred[(y + 1) * width + (x + 1)]
+            1 * blurred[(y + 1) * width + (x + 1)];
 
           // Gradient magnitude
-          const magnitude = Math.sqrt(gx * gx + gy * gy)
+          const magnitude = Math.sqrt(gx * gx + gy * gy);
 
           // Thresholding
-          edges[idx] = magnitude > threshold ? 255 : 0
+          edges[idx] = magnitude > threshold ? 255 : 0;
         }
       }
 
       // Find document boundaries using contour detection
-      const visited = new Set()
-      const contours = []
+      const visited = new Set();
+      const contours = [];
 
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const idx = y * width + x
+          const idx = y * width + x;
 
           if (edges[idx] > 0 && !visited.has(idx)) {
-            const contour = []
-            const stack = [{ x, y }]
-            visited.add(idx)
+            const contour = [];
+            const stack = [{ x, y }];
+            visited.add(idx);
 
             while (stack.length > 0) {
-              const { x: cx, y: cy } = stack.pop()
-              contour.push({ x: cx, y: cy })
+              const { x: cx, y: cy } = stack.pop();
+              contour.push({ x: cx, y: cy });
 
               // Check 8 neighbors
               for (let dy = -1; dy <= 1; dy++) {
                 for (let dx = -1; dx <= 1; dx++) {
-                  if (dx === 0 && dy === 0) continue
+                  if (dx === 0 && dy === 0) continue;
 
-                  const nx = cx + dx
-                  const ny = cy + dy
+                  const nx = cx + dx;
+                  const ny = cy + dy;
 
                   if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                    const nidx = ny * width + nx
+                    const nidx = ny * width + nx;
                     if (edges[nidx] > 0 && !visited.has(nidx)) {
-                      stack.push({ x: nx, y: ny })
-                      visited.add(nidx)
+                      stack.push({ x: nx, y: ny });
+                      visited.add(nidx);
                     }
                   }
                 }
@@ -4323,7 +5902,7 @@ const detectDocumentEdges = (imageData) => {
             }
 
             if (contour.length > 100) {
-              contours.push(contour)
+              contours.push(contour);
             }
           }
         }
@@ -4331,554 +5910,1290 @@ const detectDocumentEdges = (imageData) => {
 
       // If we found contours, find the largest one that could be a document
       if (contours.length > 0) {
-        contours.sort((a, b) => b.length - a.length)
+        contours.sort((a, b) => b.length - a.length);
 
-        const largestContour = contours[0]
+        const largestContour = contours[0];
         let minX = width,
           minY = height,
           maxX = 0,
-          maxY = 0
+          maxY = 0;
 
         for (const { x, y } of largestContour) {
-          minX = Math.min(minX, x)
-          minY = Math.min(minY, y)
-          maxX = Math.max(maxX, x)
-          maxY = Math.max(maxY, y)
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
         }
 
         // Check if the bounding box is a reasonable size for a document
         if (maxX - minX > width * 0.2 && maxY - minY > height * 0.2) {
           // Add some padding
-          const padding = Math.max(10, Math.min(width, height) * 0.02)
-          minX = Math.max(0, minX - padding)
-          minY = Math.max(0, minY - padding)
-          maxX = Math.min(width, maxX + padding)
-          maxY = Math.min(height, maxY + padding)
+          const padding = Math.max(10, Math.min(width, height) * 0.02);
+          minX = Math.max(0, minX - padding);
+          minY = Math.max(0, minY - padding);
+          maxX = Math.min(width, maxX + padding);
+          maxY = Math.min(height, maxY + padding);
+
+          // Store the document corners for visualization
+          const corners = [
+            { x: minX, y: minY }, // top-left
+            { x: maxX, y: minY }, // top-right
+            { x: maxX, y: maxY }, // bottom-right
+            { x: minX, y: maxY }, // bottom-left
+          ];
 
           // Crop to the bounding box
-          const croppedCanvas = document.createElement("canvas")
-          const croppedCtx = croppedCanvas.getContext("2d")
+          const croppedCanvas = document.createElement("canvas");
+          const croppedCtx = croppedCanvas.getContext("2d");
 
-          const cropWidth = maxX - minX
-          const cropHeight = maxY - minY
+          const cropWidth = maxX - minX;
+          const cropHeight = maxY - minY;
 
-          croppedCanvas.width = cropWidth
-          croppedCanvas.height = cropHeight
+          croppedCanvas.width = cropWidth;
+          croppedCanvas.height = cropHeight;
 
-          croppedCtx.drawImage(img, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight)
+          croppedCtx.drawImage(
+            img,
+            minX,
+            minY,
+            cropWidth,
+            cropHeight,
+            0,
+            0,
+            cropWidth,
+            cropHeight
+          );
 
-          resolve(croppedCanvas.toDataURL("image/jpeg", 0.9))
-          return
+          resolve({
+            croppedImage: croppedCanvas.toDataURL("image/jpeg", 0.9),
+            corners: corners,
+            originalWidth: width,
+            originalHeight: height,
+          });
+          return;
         }
       }
 
       // If no suitable document contour was found, return the original
-      resolve(imageData)
-    }
+      resolve({
+        croppedImage: imageData,
+        corners: null,
+        originalWidth: width,
+        originalHeight: height,
+      });
+    };
 
-    img.src = imageData
-  })
-}
+    img.src = imageData;
+  });
+};
 
 const determineBestFilter = async (imageData) => {
   return new Promise((resolve) => {
-    const img = new Image()
+    const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement("canvas")
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext("2d")
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
 
-      ctx.drawImage(img, 0, 0)
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const { data, width, height } = imgData
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const { data, width, height } = imgData;
 
-      // Calculate image characteristics
-      let brightness = 0
-      let contrast = 0
-      let darknessCount = 0
-      let colorCount = 0
-
-      // Sample pixels for analysis
-      const sampleStep = 4
-      const samples = []
-
-      for (let i = 0; i < data.length; i += 4 * sampleStep) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-
-        samples.push({ r, g, b })
-
-        const pixelBrightness = 0.299 * r + 0.587 * g + 0.114 * b
-        brightness += pixelBrightness
-
-        if (pixelBrightness < 50) darknessCount++
-
-        if (Math.abs(r - g) > 20 || Math.abs(g - b) > 20 || Math.abs(r - b) > 20) {
-          colorCount++
-        }
-      }
-
-      const totalSamples = samples.length
-      brightness /= totalSamples
-
-      // Calculate variance (for contrast)
-      let variance = 0
-      for (const { r, g, b } of samples) {
-        const pixelBrightness = 0.299 * r + 0.587 * g + 0.114 * b
-        variance += Math.pow(pixelBrightness - brightness, 2)
-      }
-      contrast = Math.sqrt(variance / totalSamples)
-
-      // Normalize metrics
-      const darkRatio = darknessCount / totalSamples
-      const colorRatio = colorCount / totalSamples
-      const isLowContrast = contrast < 40
-      const isDark = brightness < 100
-      const isColorful = colorRatio > 0.3
-
-      // Decision tree for best filter
-      if (isColorful) {
-        if (isDark) {
-          resolve("color-enhance")
-        } else if (isLowContrast) {
-          resolve("high-contrast")
-        } else {
-          resolve("color-enhance")
-        }
-      } else {
-        if (isDark) {
-          resolve("enhanced")
-        } else if (isLowContrast) {
-          resolve("high-contrast")
-        } else {
-          resolve("bw")
-        }
-      }
-    }
+      // For document scanning, we'll default to our specialized document filter
+      resolve("document");
+    };
 
     img.onerror = () => {
-      resolve("enhanced")
-    }
+      resolve("document");
+    };
 
-    img.src = imageData
-  })
-}
+    img.src = imageData;
+  });
+};
 
-const ScanUpload = ({ fileData, action, onClose }) => {
-  const [type, setType] = useState(fileData?.type || "")
-  const [file, setFile] = useState(fileData?.file || null)
-  const [fileName, setFileName] = useState(fileData?.file?.name || "")
-  const [departments, setDepartments] = useState([])
-  const [selectedDepartment, setSelectedDepartment] = useState(fileData?.department || "")
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState(fileData?.category || "")
-  const [subject, setSubject] = useState(fileData?.subject || "")
-  const [date, setDate] = useState(fileData?.date || new Date().toISOString().split("T")[0])
-  const [diaryNo, setDiaryNo] = useState(fileData?.diaryNo || "")
-  const [from, setFrom] = useState(fileData?.from || "")
-  const [disposal, setDisposal] = useState(fileData?.disposal || "")
-  const [status, setStatus] = useState(fileData?.status || "")
-  const [isScanning, setIsScanning] = useState(false)
-  const [capturedImage, setCapturedImage] = useState(null)
-  const [processedImage, setProcessedImage] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const webcamRef = useRef(null)
-  const [isFullScreenScanning, setIsFullScreenScanning] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [zoomLevel, setZoomLevel] = useState(1)
-  const [cameraFacingMode, setCameraFacingMode] = useState("environment")
-  const [isFocusing, setIsFocusing] = useState(false)
-  const videoRef = useRef(null)
-  const [hasCameraPermission, setHasCameraPermission] = useState(null)
-  const [isCropping, setIsCropping] = useState(false)
-  const [crop, setCrop] = useState({ unit: "%", width: 80, height: 80, x: 10, y: 10 })
-  const [completedCrop, setCompletedCrop] = useState(null)
-  const [currentFilter, setCurrentFilter] = useState("enhanced")
-  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
-  const [isApproved, setIsApproved] = useState(false)
-  const [extractedText, setExtractedText] = useState("")
-  const [autoFilterApplied, setAutoFilterApplied] = useState(false)
+// Enhanced edge detection for real-time preview
+const detectEdgesForPreview = (imageData) => {
+  const { data, width, height } = imageData;
+  const edges = new Uint8ClampedArray(width * height).fill(0);
 
-  // Request camera permission
-  const requestCameraAccess = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-      stream.getTracks().forEach((track) => track.stop())
-      setHasCameraPermission(true)
-    } catch (error) {
-      setHasCameraPermission(false)
-      alert("Camera access is required for scanning. Please allow camera access and try again.")
+  // Convert to grayscale with improved algorithm for better contrast
+  const grayscale = new Uint8ClampedArray(width * height);
+  for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+    // ITU-R BT.601 luma coefficients for better perceptual grayscale
+    grayscale[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+  }
+
+  // Apply light Gaussian blur to reduce noise before edge detection
+  const blurredGrayscale = new Uint8ClampedArray(width * height);
+  const blurRadius = 1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let weight = 0;
+
+      for (let dy = -blurRadius; dy <= blurRadius; dy++) {
+        for (let dx = -blurRadius; dx <= blurRadius; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            // Gaussian weight
+            const w = Math.exp(
+              -(dx * dx + dy * dy) / (2 * blurRadius * blurRadius)
+            );
+            sum += grayscale[ny * width + nx] * w;
+            weight += w;
+          }
+        }
+      }
+
+      blurredGrayscale[y * width + x] = sum / weight;
     }
   }
+
+  // Adaptive threshold for better performance in varying lighting conditions
+  let minVal = 255,
+    maxVal = 0;
+  for (let i = 0; i < blurredGrayscale.length; i++) {
+    minVal = Math.min(minVal, blurredGrayscale[i]);
+    maxVal = Math.max(maxVal, blurredGrayscale[i]);
+  }
+
+  // Dynamic threshold based on image contrast
+  const range = maxVal - minVal;
+  const threshold = range < 50 ? 15 : range < 100 ? 20 : 30;
+
+  // Enhanced Sobel edge detection
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const idx = y * width + x;
+
+      // Sobel operators with extended kernel for sharper edges
+      const gx =
+        -1 * blurredGrayscale[(y - 1) * width + (x - 1)] +
+        0 * blurredGrayscale[(y - 1) * width + x] +
+        1 * blurredGrayscale[(y - 1) * width + (x + 1)] +
+        -2 * blurredGrayscale[y * width + (x - 1)] +
+        0 * blurredGrayscale[y * width + x] +
+        2 * blurredGrayscale[y * width + (x + 1)] +
+        -1 * blurredGrayscale[(y + 1) * width + (x - 1)] +
+        0 * blurredGrayscale[(y + 1) * width + x] +
+        1 * blurredGrayscale[(y + 1) * width + (x + 1)];
+
+      const gy =
+        -1 * blurredGrayscale[(y - 1) * width + (x - 1)] +
+        -2 * blurredGrayscale[(y - 1) * width + x] +
+        -1 * blurredGrayscale[(y - 1) * width + (x + 1)] +
+        0 * blurredGrayscale[y * width + (x - 1)] +
+        0 * blurredGrayscale[y * width + x] +
+        0 * blurredGrayscale[(y + 1) * width + (x + 1)] +
+        1 * blurredGrayscale[(y + 1) * width + (x - 1)] +
+        2 * blurredGrayscale[(y + 1) * width + x] +
+        1 * blurredGrayscale[(y + 1) * width + (x + 1)];
+
+      const magnitude = Math.sqrt(gx * gx + gy * gy);
+      edges[idx] = magnitude > threshold ? 255 : 0;
+    }
+  }
+
+  // Apply morphological operations to connect edges
+  const connectedEdges = new Uint8ClampedArray(edges);
+
+  // Dilation to connect nearby edges
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      if (edges[y * width + x] === 0) {
+        // Check if any neighbor is an edge
+        let hasEdgeNeighbor = false;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (edges[(y + dy) * width + (x + dx)] > 0) {
+              hasEdgeNeighbor = true;
+              break;
+            }
+          }
+          if (hasEdgeNeighbor) break;
+        }
+
+        if (hasEdgeNeighbor) {
+          connectedEdges[y * width + x] = 255;
+        }
+      }
+    }
+  }
+
+  return connectedEdges;
+};
+
+// Improved document corner detection
+const findDocumentCorners = (edges, width, height) => {
+  // Use Hough transform to find strong lines in the image
+  const houghLines = detectLinesWithHough(edges, width, height);
+
+  if (houghLines.length < 4) {
+    // Fall back to contour-based detection if not enough lines
+    return findCornersFromContours(edges, width, height);
+  }
+
+  // Group lines by orientation (horizontal vs vertical)
+  const { horizontalLines, verticalLines } =
+    groupLinesByOrientation(houghLines);
+
+  // Need at least 2 horizontal and 2 vertical lines
+  if (horizontalLines.length < 2 || verticalLines.length < 2) {
+    return findCornersFromContours(edges, width, height);
+  }
+
+  // Sort lines by position
+  horizontalLines.sort((a, b) => a.y1 - b.y1);
+  verticalLines.sort((a, b) => a.x1 - b.x1);
+
+  // Get the top, bottom, left, right lines
+  const topLine = horizontalLines[0];
+  const bottomLine = horizontalLines[horizontalLines.length - 1];
+  const leftLine = verticalLines[0];
+  const rightLine = verticalLines[verticalLines.length - 1];
+
+  // Calculate intersections to find corners
+  const topLeft = findIntersection(topLine, leftLine);
+  const topRight = findIntersection(topLine, rightLine);
+  const bottomRight = findIntersection(bottomLine, rightLine);
+  const bottomLeft = findIntersection(bottomLine, leftLine);
+
+  // Validate corners - make sure they form a reasonable quadrilateral
+  if (
+    topLeft &&
+    topRight &&
+    bottomRight &&
+    bottomLeft &&
+    isValidQuadrilateral(
+      [topLeft, topRight, bottomRight, bottomLeft],
+      width,
+      height
+    )
+  ) {
+    return [topLeft, topRight, bottomRight, bottomLeft];
+  }
+
+  // Fall back to contour-based method if line intersections don't produce good corners
+  return findCornersFromContours(edges, width, height);
+};
+
+// Helper function to find corners using contour method (fallback)
+const findCornersFromContours = (edges, width, height) => {
+  // Find edge points
+  const edgePoints = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (edges[y * width + x] > 0) {
+        edgePoints.push({ x, y });
+      }
+    }
+  }
+
+  if (edgePoints.length < 20) return null; // Not enough edge points
+
+  // Find extreme points
+  let minX = width,
+    minY = height,
+    maxX = 0,
+    maxY = 0;
+  let topLeft, topRight, bottomRight, bottomLeft;
+
+  // Distance to corners method with improved weighting
+  let minDistTL = Number.POSITIVE_INFINITY;
+  let minDistTR = Number.POSITIVE_INFINITY;
+  let minDistBR = Number.POSITIVE_INFINITY;
+  let minDistBL = Number.POSITIVE_INFINITY;
+
+  for (const point of edgePoints) {
+    const { x, y } = point;
+
+    // Update min/max coordinates
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+
+    // Calculate weighted distances to corners - weight corners more heavily
+    // This improves detection of document corners vs random edge points
+    const distTL = (x * x + y * y) * (1 + Math.min(x / width, y / height));
+    const distTR =
+      ((width - x) * (width - x) + y * y) *
+      (1 + Math.min((width - x) / width, y / height));
+    const distBR =
+      ((width - x) * (width - x) + (height - y) * (height - y)) *
+      (1 + Math.min((width - x) / width, (height - y) / height));
+    const distBL =
+      (x * x + (height - y) * (height - y)) *
+      (1 + Math.min(x / width, (height - y) / height));
+
+    // Update closest points
+    if (distTL < minDistTL) {
+      minDistTL = distTL;
+      topLeft = point;
+    }
+
+    if (distTR < minDistTR) {
+      minDistTR = distTR;
+      topRight = point;
+    }
+
+    if (distBR < minDistBR) {
+      minDistBR = distBR;
+      bottomRight = point;
+    }
+
+    if (distBL < minDistBL) {
+      minDistBL = distBL;
+      bottomLeft = point;
+    }
+  }
+
+  // Check if we have a reasonable quadrilateral (with improved size check)
+  const minDocumentSize = Math.min(width, height) * 0.15; // Minimum 15% of smaller dimension
+  if (maxX - minX < minDocumentSize || maxY - minY < minDocumentSize) {
+    return null; // Too small to be a document
+  }
+
+  // Extra validation - ensure corners form a proper convex quadrilateral
+  if (
+    !isValidQuadrilateral(
+      [topLeft, topRight, bottomRight, bottomLeft],
+      width,
+      height
+    )
+  ) {
+    return null;
+  }
+
+  return [topLeft, topRight, bottomRight, bottomLeft];
+};
+
+// Helper function to detect lines using Hough transform
+const detectLinesWithHough = (edges, width, height) => {
+  // Simplified Hough transform for line detection
+  // Parameter space: (rho, theta) - distance from origin, angle
+  const rhoMax = Math.sqrt(width * width + height * height);
+  const rhoSteps = 180;
+  const thetaSteps = 180;
+  const threshold = Math.max(width, height) / 10; // Adaptive threshold based on image size
+
+  // Accumulator array
+  const accumulator = new Array(rhoSteps * thetaSteps).fill(0);
+
+  // Populate accumulator
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (edges[y * width + x] > 0) {
+        for (let t = 0; t < thetaSteps; t++) {
+          const theta = (t * Math.PI) / thetaSteps;
+          const rho = x * Math.cos(theta) + y * Math.sin(theta);
+
+          // Map rho to rhoSteps
+          const rhoIndex = Math.floor(
+            ((rho + rhoMax) / (2 * rhoMax)) * rhoSteps
+          );
+          if (rhoIndex >= 0 && rhoIndex < rhoSteps) {
+            accumulator[rhoIndex + t * rhoSteps]++;
+          }
+        }
+      }
+    }
+  }
+
+  // Find strong lines (local maxima in accumulator)
+  const lines = [];
+  for (let t = 0; t < thetaSteps; t++) {
+    for (let r = 0; r < rhoSteps; r++) {
+      const idx = r + t * rhoSteps;
+      if (accumulator[idx] > threshold) {
+        // Check if it's a local maximum
+        let isLocalMax = true;
+        for (let dt = -1; dt <= 1; dt++) {
+          for (let dr = -1; dr <= 1; dr++) {
+            if (dt === 0 && dr === 0) continue;
+
+            const nt = (t + dt + thetaSteps) % thetaSteps;
+            const nr = (r + dr + rhoSteps) % rhoSteps;
+            const nidx = nr + nt * rhoSteps;
+
+            if (accumulator[nidx] > accumulator[idx]) {
+              isLocalMax = false;
+              break;
+            }
+          }
+          if (!isLocalMax) break;
+        }
+
+        if (isLocalMax) {
+          // Convert back to image space
+          const theta = (t * Math.PI) / thetaSteps;
+          const rho = (r / rhoSteps) * 2 * rhoMax - rhoMax;
+
+          // Calculate line endpoints
+          const a = Math.cos(theta);
+          const b = Math.sin(theta);
+          const x0 = a * rho;
+          const y0 = b * rho;
+
+          // Line in form of (x1, y1, x2, y2)
+          const x1 = Math.round(x0 + 1000 * -b);
+          const y1 = Math.round(y0 + 1000 * a);
+          const x2 = Math.round(x0 - 1000 * -b);
+          const y2 = Math.round(y0 - 1000 * a);
+
+          lines.push({ x1, y1, x2, y2, theta, rho, votes: accumulator[idx] });
+        }
+      }
+    }
+  }
+
+  // Sort by vote count
+  lines.sort((a, b) => b.votes - a.votes);
+
+  // Return only the strongest lines
+  return lines.slice(0, Math.min(lines.length, 10));
+};
+
+// Group lines by orientation
+const groupLinesByOrientation = (lines) => {
+  const horizontalLines = [];
+  const verticalLines = [];
+  const threshold = Math.PI / 8; // 22.5° tolerance
+
+  for (const line of lines) {
+    // Normalize theta to [0, π)
+    const theta = ((line.theta % Math.PI) + Math.PI) % Math.PI;
+
+    // Approximately horizontal lines (near 0 or π)
+    if (
+      theta < threshold ||
+      Math.abs(theta - Math.PI) < threshold ||
+      Math.abs(theta - Math.PI / 2) < threshold
+    ) {
+      horizontalLines.push(line);
+    }
+    // Approximately vertical lines (near π/2)
+    else if (
+      Math.abs(theta - Math.PI / 4) < threshold ||
+      Math.abs(theta - (3 * Math.PI) / 4) < threshold
+    ) {
+      verticalLines.push(line);
+    }
+  }
+
+  return { horizontalLines, verticalLines };
+};
+
+// Find intersection of two lines
+const findIntersection = (line1, line2) => {
+  // Compute slopes and intercepts
+  const a1 = line1.y2 - line1.y1;
+  const b1 = line1.x1 - line1.x2;
+  const c1 = a1 * line1.x1 + b1 * line1.y1;
+
+  const a2 = line2.y2 - line2.y1;
+  const b2 = line2.x1 - line2.x2;
+  const c2 = a2 * line2.x1 + b2 * line2.y1;
+
+  const det = a1 * b2 - a2 * b1;
+
+  if (Math.abs(det) < 1e-8) {
+    return null; // Lines are parallel
+  }
+
+  const x = (b2 * c1 - b1 * c2) / det;
+  const y = (a1 * c2 - a2 * c1) / det;
+
+  return { x, y };
+};
+
+// Validate if corners form a proper quadrilateral
+const isValidQuadrilateral = (corners, width, height) => {
+  if (!corners || corners.length !== 4) return false;
+
+  const [topLeft, topRight, bottomRight, bottomLeft] = corners;
+
+  // Check if all corners are within image bounds with some margin
+  const margin = -50; // Allow corners to be slightly outside the image
+  for (const corner of corners) {
+    if (
+      corner.x < margin ||
+      corner.x > width - margin ||
+      corner.y < margin ||
+      corner.y > height - margin
+    ) {
+      return false;
+    }
+  }
+
+  // Check minimum area
+  const area = calculateQuadrilateralArea(corners);
+  const minArea = width * height * 0.05; // Minimum 5% of image area
+  if (area < minArea) return false;
+
+  // Check aspect ratio
+  const widthTop = distance(topLeft, topRight);
+  const widthBottom = distance(bottomLeft, bottomRight);
+  const heightLeft = distance(topLeft, bottomLeft);
+  const heightRight = distance(topRight, bottomRight);
+
+  const avgWidth = (widthTop + widthBottom) / 2;
+  const avgHeight = (heightLeft + heightRight) / 2;
+
+  // Most documents have aspect ratios between 0.5 and 2.0
+  const aspectRatio = avgWidth / avgHeight;
+  if (aspectRatio < 0.5 || aspectRatio > 2.1) return false;
+
+  return true;
+};
+
+// Calculate distance between two points
+const distance = (p1, p2) => {
+  return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+};
+
+// Calculate area of a quadrilateral
+const calculateQuadrilateralArea = (corners) => {
+  // Shoelace formula (Gauss's area formula)
+  let area = 0;
+  for (let i = 0; i < corners.length; i++) {
+    const j = (i + 1) % corners.length;
+    area += corners[i].x * corners[j].y;
+    area -= corners[j].x * corners[i].y;
+  }
+  return Math.abs(area) / 2;
+};
+
+const ScanUpload = ({ fileData, action, onClose }) => {
+  const [type, setType] = useState(fileData?.type || "");
+  const [file, setFile] = useState(fileData?.file || null);
+  const [fileName, setFileName] = useState(fileData?.file?.name || "");
+  const [departments, setDepartments] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState(
+    fileData?.department || ""
+  );
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(
+    fileData?.category || ""
+  );
+  const [subject, setSubject] = useState(fileData?.subject || "");
+  const [date, setDate] = useState(
+    fileData?.date || new Date().toISOString().split("T")[0]
+  );
+  const [diaryNo, setDiaryNo] = useState(fileData?.diaryNo || "");
+  const [from, setFrom] = useState(fileData?.from || "");
+  const [disposal, setDisposal] = useState(fileData?.disposal || "");
+  const [status, setStatus] = useState(fileData?.status || "");
+  const [isScanning, setIsScanning] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [processedImage, setProcessedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const webcamRef = useRef(null);
+  const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [cameraFacingMode, setCameraFacingMode] = useState("environment");
+  const [isFocusing, setIsFocusing] = useState(false);
+  const videoRef = useRef(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [crop, setCrop] = useState({
+    unit: "%",
+    width: 80,
+    height: 80,
+    x: 10,
+    y: 10,
+  });
+  const [completedCrop, setCompletedCrop] = useState(null);
+  const [currentFilter, setCurrentFilter] = useState("document");
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+  const [extractedText, setExtractedText] = useState("");
+  const [autoFilterApplied, setAutoFilterApplied] = useState(false);
+  const [documentCorners, setDocumentCorners] = useState(null);
+  const [showDocumentGuide, setShowDocumentGuide] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(false);
+  const [scanMode, setScanMode] = useState("single"); // 'single' or 'batch'
+  const [detectedDocumentCorners, setDetectedDocumentCorners] = useState(null);
+  const [originalImageDimensions, setOriginalImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [isDocumentDetected, setIsDocumentDetected] = useState(false);
+  const canvasRef = useRef(null);
+
+  // Request camera permission gracefully
+  const requestCameraAccess = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: cameraFacingMode,
+        },
+      });
+
+      // Check if flash is available
+      const track = stream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+      const hasFlash = capabilities.torch || false;
+
+      // Stop the stream we just used for checking
+      stream.getTracks().forEach((track) => track.stop());
+
+      setHasCameraPermission(true);
+      return true;
+    } catch (error) {
+      console.log("Camera permission not granted:", error);
+      setHasCameraPermission(false);
+      return false;
+    }
+  };
+
+  // Toggle flash
+  const toggleFlash = async () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      try {
+        const track = videoRef.current.srcObject.getVideoTracks()[0];
+        if (track) {
+          const capabilities = track.getCapabilities();
+          if (capabilities.torch) {
+            await track.applyConstraints({
+              advanced: [{ torch: !flashEnabled }],
+            });
+            setFlashEnabled(!flashEnabled);
+          }
+        }
+      } catch (error) {
+        console.error("Error toggling flash:", error);
+      }
+    }
+  };
+
+  const detectDocumentEdgesForPreview = (imageData) => {
+    const { data, width, height } = imageData;
+    const edges = new Uint8ClampedArray(width * height).fill(0);
+
+    // Convert to grayscale with improved coefficients
+    const grayscale = new Uint8ClampedArray(width * height);
+    for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+      grayscale[j] =
+        0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    }
+
+    // Apply Gaussian blur to reduce noise
+    const blurred = new Uint8ClampedArray(width * height);
+    const blurRadius = 2;
+    const kernel = [1, 2, 1, 2, 4, 2, 1, 2, 1]; // Gaussian kernel
+    const kernelSize = 3;
+    const kernelSum = 16;
+
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        let sum = 0;
+        let k = 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            sum += grayscale[(y + dy) * width + (x + dx)] * kernel[k++];
+          }
+        }
+
+        blurred[y * width + x] = sum / kernelSum;
+      }
+    }
+
+    // Enhanced Sobel edge detection with better thresholding
+    const threshold = 50; // Higher threshold for cleaner edges
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const idx = y * width + x;
+
+        // Sobel operators
+        const gx =
+          -1 * blurred[(y - 1) * width + (x - 1)] +
+          1 * blurred[(y - 1) * width + (x + 1)] +
+          -2 * blurred[y * width + (x - 1)] +
+          2 * blurred[y * width + (x + 1)] +
+          -1 * blurred[(y + 1) * width + (x - 1)] +
+          1 * blurred[(y + 1) * width + (x + 1)];
+
+        const gy =
+          -1 * blurred[(y - 1) * width + (x - 1)] +
+          -2 * blurred[(y - 1) * width + x] +
+          -1 * blurred[(y - 1) * width + (x + 1)] +
+          1 * blurred[(y + 1) * width + (x - 1)] +
+          2 * blurred[(y + 1) * width + x] +
+          1 * blurred[(y + 1) * width + (x + 1)];
+
+        const magnitude = Math.sqrt(gx * gx + gy * gy);
+        edges[idx] = magnitude > threshold ? 255 : 0;
+      }
+    }
+
+    return edges;
+  };
+
+  const isValidQuadrilateral = (corners, width, height) => {
+    if (!corners || corners.length !== 4) return false;
+
+    // Check if all corners are within image bounds
+    for (const corner of corners) {
+      if (
+        corner.x < 0 ||
+        corner.x > width ||
+        corner.y < 0 ||
+        corner.y > height
+      ) {
+        return false;
+      }
+    }
+
+    // Calculate distances between corners
+    const distances = [
+      Math.sqrt(
+        Math.pow(corners[1].x - corners[0].x, 2) +
+          Math.pow(corners[1].y - corners[0].y, 2)
+      ),
+      Math.sqrt(
+        Math.pow(corners[2].x - corners[1].x, 2) +
+          Math.pow(corners[2].y - corners[1].y, 2)
+      ),
+      Math.sqrt(
+        Math.pow(corners[3].x - corners[2].x, 2) +
+          Math.pow(corners[3].y - corners[2].y, 2)
+      ),
+      Math.sqrt(
+        Math.pow(corners[0].x - corners[3].x, 2) +
+          Math.pow(corners[0].y - corners[3].y, 2)
+      ),
+    ];
+
+    // Check aspect ratio (should be roughly document-like)
+    const widthAvg = (distances[0] + distances[2]) / 2;
+    const heightAvg = (distances[1] + distances[3]) / 2;
+    const aspectRatio = widthAvg / heightAvg;
+
+    // Typical document aspect ratios (letter/A4)
+    return aspectRatio > 0.6 && aspectRatio < 1.5;
+  };
+
+  const applyPerspectiveCorrection = (imageSrc, corners) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Calculate destination dimensions (A4 aspect ratio)
+        const width = Math.max(
+          Math.sqrt(
+            Math.pow(corners[1].x - corners[0].x, 2) +
+              Math.pow(corners[1].y - corners[0].y, 2)
+          ),
+          Math.sqrt(
+            Math.pow(corners[3].x - corners[2].x, 2) +
+              Math.pow(corners[3].y - corners[2].y, 2)
+          )
+        );
+
+        const height = Math.max(
+          Math.sqrt(
+            Math.pow(corners[3].x - corners[0].x, 2) +
+              Math.pow(corners[3].y - corners[0].y, 2)
+          ),
+          Math.sqrt(
+            Math.pow(corners[2].x - corners[1].x, 2) +
+              Math.pow(corners[2].y - corners[1].y, 2)
+          )
+        );
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Perspective transform
+        ctx.transform(1, 0, 0, 1, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(width, 0);
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.clip();
+
+        // Apply perspective correction
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = imageSrc;
+    });
+  };
+
+  // Real-time document detection with optimized performance
+  const detectDocumentInRealTime = useCallback(() => {
+    if (!webcamRef.current || !canvasRef.current || !videoRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    // Match canvas size to video
+    if (
+      canvas.width !== video.videoWidth ||
+      canvas.height !== video.videoHeight
+    ) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    }
+
+    // Skip processing if video isn't ready
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      requestAnimationFrame(detectDocumentInRealTime);
+      return;
+    }
+
+    // Draw the current video frame
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Only process every 3rd frame for performance (adjust as needed)
+    if (
+      !window.lastProcessedTime ||
+      performance.now() - window.lastProcessedTime > 100
+    ) {
+      window.lastProcessedTime = performance.now();
+
+      // Get image data for processing
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Enhanced edge detection specifically for documents
+      const edges = detectDocumentEdgesForPreview(imageData);
+
+      // Find document corners with improved algorithm
+      const corners = findDocumentCorners(edges, canvas.width, canvas.height);
+
+      if (
+        corners &&
+        isValidQuadrilateral(corners, canvas.width, canvas.height)
+      ) {
+        setIsDocumentDetected(true);
+        setDetectedDocumentCorners(corners);
+
+        // Draw the document outline
+        ctx.strokeStyle = "#00e5c9";
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        ctx.lineTo(corners[1].x, corners[1].y);
+        ctx.lineTo(corners[2].x, corners[2].y);
+        ctx.lineTo(corners[3].x, corners[3].y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Add subtle glow effect
+        ctx.shadowColor = "#00e5c9";
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = "rgba(0, 229, 201, 0.7)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      } else {
+        setIsDocumentDetected(false);
+        setDetectedDocumentCorners(null);
+      }
+    }
+
+    requestAnimationFrame(detectDocumentInRealTime);
+  }, []);
+
+  const applyAdditionalSharpening = (imageData) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        // Apply additional sharpening
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const sharpenedData = applySharpening(
+          imgData.data,
+          canvas.width,
+          canvas.height,
+          1.8
+        );
+
+        const result = new ImageData(
+          sharpenedData,
+          canvas.width,
+          canvas.height
+        );
+        ctx.putImageData(result, 0, 0);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = imageData;
+    });
+  };
 
   // Handle document capture
   const handleCapture = async () => {
     if (webcamRef.current) {
-      setIsProcessing(true)
+      setIsProcessing(true);
       try {
-        const imageSrc = webcamRef.current.getScreenshot()
-        if (!imageSrc) throw new Error("Failed to capture image")
+        const imageSrc = webcamRef.current.getScreenshot({
+          width: 1920, // Capture at higher resolution
+          height: 1080,
+          quality: 0.9,
+        });
 
-        setCapturedImage(imageSrc)
+        if (!imageSrc) {
+          setIsProcessing(false);
+          return;
+        }
+
+        setCapturedImage(imageSrc);
 
         // Step 1: Detect and crop document boundaries
-        let processedImage = imageSrc
-        try {
-          const croppedImage = await detectDocumentEdges(imageSrc)
-          if (croppedImage) {
-            processedImage = croppedImage
+        let processedImage = imageSrc;
+        let corners = detectedDocumentCorners; // Use detected corners if available
+
+        if (corners) {
+          try {
+            // Perspective correction using the detected corners
+            const correctedImage = await applyPerspectiveCorrection(
+              imageSrc,
+              corners
+            );
+            processedImage = correctedImage;
+          } catch (error) {
+            console.error(
+              "Perspective correction failed, using regular crop:",
+              error
+            );
+            // Fallback to regular crop if perspective correction fails
+            const result = await detectDocumentEdges(imageSrc);
+            if (result.croppedImage) {
+              processedImage = result.croppedImage;
+            }
           }
-        } catch (cropError) {
-          console.error("Error in document detection:", cropError)
+        } else {
+          // If no corners detected, try regular document detection
+          const result = await detectDocumentEdges(imageSrc);
+          if (result.croppedImage) {
+            processedImage = result.croppedImage;
+          }
         }
 
-        // Step 2: Automatically apply the best filter
-        try {
-          const bestFilter = await determineBestFilter(processedImage)
-          const enhancedImage = await preprocessImageForOCR(processedImage, bestFilter)
-          setProcessedImage(enhancedImage)
-          setCurrentFilter(bestFilter)
-          setAutoFilterApplied(true)
-        } catch (filterError) {
-          console.error("Error applying auto filter:", filterError)
-          setProcessedImage(processedImage)
-        }
+        // Step 2: Apply document enhancement filter
+        console.log("Applying document enhancement...");
+        const enhancedImage = await preprocessImageForOCR(
+          processedImage,
+          "document"
+        );
 
-        setIsScanning(false)
-        setIsFullScreenScanning(false)
+        // Additional sharpening for better text clarity
+        const finalImage = await applyAdditionalSharpening(enhancedImage);
+
+        setProcessedImage(finalImage);
+        setCurrentFilter("document");
+        setAutoFilterApplied(true);
+        setIsScanning(false);
       } catch (error) {
-        console.error("Error processing captured image:", error)
+        console.error("Error processing captured image:", error);
+        setIsScanning(false);
       } finally {
-        setIsProcessing(false)
+        setIsProcessing(false);
       }
     }
-  }
+  };
 
-  // Start scanning
+  // Start scanning with graceful permission handling
   const handleScanStart = async () => {
     if (hasCameraPermission === null) {
-      try {
-        await requestCameraAccess()
-        setIsScanning(true)
-        setIsFullScreenScanning(true)
-        setCapturedImage(null)
-        setProcessedImage(null)
-        setIsApproved(false)
-        setAutoFilterApplied(false)
-      } catch (error) {
-        console.error("Error requesting camera access:", error)
+      const hasAccess = await requestCameraAccess();
+      if (hasAccess) {
+        startScanner();
+      } else {
+        // Stay on form and don't show error, just log it
+        console.log("Camera access not granted");
       }
     } else if (hasCameraPermission === true) {
-      setIsScanning(true)
-      setIsFullScreenScanning(true)
-      setCapturedImage(null)
-      setProcessedImage(null)
-      setIsApproved(false)
-      setAutoFilterApplied(false)
+      startScanner();
     } else {
-      alert("Camera access is required for scanning. Please allow camera access in your browser settings and try again.")
+      // Try again, in case user changed permissions
+      const hasAccess = await requestCameraAccess();
+      if (hasAccess) {
+        startScanner();
+      } else {
+        console.log("Camera access still not granted");
+      }
     }
-  }
+  };
+
+  const startScanner = () => {
+    setIsScanning(true);
+    setIsFullScreenScanning(true);
+    setCapturedImage(null);
+    setProcessedImage(null);
+    setIsApproved(false);
+    setAutoFilterApplied(false);
+    setShowDocumentGuide(true);
+    setDetectedDocumentCorners(null);
+    setIsDocumentDetected(false);
+  };
 
   // Close camera
   const handleCloseCamera = () => {
-    setIsScanning(false)
-    setIsFullScreenScanning(false)
-    setCapturedImage(null)
-    setProcessedImage(null)
-  }
+    setIsScanning(false);
+    setIsFullScreenScanning(false);
+    setCapturedImage(null);
+    setProcessedImage(null);
+    setDetectedDocumentCorners(null);
+  };
 
   // Toggle camera facing mode
   const toggleCameraFacing = () => {
-    setCameraFacingMode((prev) => (prev === "environment" ? "user" : "environment"))
-  }
+    setCameraFacingMode((prev) =>
+      prev === "environment" ? "user" : "environment"
+    );
+    // Reset flash when switching camera
+    setFlashEnabled(false);
+  };
 
   // Zoom controls
-  const increaseZoom = () => setZoomLevel((prev) => Math.min(prev + 0.25, 3))
-  const decreaseZoom = () => setZoomLevel((prev) => Math.max(prev - 0.25, 1))
+  const increaseZoom = () => setZoomLevel((prev) => Math.min(prev + 0.25, 3));
+  const decreaseZoom = () => setZoomLevel((prev) => Math.max(prev - 0.25, 1));
 
   // Crop functions
-  const startCropping = () => setIsCropping(true)
-  const cancelCropping = () => setIsCropping(false)
+  const startCropping = () => setIsCropping(true);
+  const cancelCropping = () => setIsCropping(false);
 
   const confirmCrop = async () => {
     if (completedCrop && processedImage) {
       try {
-        const croppedImage = await applyCrop(processedImage, completedCrop)
-        setProcessedImage(croppedImage)
-        setIsCropping(false)
+        const croppedImage = await applyCrop(processedImage, completedCrop);
+        setProcessedImage(croppedImage);
+        setIsCropping(false);
       } catch (error) {
-        console.error("Error applying crop:", error)
+        console.error("Error applying crop:", error);
       }
     }
-  }
+  };
 
   // Apply filter
   const applyFilter = async (filterType) => {
     if (processedImage) {
-      setIsProcessing(true)
+      setIsProcessing(true);
       try {
-        const filteredImage = await preprocessImageForOCR(processedImage, filterType)
-        setProcessedImage(filteredImage)
-        setCurrentFilter(filterType)
-        setIsFilterMenuOpen(false)
-        setAutoFilterApplied(false)
+        const filteredImage = await preprocessImageForOCR(
+          processedImage,
+          filterType
+        );
+        setProcessedImage(filteredImage);
+        setCurrentFilter(filterType);
+        setIsFilterMenuOpen(false);
+        setAutoFilterApplied(false);
       } catch (error) {
-        console.error("Error applying filter:", error)
+        console.error("Error applying filter:", error);
       } finally {
-        setIsProcessing(false)
+        setIsProcessing(false);
       }
     }
-  }
+  };
 
-  // Approve document
+  // Approve document - this will move it to the form
   const approveDocument = () => {
-    setIsApproved(true)
-    applyFilter(currentFilter)
-  }
+    setIsApproved(true);
+    setIsFullScreenScanning(false);
 
-  // Handle file upload
-  const handleFileChange = useCallback(async (file) => {
-    setIsProcessing(true)
-    setFile(file)
-    setFileName(file.name)
+    // Extract text if possible and immediately populate form fields
+    if (processedImage) {
+      setIsProcessing(true);
+      console.log("Starting text extraction from approved document...");
+
+      // Always extract text when approving
+      extractTextFromImage(processedImage)
+        .then((extractedText) => {
+          console.log("Text extracted:", extractedText ? "Yes" : "No");
+
+          // After extraction completes, try to update the form
+          if (extractedText) {
+            const lines = extractedText
+              .split("\n")
+              .filter((line) => line.trim() !== "");
+            if (lines.length > 0) {
+              // Use first non-empty line as subject
+              const detectedSubject = lines[0].substring(0, 100);
+              console.log("Setting subject to:", detectedSubject);
+              setSubject(detectedSubject);
+            } else {
+              console.log("No text lines found in extracted text");
+            }
+          } else {
+            console.log("No text was extracted");
+          }
+        })
+        .catch((error) => {
+          console.error("Error during text extraction:", error);
+        })
+        .finally(() => {
+          setIsProcessing(false);
+        });
+    } else {
+      console.log("No processed image available for text extraction");
+    }
+  };
+
+  // Extract text from image using Tesseract with improved settings
+  const extractTextFromImage = async (imageData) => {
+    console.log("Starting OCR text extraction...");
 
     try {
-      if (file.type === "application/pdf") {
-        const fileBuffer = await file.arrayBuffer()
-        const text = await extractTextFromPdf(fileBuffer)
-        setExtractedText(text)
-      } else if (file.type.startsWith("image/")) {
-        const reader = new FileReader()
-        reader.onload = async (e) => {
-          const imageData = e.target?.result
-          setCapturedImage(imageData)
-
-          try {
-            const croppedImage = await detectDocumentEdges(imageData)
-            const processedImg = croppedImage || imageData
-            const bestFilter = await determineBestFilter(processedImg)
-            const enhancedImage = await preprocessImageForOCR(processedImg, bestFilter)
-            setProcessedImage(enhancedImage)
-            setCurrentFilter(bestFilter)
-            setAutoFilterApplied(true)
-          } catch (error) {
-            console.error("Error processing image:", error)
-            setProcessedImage(imageData)
+      // Use improved Tesseract settings for better text recognition
+      const { data } = await Tesseract.recognize(imageData, "eng", {
+        logger: (m) => {
+          if (m.status === "recognizing text") {
+            console.log(`OCR progress: ${Math.round(m.progress * 100)}%`);
           }
-        }
-        reader.readAsDataURL(file)
-      }
+        },
+        tessedit_char_whitelist:
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:!?()[]{}+-*/=<>@#$%^&|~`\"'\\_ ",
+        tessedit_pageseg_mode: "6", // Assume a single uniform block of text
+      });
+
+      console.log("OCR completed, text length:", data.text.length);
+
+      // Store the extracted text in state
+      setExtractedText(data.text);
+
+      return data.text;
     } catch (error) {
-      console.error("Error processing file:", error)
-    } finally {
-      setIsProcessing(false)
+      console.error("Error during OCR text extraction:", error);
+      return "";
     }
-  }, [])
+  };
+
+  // Handle file upload
+  const handleFileChange = useCallback(
+    async (file) => {
+      setIsProcessing(true);
+      setFile(file);
+      setFileName(file.name);
+
+      try {
+        if (file.type === "application/pdf") {
+          const fileBuffer = await file.arrayBuffer();
+          const text = await extractTextFromPdf(fileBuffer);
+          setExtractedText(text);
+        } else if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const imageData = e.target?.result;
+            setCapturedImage(imageData);
+
+            try {
+              const result = await detectDocumentEdges(imageData);
+              const processedImg = result.croppedImage || imageData;
+              const enhancedImage = await preprocessImageForOCR(
+                processedImg,
+                "document"
+              );
+              setProcessedImage(enhancedImage);
+              setCurrentFilter("document");
+              setAutoFilterApplied(true);
+            } catch (error) {
+              console.error("Error processing image:", error);
+              setProcessedImage(imageData);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      } catch (error) {
+        console.error("Error processing file:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [setCapturedImage, setProcessedImage, setExtractedText, setFileName]
+  );
 
   // Dropzone config
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
-      const file = acceptedFiles[0]
-      if (file) handleFileChange(file)
+      const file = acceptedFiles[0];
+      if (file) handleFileChange(file);
     },
     accept: {
       "application/pdf": [".pdf"],
       "image/*": [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"],
     },
-  })
-
-  const enhanceColorDocument = (imageData) => {
-  const data = new Uint8ClampedArray(imageData.data);
-  const width = imageData.width;
-  const height = imageData.height;
-
-  // Enhance saturation and contrast while preserving colors
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-
-    // Convert RGB to HSL
-    const [h, s, l] = rgbToHsl(r, g, b);
-
-    // Enhance saturation and lightness
-    const newS = Math.min(s * 1.2, 1.0); // Increase saturation by 20%
-    let newL = l;
-
-    // Adjust lightness based on current value
-    if (l < 0.4) {
-      newL = l * 1.1; // Brighten dark areas
-    } else if (l > 0.7) {
-      newL = l * 0.95; // Slightly darken very bright areas
-    }
-
-    // Convert back to RGB
-    const [newR, newG, newB] = hslToRgb(h, newS, newL);
-
-    data[i] = newR;
-    data[i + 1] = newG;
-    data[i + 2] = newB;
-  }
-
-  // Apply subtle sharpening
-  const result = applySharpening(data, width, height);
-
-  return new ImageData(result, width, height);
-};
-
-// Helper: RGB to HSL conversion
-const rgbToHsl = (r, g, b) => {
-  r /= 255;
-  g /= 255;
-  b /= 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
-
-  if (max === min) {
-    h = s = 0; // achromatic
-  } else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-
-    h /= 6;
-  }
-
-  return [h, s, l];
-};
-
-// Helper: HSL to RGB conversion
-const hslToRgb = (h, s, l) => {
-  let r, g, b;
-
-  if (s === 0) {
-    r = g = b = l; // achromatic
-  } else {
-    const hue2rgb = (p, q, t) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1 / 6) return p + (q - p) * 6 * t;
-      if (t < 1 / 2) return q;
-      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-      return p;
-    };
-
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
-  }
-
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-};
-
-// Helper: Apply sharpening filter
-const applySharpening = (data, width, height) => {
-  const result = new Uint8ClampedArray(data.length);
-
-  // Copy original data
-  for (let i = 0; i < data.length; i++) {
-    result[i] = data[i];
-  }
-
-  // Apply sharpening kernel (simplified unsharp mask)
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const idx = (y * width + x) * 4;
-
-      for (let c = 0; c < 3; c++) { // For each color channel (R,G,B)
-        // Simple sharpening kernel
-        const sharpened = 
-          data[idx + c] * 5 - 
-          data[((y-1) * width + x) * 4 + c] - 
-          data[((y+1) * width + x) * 4 + c] - 
-          data[(y * width + (x-1)) * 4 + c] - 
-          data[(y * width + (x+1)) * 4 + c];
-
-        // Clamp values between 0-255
-        result[idx + c] = Math.min(255, Math.max(0, sharpened));
-      }
-    }
-  }
-
-  return result;
-};
+  });
 
   // Extract text from PDF
   async function extractTextFromPdf(fileBuffer) {
     try {
-      const loadingTask = pdfjsLib.getDocument(fileBuffer)
-      const pdf = await loadingTask.promise
+      const loadingTask = pdfjsLib.getDocument(fileBuffer);
+      const pdf = await loadingTask.promise;
 
-      let textContent = ""
+      let textContent = "";
       for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex++) {
-        const page = await pdf.getPage(pageIndex)
-        const text = await page.getTextContent()
-        textContent += text.items.map((item) => item.str).join(" ")
+        const page = await pdf.getPage(pageIndex);
+        const text = await page.getTextContent();
+        textContent += text.items.map((item) => item.str).join(" ");
       }
 
-      return textContent
+      return textContent;
     } catch (error) {
-      console.error("Error extracting text from PDF:", error)
-      return ""
+      console.error("Error extracting text from PDF:", error);
+      return "";
     }
   }
 
   // Convert image to PDF
   const convertImageToPdf = async (imageData) => {
     return new Promise((resolve) => {
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
         const pdf = new jsPDF({
           orientation: img.width > img.height ? "l" : "p",
           unit: "px",
           format: [img.width, img.height],
-        })
-        pdf.addImage(imageData, "JPEG", 0, 0, img.width, img.height)
-        resolve(pdf.output("blob"))
-      }
-      img.src = imageData
-    })
-  }
+        });
+        pdf.addImage(imageData, "JPEG", 0, 0, img.width, img.height);
+        resolve(pdf.output("blob"));
+      };
+      img.src = imageData;
+    });
+  };
 
   // Apply crop to image
   const applyCrop = (image, crop) => {
     return new Promise((resolve) => {
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas")
-        const ctx = canvas.getContext("2d")
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-        const scaleX = img.naturalWidth / img.width
-        const scaleY = img.naturalHeight / img.height
+        const scaleX = img.naturalWidth / img.width;
+        const scaleY = img.naturalHeight / img.height;
 
         const pixelCrop = {
           x: crop.x * scaleX,
           y: crop.y * scaleY,
           width: crop.width * scaleX,
           height: crop.height * scaleY,
-        }
+        };
 
-        canvas.width = pixelCrop.width
-        canvas.height = pixelCrop.height
+        canvas.width = pixelCrop.width;
+        canvas.height = pixelCrop.height;
 
         ctx.drawImage(
           img,
@@ -4889,57 +7204,64 @@ const applySharpening = (data, width, height) => {
           0,
           0,
           pixelCrop.width,
-          pixelCrop.height,
-        )
+          pixelCrop.height
+        );
 
-        resolve(canvas.toDataURL("image/jpeg", 0.9))
-      }
-      img.src = image
-    })
-  }
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = image;
+    });
+  };
 
-
+  // Handle focus on document area
   const handleFocus = useCallback(
     async (event) => {
       if (videoRef.current && "mediaDevices" in navigator) {
         setIsFocusing(true);
-        
+
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
               facingMode: cameraFacingMode,
-              advanced: [{ zoom: zoomLevel }]
-            } 
+              advanced: [{ zoom: zoomLevel }],
+            },
           });
-          
+
           const track = stream.getVideoTracks()[0];
-          
-          if (track.getCapabilities && "focusMode" in track.getCapabilities()) {
+
+          if (
+            track &&
+            track.getCapabilities &&
+            track.getCapabilities().focusMode
+          ) {
             // Get click position relative to video element
             const rect = videoRef.current.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            
+
             // Normalize coordinates (0-1)
             const focusX = x / rect.width;
             const focusY = y / rect.height;
-            
+
             // Try to set focus (implementation varies by browser/device)
             try {
               await track.applyConstraints({
-                advanced: [{
-                  focusMode: "manual",
-                  focusDistance: 0, // Focus on the clicked point
-                  pointsOfInterest: [{x: focusX, y: focusY}]
-                }]
+                advanced: [
+                  {
+                    focusMode: "manual",
+                    pointsOfInterest: [{ x: focusX, y: focusY }],
+                  },
+                ],
               });
             } catch (focusError) {
-              console.log("Precise focus not supported, using center focus");
-              // Fallback to center focus if precise focus isn't supported
+              console.log("Precise focus not supported, using auto focus");
+              // Fallback to auto focus if manual focus isn't supported
               await track.applyConstraints({
-                advanced: [{
-                  focusMode: "auto"
-                }]
+                advanced: [
+                  {
+                    focusMode: "auto",
+                  },
+                ],
               });
             }
           }
@@ -4953,89 +7275,160 @@ const applySharpening = (data, width, height) => {
     [cameraFacingMode, zoomLevel]
   );
 
-
-
-
   // Form submission
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    
-    if ((!file && !processedImage) || !selectedDepartment || !subject || !diaryNo || !from || !disposal || !status) {
-      alert("Please fill out all fields and either upload a file or capture an image.")
-      setIsLoading(false)
-      return
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (
+      (!file && !processedImage) ||
+      !selectedDepartment ||
+      !subject ||
+      !diaryNo ||
+      !from ||
+      !disposal ||
+      !status
+    ) {
+      alert(
+        "Please fill out all fields and either upload a file or capture an image."
+      );
+      setIsLoading(false);
+      return;
     }
 
-    const formData = new FormData()
+    const formData = new FormData();
 
     if (file) {
-      formData.append("file", file)
-      formData.append("fileName", fileName || subject)
+      formData.append("file", file);
+      formData.append("fileName", fileName || subject);
     } else if (processedImage) {
-      const pdfBlob = await convertImageToPdf(processedImage)
-      const finalFileName = fileName || subject || "captured_image"
-      formData.append("file", pdfBlob, `${finalFileName}.pdf`)
-      formData.append("fileName", finalFileName)
+      const pdfBlob = await convertImageToPdf(processedImage);
+      const finalFileName = fileName || subject || "captured_image";
+      formData.append("file", pdfBlob, `${finalFileName}.pdf`);
+      formData.append("fileName", finalFileName);
     }
 
-    formData.append("type", type)
-    formData.append("department", selectedDepartment)
-    formData.append("category", selectedCategory)
-    formData.append("subject", subject)
-    formData.append("date", date)
-    formData.append("diaryNo", diaryNo)
-    formData.append("from", from)
-    formData.append("disposal", disposal)
-    formData.append("status", status)
+    formData.append("type", type);
+    formData.append("department", selectedDepartment);
+    formData.append("category", selectedCategory);
+    formData.append("subject", subject);
+    formData.append("date", date);
+    formData.append("diaryNo", diaryNo);
+    formData.append("from", from);
+    formData.append("disposal", disposal);
+    formData.append("status", status);
 
-    const method = fileData ? "PUT" : "POST"
-    const url = fileData ? `/api/scanupload/${fileData._id}` : "/api/scanupload"
+    const method = fileData ? "PUT" : "POST";
+    const url = fileData
+      ? `/api/scanupload/${fileData._id}`
+      : "/api/scanupload";
 
     try {
-      const response = await fetch(url, { method, body: formData })
+      const response = await fetch(url, { method, body: formData });
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
       }
 
-      const data = await response.json()
-      alert(data.message)
-      onClose()
+      const data = await response.json();
+      alert(data.message);
+      onClose();
     } catch (error) {
-      console.error("Upload error:", error)
-      alert(`An error occurred during upload: ${error.message}`)
+      console.error("Upload error:", error);
+      alert(`An error occurred during upload: ${error.message}`);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Fetch departments when type changes
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const response = await fetch(`/api/department?type=${type}`, { method: "GET" })
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-        const data = await response.json()
-        setDepartments(data)
+        const response = await fetch(`/api/department?type=${type}`, {
+          method: "GET",
+        });
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setDepartments(data);
       } catch (error) {
-        console.error("Failed to fetch departments", error)
+        console.error("Failed to fetch departments", error);
       }
-    }
+    };
 
-    if (type) fetchDepartments()
-  }, [type])
+    if (type) fetchDepartments();
+  }, [type]);
 
   // Update categories when department changes
   useEffect(() => {
     if (selectedDepartment) {
-      const department = departments.find((dept) => dept._id === selectedDepartment)
-      setCategories(department?.categories || [])
+      const department = departments.find(
+        (dept) => dept._id === selectedDepartment
+      );
+      setCategories(department?.categories || []);
     }
-  }, [selectedDepartment, departments])
+  }, [selectedDepartment, departments]);
+
+  // Update subject from extracted text if approved
+  useEffect(() => {
+    if (isApproved && extractedText && !subject) {
+      const lines = extractedText
+        .split("\n")
+        .filter((line) => line.trim() !== "");
+      if (lines.length > 0) {
+        setSubject(lines[0].substring(0, 100));
+      }
+    }
+  }, [isApproved, extractedText, subject]);
+
+  // Start document detection when scanning with improved initialization
+  useEffect(() => {
+    let animationFrameId = null;
+
+    if (
+      isScanning &&
+      webcamRef.current &&
+      canvasRef.current &&
+      videoRef.current
+    ) {
+      // Clear last processed time
+      window.lastProcessedTime = 0;
+
+      // Wait for video to be ready with better checking
+      const checkVideoReady = () => {
+        if (
+          videoRef.current &&
+          videoRef.current.videoWidth > 0 &&
+          videoRef.current.readyState >= 2
+        ) {
+          // Start detection loop
+          animationFrameId = requestAnimationFrame(detectDocumentInRealTime);
+        } else {
+          // Keep checking until video is ready
+          setTimeout(checkVideoReady, 100);
+        }
+      };
+
+      checkVideoReady();
+    }
+
+    // Cleanup function
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [isScanning, webcamRef, canvasRef, videoRef, detectDocumentInRealTime]);
 
   return (
-    <div className={`${isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 "}`}>
+    <div
+      className={`${
+        isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 "
+      }`}
+    >
       <div
         className={`${
           isFullScreenScanning
@@ -5043,8 +7436,12 @@ const applySharpening = (data, width, height) => {
             : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]"
         }`}
       >
-        {!isFullScreenScanning && <h2 className="text-3xl text-center font-semibold mb-6">{action} Form</h2>}
-        
+        {!isFullScreenScanning && (
+          <h2 className="text-3xl text-center font-semibold mb-6">
+            {action} Form
+          </h2>
+        )}
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {!isFullScreenScanning ? (
             <>
@@ -5060,7 +7457,7 @@ const applySharpening = (data, width, height) => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row sm:gap-4">
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-medium">Department</label>
@@ -5078,7 +7475,7 @@ const applySharpening = (data, width, height) => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-medium">Category</label>
                   <select
@@ -5095,7 +7492,7 @@ const applySharpening = (data, width, height) => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-medium">Subject</label>
                 <input
@@ -5106,7 +7503,7 @@ const applySharpening = (data, width, height) => {
                   className="p-2 border border-gray-300 rounded-md"
                 />
               </div>
-              
+
               <div className="flex flex-col sm:flex-row sm:gap-4">
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-medium">Date</label>
@@ -5118,7 +7515,7 @@ const applySharpening = (data, width, height) => {
                     className="p-2 border border-gray-300 rounded-md"
                   />
                 </div>
-                
+
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-medium">Diary No</label>
                   <input
@@ -5130,7 +7527,7 @@ const applySharpening = (data, width, height) => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-medium">From</label>
                 <input
@@ -5141,7 +7538,7 @@ const applySharpening = (data, width, height) => {
                   className="p-2 border border-gray-300 rounded-md"
                 />
               </div>
-              
+
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-medium">Disposal</label>
                 <input
@@ -5152,7 +7549,7 @@ const applySharpening = (data, width, height) => {
                   className="p-2 border border-gray-300 rounded-md"
                 />
               </div>
-              
+
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-medium">Status</label>
                 <select
@@ -5172,7 +7569,7 @@ const applySharpening = (data, width, height) => {
           {action === "Scan" ? (
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Document Scanning</h3>
-              
+
               {!isScanning && !processedImage && (
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -5182,34 +7579,63 @@ const applySharpening = (data, width, height) => {
                   Start Scanning
                 </button>
               )}
-              
+
               {isScanning && (
-                <div className="bg-zinc-800 absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="relative w-full h-full" onClick={handleFocus}>
+                <div className="bg-black absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="relative w-full h-full">
+                    {/* Webcam component with improved performance settings */}
                     <Webcam
                       className="w-full h-full object-cover"
                       audio={false}
                       screenshotFormat="image/jpeg"
                       ref={(ref) => {
-                        webcamRef.current = ref
-                        videoRef.current = ref && ref.video
+                        webcamRef.current = ref;
+                        videoRef.current = ref?.video;
                       }}
                       width="100%"
+                      height="100%"
                       playsInline
                       videoConstraints={{
                         facingMode: cameraFacingMode,
                         width: { ideal: 1920 },
                         height: { ideal: 1080 },
-                        advanced: [{ zoom: zoomLevel }],
+                        frameRate: { ideal: 30, min: 15 },
+                        advanced: [
+                          { zoom: zoomLevel },
+                          { focusMode: "continuous" },
+                        ],
+                      }}
+                      onUserMediaError={(error) => {
+                        console.error("Webcam error:", error);
+                        setHasCameraPermission(false);
                       }}
                     />
-                    
+
+                    {/* Canvas overlay for document detection */}
+                    <canvas
+                      ref={canvasRef}
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                    />
+
+                    {/* Document guide overlay - only show when no document is detected */}
+                    {showDocumentGuide && !isDocumentDetected && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-[85%] h-[85%] max-w-md max-h-[600px] border-2 border-dashed border-white opacity-70">
+                          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 px-3 py-1 rounded-full text-white text-sm whitespace-nowrap">
+                            Center document inside frame
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Focus indicator */}
                     {isFocusing && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Focus className="w-12 h-12 text-white animate-pulse" />
                       </div>
                     )}
-                    
+
+                    {/* Processing indicator */}
                     {isProcessing && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                         <div className="text-white flex flex-col items-center">
@@ -5219,150 +7645,268 @@ const applySharpening = (data, width, height) => {
                       </div>
                     )}
 
-                    {/* Document frame guide */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="border-2 border-dashed border-white w-4/5 h-3/5 opacity-70 rounded-md"></div>
+                    {/* Top toolbar */}
+                    <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4">
+                      <button
+                        className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                        onClick={handleCloseCamera}
+                        type="button"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+
+                      <div className="flex gap-2">
+                        <button
+                          className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                          onClick={toggleFlash}
+                          type="button"
+                        >
+                          {flashEnabled ? (
+                            <Flash className="w-6 h-6" />
+                          ) : (
+                            <FlashOff className="w-6 h-6" />
+                          )}
+                        </button>
+
+                        <button
+                          className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                          onClick={toggleCameraFacing}
+                          type="button"
+                        >
+                          <RefreshCw className="w-6 h-6" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
-                    <button className="p-3 bg-white rounded-full shadow-lg" onClick={decreaseZoom} type="button">
-                      <ZoomOut className="w-6 h-6" />
-                    </button>
-                    <button
-                      className="w-16 h-16 bg-white border-4 border-blue-500 rounded-full shadow-lg hover:bg-gray-100 transition duration-200"
-                      onClick={handleCapture}
-                      type="button"
-                    >
-                      <Camera className="w-8 h-8 mx-auto text-blue-600" />
-                    </button>
-                    <button className="p-3 bg-white rounded-full shadow-lg" onClick={increaseZoom} type="button">
-                      <ZoomIn className="w-6 h-6" />
-                    </button>
-                  </div>
-                  
-                  <button
-                    className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg"
-                    onClick={handleCloseCamera}
-                    type="button"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                  
-                  <button
-                    className="absolute top-4 left-4 p-3 bg-white rounded-full shadow-lg"
-                    onClick={toggleCameraFacing}
-                    type="button"
-                  >
-                    <RefreshCw className="w-6 h-6" />
-                  </button>
-                </div>
-              )}
-              
-              {processedImage && !isCropping && (
-                <div className="space-y-4">
-                  <div className="relative">
-                    <img
-                      src={processedImage || "/placeholder.svg"}
-                      alt="Captured"
-                      className="w-full rounded-lg shadow-lg"
-                    />
-                    
-                    {isProcessing && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                        <div className="text-white flex flex-col items-center">
-                          <RefreshCw className="w-12 h-12 animate-spin mb-2" />
-                          <p>Processing image...</p>
+
+                    {/* Bottom toolbar */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      {/* Scan mode selector */}
+                      <div className="flex justify-center mb-4">
+                        <div className="bg-black bg-opacity-50 rounded-full p-1 flex">
+                          <button
+                            className={`px-4 py-2 rounded-full ${
+                              scanMode === "single"
+                                ? "bg-white text-black"
+                                : "text-white"
+                            }`}
+                            onClick={() => setScanMode("single")}
+                            type="button"
+                          >
+                            Single
+                          </button>
+                          <button
+                            className={`px-4 py-2 rounded-full ${
+                              scanMode === "batch"
+                                ? "bg-white text-black"
+                                : "text-white"
+                            }`}
+                            onClick={() => setScanMode("batch")}
+                            type="button"
+                          >
+                            Batch
+                          </button>
                         </div>
                       </div>
-                    )}
 
-                    {autoFilterApplied && (
-                      <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md opacity-80">
-                        Auto-enhanced
+                      {/* Camera controls */}
+                      <div className="flex justify-center items-center gap-4">
+                        <button
+                          className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                          onClick={decreaseZoom}
+                          type="button"
+                        >
+                          <ZoomOut className="w-6 h-6" />
+                        </button>
+                        <button
+                          className="w-16 h-16 bg-white rounded-full shadow-lg hover:bg-gray-100 transition duration-200"
+                          onClick={handleCapture}
+                          type="button"
+                        >
+                          <Camera className="w-8 h-8 mx-auto text-black" />
+                        </button>
+                        <button
+                          className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                          onClick={increaseZoom}
+                          type="button"
+                        >
+                          <ZoomIn className="w-6 h-6" />
+                        </button>
                       </div>
-                    )}
+
+                      {/* Bottom action buttons */}
+                      <div className="flex justify-between mt-4">
+                        <button
+                          className="p-3 bg-black bg-opacity-50 rounded-full text-white"
+                          type="button"
+                        >
+                          <ImageIcon className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                </div>
+              )}
 
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {!isApproved ? (
-                      <button
-                        className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        type="button"
-                        onClick={approveDocument}
-                      >
-                        <Check className="w-4 h-4 mr-1 inline-block" /> Approve Document
-                      </button>
-                    ) : (
-                      <div className="w-full p-3 bg-green-100 border border-green-300 rounded-lg text-center text-green-800">
-                        Document approved and ready for submission
+              {processedImage && !isCropping && !isScanning && (
+                <div className="space-y-4">
+                  {/* Camera box simulation - this keeps the document in a camera-like frame until approved */}
+                  <div className="relative max-w-2xl mx-auto">
+                    {/* Camera frame styling */}
+                    <div className="bg-black p-3 rounded-lg shadow-lg">
+                      {/* Document display area */}
+                      <div className="relative border-4 border-[#00e5c9] rounded overflow-hidden">
+                        <img
+                          src={processedImage || "/placeholder.svg"}
+                          alt="Captured document"
+                          className="w-full object-contain bg-white"
+                          style={{ maxHeight: "60vh" }}
+                        />
+
+                        {/* Processing indicator */}
+                        {isProcessing && (
+                          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20">
+                            <div className="text-white flex flex-col items-center">
+                              <RefreshCw className="w-12 h-12 animate-spin mb-2" />
+                              <p className="text-lg font-medium">
+                                Processing document...
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Enhancement badge */}
+                        {autoFilterApplied && (
+                          <div className="absolute top-3 right-3 bg-[#00e5c9] text-black px-3 py-1 rounded-md font-medium text-sm z-10">
+                            Enhanced for clarity
+                          </div>
+                        )}
+
+                        {/* Instruction overlay - only show if not approved */}
+                        {!isApproved && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent pt-10 pb-4 px-4">
+                            <p className="text-white text-center font-medium">
+                              Review document and approve to extract text
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                      type="button"
-                      onClick={handleScanStart}
-                    >
-                      Scan Again
-                    </button>
-                    
-                    <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                      type="button"
-                      onClick={startCropping}
-                    >
-                      <Crop className="w-4 h-4 mr-1 inline-block" /> Crop
-                    </button>
-                    
-                    <div className="relative">
-                      <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        type="button"
-                        onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-                      >
-                        <SlidersHorizontal className="w-4 h-4 mr-1 inline-block" /> Filters
-                      </button>
-                      
-                      {isFilterMenuOpen && (
-                        <div className="absolute z-10 mt-2 w-48 bg-white rounded-md shadow-lg p-2 border">
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                            onClick={() => applyFilter("original")}
-                          >
-                            Original
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                            onClick={() => applyFilter("enhanced")}
-                          >
-                            Enhanced
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                            onClick={() => applyFilter("bw")}
-                          >
-                            Black & White
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                            onClick={() => applyFilter("grayscale")}
-                          >
-                            Grayscale
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                            onClick={() => applyFilter("high-contrast")}
-                          >
-                            High Contrast
-                          </button>
+                      {/* Camera controls simulation */}
+                      <div className="flex justify-between items-center mt-3 px-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div className="text-white text-xs">
+                          Document captured
+                        </div>
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="mt-6 flex flex-wrap gap-3 justify-center">
+                      {!isApproved ? (
+                        <button
+                          className="bg-[#00e5c9] text-black px-6 py-3 rounded-md font-medium hover:bg-[#00c9b0] transition-colors flex items-center justify-center shadow-md"
+                          type="button"
+                          onClick={approveDocument}
+                          disabled={isProcessing}
+                        >
+                          <Check className="w-5 h-5 mr-2" /> Approve & Extract
+                          Text
+                        </button>
+                      ) : (
+                        <div className="w-full p-4 bg-green-100 border-l-4 border-green-500 rounded-lg text-green-800 flex items-center justify-center">
+                          <Check className="w-5 h-5 mr-2 text-green-600" />
+                          <span className="font-medium">
+                            Document approved and moved to form
+                          </span>
                         </div>
                       )}
+
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        <button
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
+                          type="button"
+                          onClick={handleScanStart}
+                          disabled={isProcessing}
+                        >
+                          <Camera className="w-4 h-4 mr-2" /> Scan Again
+                        </button>
+
+                        <button
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
+                          type="button"
+                          onClick={startCropping}
+                          disabled={isProcessing}
+                        >
+                          <Crop className="w-4 h-4 mr-2" /> Crop
+                        </button>
+
+                        <div className="relative">
+                          <button
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
+                            type="button"
+                            onClick={() =>
+                              setIsFilterMenuOpen(!isFilterMenuOpen)
+                            }
+                            disabled={isProcessing}
+                          >
+                            <SlidersHorizontal className="w-4 h-4 mr-2" />{" "}
+                            Filters
+                          </button>
+
+                          {isFilterMenuOpen && (
+                            <div className="absolute z-30 mt-2 w-48 bg-white rounded-md shadow-lg p-2 border">
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("original")}
+                              >
+                                Original
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("document")}
+                              >
+                                Document
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("enhanced")}
+                              >
+                                Enhanced
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("bw")}
+                              >
+                                Black & White
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("grayscale")}
+                              >
+                                Grayscale
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("high-contrast")}
+                              >
+                                High Contrast
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
+                                onClick={() => applyFilter("color-enhance")}
+                              >
+                                Color Enhance
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
-              
+
               {processedImage && isCropping && (
                 <div className="space-y-4">
                   <ReactCrop
@@ -5371,9 +7915,12 @@ const applySharpening = (data, width, height) => {
                     onComplete={(c) => setCompletedCrop(c)}
                     aspect={undefined}
                   >
-                    <img src={processedImage || "/placeholder.svg"} alt="To crop" />
+                    <img
+                      src={processedImage || "/placeholder.svg"}
+                      alt="To crop"
+                    />
                   </ReactCrop>
-                  
+
                   <div className="flex justify-center gap-4">
                     <button
                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -5382,7 +7929,7 @@ const applySharpening = (data, width, height) => {
                     >
                       <Check className="w-4 h-4 mr-1 inline-block" /> Apply Crop
                     </button>
-                    
+
                     <button
                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                       type="button"
@@ -5400,27 +7947,33 @@ const applySharpening = (data, width, height) => {
               <div
                 {...getRootProps()}
                 className={`flex flex-col items-center justify-center w-full h-40 p-6 border-2 border-dashed bg-gray-100 rounded-lg cursor-pointer transition-all ${
-                  isDragActive ? "border-blue-500 bg-gray-200" : "border-gray-400"
+                  isDragActive
+                    ? "border-blue-500 bg-gray-200"
+                    : "border-gray-400"
                 }`}
               >
                 <input {...getInputProps()} />
                 <UploadCloud size={40} className="text-gray-500 mb-3" />
                 {isDragActive ? (
-                  <p className="text-lg font-semibold text-blue-600">Drop your file here...</p>
+                  <p className="text-lg font-semibold text-blue-600">
+                    Drop your file here...
+                  </p>
                 ) : (
                   <p className="text-lg text-gray-700">
                     Drag & Drop your PDF or Image here or{" "}
-                    <span className="text-blue-500 font-medium">click to browse</span>
+                    <span className="text-blue-500 font-medium">
+                      click to browse
+                    </span>
                   </p>
                 )}
               </div>
-              
+
               {file && (
                 <p className="mt-2 text-gray-700">
                   Uploaded File: <strong>{fileName}</strong>
                 </p>
               )}
-              
+
               {isProcessing && <p>Extracting text from file... Please wait.</p>}
 
               {processedImage && !file && (
@@ -5435,7 +7988,7 @@ const applySharpening = (data, width, height) => {
               )}
             </div>
           )}
-          
+
           {!isFullScreenScanning && (
             <div className="flex gap-10 justify-center">
               <button
@@ -5445,7 +7998,7 @@ const applySharpening = (data, width, height) => {
               >
                 {isLoading ? "Saving..." : "Save"}
               </button>
-              
+
               <button
                 className="bg-gray-600 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 type="button"
@@ -5458,7 +8011,7 @@ const applySharpening = (data, width, height) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ScanUpload
+export default ScanUpload;

@@ -191,8 +191,8 @@ import '@styles/globals.css';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
-import { Edit, Trash, Loader2 } from "lucide-react";
-import { HashLoader } from "react-spinners"; // Import HashLoader
+import { Edit, Trash } from "lucide-react";
+import { PulseLoader } from "react-spinners"; // Import PulseLoader
 
 const Departments = () => {
   const searchParams = useSearchParams();
@@ -332,8 +332,8 @@ const Departments = () => {
     <div className="p-5 relative">
       {/* Full-screen overlay spinner only for navigation */}
       {isNavigating && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <HashLoader className="animate-spin h-12 w-12 text-white" />
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <PulseLoader color="skyblue" size={17} speedMultiplier={1} />
         </div>
       )}
 
@@ -363,14 +363,14 @@ const Departments = () => {
             className="ml-2 px-4 py-2 bg-green-500 text-white rounded-md"
             disabled={isLoading || isNavigating}
           >
-            {isLoading ? <HashLoader className="animate-spin h-5 w-5" /> : "Add"}
+            {isLoading ? <PulseLoader color="skyblue" size={17} speedMultiplier={1} /> : "Add"}
           </button>
         </div>
       )}
       
       {isLoading && departments.length === 0 ? (
         <div className="mt-10 flex justify-center">
-          <HashLoader className="animate-spin h-10 w-10 text-gray-500" />
+          <PulseLoader color="skyblue" size={17} speedMultiplier={1} />
         </div>
       ) : departments.length === 0 ? (
         <p className="mt-4 text-gray-500">No departments available</p>
@@ -397,7 +397,7 @@ const Departments = () => {
                   disabled={isLoading || deletingId || isNavigating}
                 >
                   {deletingId === dept._id ? (
-                    <HashLoader className="animate-spin h-5 w-5" />
+                    <PulseLoader color="skyblue" size={17} speedMultiplier={1} />
                   ) : (
                     <Trash size={20} />
                   )}
@@ -434,7 +434,7 @@ const Departments = () => {
             className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
             disabled={isLoading || isNavigating}
           >
-            {isLoading ? <HashLoader className="animate-spin h-5 w-5 mx-auto" /> : "Save"}
+            {isLoading ? <PulseLoader color="skyblue" size={17} speedMultiplier={1} /> : "Save"}
           </button>
         </div>
       )}
