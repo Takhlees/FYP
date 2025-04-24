@@ -200,7 +200,7 @@ import {
   FileText,
   Users,
 } from "lucide-react";
-import { HashLoader } from "react-spinners"; // Import HashLoader
+import { PulseLoader } from "react-spinners"; // Import PulseLoader
 
 const Departments = () => {
   const searchParams = useSearchParams();
@@ -370,7 +370,7 @@ const Departments = () => {
       {/* Full-screen overlay spinner only for navigation */}
       {isNavigating && (
           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <PulseLoader color="skyblue" size={17} speedMultiplier={1} />
+          <PulseLoader size={17} color="#d2d4d6" speedMultiplier={0.7} />
         </div>
       )}
 
@@ -418,7 +418,7 @@ const Departments = () => {
               className="px-5 py-2.5 bg-black text-white rounded-md  shadow-sm relative group text-center transition-transform transform hover:scale-110 duration-300"
               disabled={isLoading || isNavigating}>
               {isLoading ? (
-                <HashLoader className="animate-spin h-5 w-5" />
+                <PulseLoader className="animate-spin h-5 w-5" color="#d2d4d6" speedMultiplier={0.7}/>
               ) : (
                 "Add"
               )}
@@ -429,7 +429,7 @@ const Departments = () => {
 
       {isLoading && departments.length === 0 ? (
         <div className="mt-10 flex justify-center">
-          <PulseLoader color="skyblue" size={17} speedMultiplier={1} />
+          <PulseLoader size={17} color="#d2d4d6" speedMultiplier={0.7} />
         </div>
       ) : departments.length === 0 ? (
         <div className="mt-8 p-8 text-center border-dashed border-[#F3F4F6] rounded-lg">
@@ -490,7 +490,7 @@ const Departments = () => {
                       className="p-2 rounded-md bg-white shadow-sm text-[#6B7280] hover:text-red-600 transition-colors"
                       disabled={isLoading || deletingId || isNavigating}>
                       {deletingId === dept._id ? (
-                        <HashLoader className="animate-spin h-5 w-5" />
+                        <PulseLoader color="#d2d4d6" className="animate-spin h-5 w-5" speedMultiplier={0.7} />
                       ) : (
                         <Trash size={20} />
                       )}
@@ -545,7 +545,7 @@ const Departments = () => {
                 className="flex-1 px-4 py-2.5 bg-[#3B5FE3] text-white rounded-md hover:bg-[#3051C6] transition-colors"
                 disabled={isLoading || isNavigating}>
                 {isLoading ? (
-                  <HashLoader className="animate-spin h-5 w-5 mx-auto" />
+                  <PulseLoader className="animate-spin h-5 w-5 mx-auto" color="#d2d4d6" speedMultiplier={0.7}/>
                 ) : (
                   "Save"
                 )}

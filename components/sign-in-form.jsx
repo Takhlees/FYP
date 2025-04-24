@@ -562,12 +562,12 @@ export default function SignInForm({ onSignInSuccess }) {
             <p className="text-white text-lg max-w-md text-center font-medium drop-shadow-md">
               Access your university email and stay connected with your academic community
             </p>
-            <div className="mt-8 p-4 bg-white/20 backdrop-blur-md rounded-xl max-w-sm border border-white/40 shadow-lg">
+            {/* <div className="mt-8 p-4 bg-white/20 backdrop-blur-md rounded-xl max-w-sm border border-white/40 shadow-lg">
               <p className="text-white italic text-sm drop-shadow-sm">
                 "Education is the passport to the future, for tomorrow belongs to those who prepare for it today."
               </p>
               <p className="text-white text-sm mt-2 font-medium">— Malcolm X</p>
-            </div>
+            </div> */}
           </div>
         </div>
 
