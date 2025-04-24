@@ -7425,16 +7425,16 @@ const ScanUpload = ({ fileData, action, onClose }) => {
 
   return (
     <div
-      className={`${
-        isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 "
-      }`}
+      className={
+        isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 overflow-auto"
+     }
     >
       <div
-        className={`${
+        className={
           isFullScreenScanning
             ? "h-full max-h-full"
-            : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px]"
-        }`}
+            : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px] relative"
+       }
       >
         {!isFullScreenScanning && (
           <h2 className="text-3xl text-center font-semibold mb-6">
@@ -7442,7 +7442,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           </h2>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10" tabIndex="0">
           {!isFullScreenScanning ? (
             <>
               <div className="flex flex-col gap-2 w-full">
@@ -7992,7 +7992,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           {!isFullScreenScanning && (
             <div className="flex gap-10 justify-center">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-black text-white px-4 py-2 rounded-md font-medium transition-transform transform hover:scale-110 duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 type="submit"
                 disabled={isLoading || (!file && !processedImage)}
               >
@@ -8000,7 +8000,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               </button>
 
               <button
-                className="bg-gray-600 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-black text-white px-4 py-2 rounded-md font-medium transition-transform transform hover:scale-110 duration-300 "
                 type="button"
                 onClick={onClose}
               >

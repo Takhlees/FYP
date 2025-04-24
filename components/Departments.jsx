@@ -415,7 +415,7 @@ const Departments = () => {
             </select>
             <button
               onClick={addDepartment}
-              className="px-5 py-2.5 bg-black text-white rounded-md  shadow-sm relative group text-center transition-transform transform hover:scale-110 duration-300"
+              className="px-5 py-2.5 bg-black text-white rounded-md shadow-sm relative group text-center transition-transform transform hover:scale-110 duration-300"
               disabled={isLoading || isNavigating}>
               {isLoading ? (
                 <PulseLoader className="animate-spin h-5 w-5" color="#d2d4d6" speedMultiplier={0.7}/>

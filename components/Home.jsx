@@ -1366,7 +1366,7 @@ export default function Home() {
               </div>
             </div>
           )}
-          <div className="flex-grow w-full flex flex-col items-center p-16">
+          <div className="flex-grow w-full flex flex-col items-center p-14">
             {/* Header Section */}
             <div className="flex items-center justify-center h-screen">
               <div className="text-center mx-auto mb-12 transform -translate-y-20">
