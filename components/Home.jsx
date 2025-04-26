@@ -50,6 +50,7 @@ export default function Home() {
     // Fetch overdue mails
     async function fetchOverdueMails() {
       try {
+        setIsLoading(false);
         console.log("Fetching overdue mails...");
         const response = await fetch("http://localhost:3000/api/reminder", {
           method: "GET",
