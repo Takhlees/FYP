@@ -28,14 +28,14 @@ export default function AboutPage() {
     {
       id: "smart",
       title: "Smart Document Routing",
-      description: "Automatically route documents to the right departments",
+      description: "Automatically route documents to the correct department based on your selection.",
       icon: <FileText className="h-6 w-6" />,
       color: "bg-gradient-to-br from-blue-500 to-indigo-600",
     },
     {
       id: "search",
       title: "Powerful Search",
-      description: "Find any document in seconds with advanced search",
+      description: "Locate any document quickly with advanced search",
       icon: <Search className="h-6 w-6" />,
       color: "bg-gradient-to-br from-indigo-500 to-purple-600",
     },
@@ -138,8 +138,7 @@ export default function AboutPage() {
                 <span className="text-[#3B5FE3]">Universities</span>
               </h1>
               <p className="text-xl text-gray-300 mb-8">
-                Streamline communication, enhance collaboration, and improve
-                efficiency across all departments
+              Doculus provides an intuitive, efficient solution for managing academic and administrative documents. From uploading and scanning to organizing and retrieving your files — everything is simplified.
               </p>
               {/* <div className="flex flex-wrap gap-4">
               <a
@@ -168,8 +167,7 @@ export default function AboutPage() {
                   Powerful Features
                 </h2>
                 <p className="text-[#6B7280] max-w-2xl mx-auto">
-                  Our mail management system is designed specifically for the
-                  unique needs of university departments
+                Smart, secure, and efficient document management for universities.
                 </p>
               </div>
 
@@ -213,7 +211,7 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-[#111827]">
-                          75% Faster Document Processing
+                         Faster Document Processing
                         </h3>
                         <p className="text-[#6B7280]">
                           Automated routing and approvals dramatically reduce

@@ -7313,7 +7313,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     formData.append("category", selectedCategory);
     formData.append("subject", subject);
     formData.append("date", date);
-    formData.append("diaryNo", diaryNo);
+    if (type !== "notification") {
+      formData.append("diaryNo", diaryNo)
+    }
     formData.append("from", from);
     formData.append("disposal", disposal);
     formData.append("status", status);
@@ -7455,6 +7457,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   <option value="">Select Type</option>
                   <option value="uni">University</option>
                   <option value="admin">Admin</option>
+                  <option value="not">Notification</option>
                 </select>
               </div>
 

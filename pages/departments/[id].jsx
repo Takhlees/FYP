@@ -683,13 +683,13 @@ export default function DepartmentPage() {
                 </thead>
                 <tbody className="divide-y divide-[#F3F4F6]">
                   {filteredFiles.map((doc) => (
-                    <tr key={doc._id} className="hover:bg-[#F3F4F6] transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">
+                    <tr key={doc._id} >
+                      <td className="px-6 py-4 ">
                         <a
                           href={`/api/scanupload/${doc._id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#3B5FE3] hover:text-[#3051C6] hover:underline focus:outline-none"
+                          className="text-light hover:text-mid hover:underline focus:outline-none"
                         >
                           {doc.subject}
                         </a>
@@ -704,14 +704,14 @@ export default function DepartmentPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
                         <a
                           onClick={() => handleEdit(doc)}
-                          className="text-[#3B5FE3] hover:text-[#3051C6] cursor-pointer mr-4"
+                          className="text-light hover:text-mid cursor-pointer mr-4"
                         >
                           <Edit size={20} />
                         </a>
 
                         <a
                           onClick={() => handleDownload(doc)}
-                          className="text-[#3B5FE3] hover:text-[#3051C6] cursor-pointer"
+                          className="text-light hover:text-mid cursor-pointer"
                         >
                           <Download size={20} />
                         </a>

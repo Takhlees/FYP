@@ -537,7 +537,7 @@ export default function SignInForm({ onSignInSuccess }) {
       <div className="container mx-auto my-auto max-w-5xl h-[90vh] flex shadow-2xl rounded-3xl overflow-hidden">
         {/* Left side - Image background with GCU Mailbox */}
         <div
-          className="w-1/2 relative rounded-l-3xl overflow-hidden"
+          className="hidden md:block w-1/2 relative rounded-l-3xl overflow-hidden"
           style={{
             backgroundImage: "url('/images.jpg')",
             backgroundSize: "cover",
@@ -558,9 +558,9 @@ export default function SignInForm({ onSignInSuccess }) {
             <div className="mb-6 p-4 rounded-full bg-indigo-600/70 backdrop-blur-md shadow-xl">
               <Mail className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md">GCU Mailbox</h1>
+            <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md">DOCULUS</h1>
             <p className="text-white text-lg max-w-md text-center font-medium drop-shadow-md">
-              Access your university email and stay connected with your academic community
+            Step into seamless digital file management system.
             </p>
             {/* <div className="mt-8 p-4 bg-white/20 backdrop-blur-md rounded-xl max-w-sm border border-white/40 shadow-lg">
               <p className="text-white italic text-sm drop-shadow-sm">
@@ -572,11 +572,11 @@ export default function SignInForm({ onSignInSuccess }) {
         </div>
 
         {/* Right side - Sign in form */}
-        <div className="w-1/2 bg-white flex items-center justify-center rounded-r-3xl">
+        <div className="w-full md:w-1/2 bg-white flex items-center justify-center rounded-3xl md:rounded-l-none md:rounded-r-3xl">
           <div className="w-full max-w-md px-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-              <p className="text-gray-600 text-sm mt-1">Sign in to access your university email</p>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome To Doculus!</h2>
+              <p className="text-gray-600 text-sm mt-1">Sign in to manage, upload, and scan your documents effortlessly.</p>
             </div>
 
             {errors.global && (
