@@ -17,17 +17,19 @@ export default function Footer() {
             <div>
               <ul className="flex space-x-4">
                 <li>
-                  <a href="#" className="hover:text-blue-200">
+                  
+                  <a href="#" className="hover:text-gray-600">
                     Privacy Policy
                   </a>
+                
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-200">
+                  <a href="#" className="hover:text-gray-600">
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <button onClick={() => setShowContact(!showContact)} className="hover:text-blue-200">
+                  <button onClick={() => setShowContact(!showContact)} className="hover:text-gray-600">
                     Contact
                   </button>
                 </li>

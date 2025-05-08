@@ -125,7 +125,7 @@ export default function AboutPage() {
         <Navbar />
 
         {/* Hero Section */}
-        <header className="relative bg-[#1E213A] text-white overflow-hidden">
+        <header className="relative bg-[#111524] text-white overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-[#3B5FE3]/30 to-purple-500/20 blur-3xl rounded-full transform translate-x-1/4 -translate-y-1/4"></div>
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-[#3B5FE3]/20 to-blue-500/10 blur-3xl rounded-full transform -translate-x-1/4 translate-y-1/4"></div>
