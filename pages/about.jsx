@@ -125,19 +125,15 @@ export default function AboutPage() {
         <Navbar />
 
         {/* Hero Section */}
-        <header className="relative bg-[#111524] text-white overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-[#3B5FE3]/30 to-purple-500/20 blur-3xl rounded-full transform translate-x-1/4 -translate-y-1/4"></div>
-            <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-[#3B5FE3]/20 to-blue-500/10 blur-3xl rounded-full transform -translate-x-1/4 translate-y-1/4"></div>
-          </div>
+        <header className="relative overflow-hidden">
 
           <div className="container mx-auto px-4 py-16 relative z-10">
             <div className="max-w-3xl">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Modern Document Management for{" "}
-                <span className="text-[#3B5FE3]">Universities</span>
+                <span className="bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">Universities</span>
               </h1>
-              <p className="text-xl text-gray-300 mb-8">
+              <p className="text-xl text-gray-600 mt-8 mb-8">
               Doculus provides an intuitive, efficient solution for managing academic and administrative documents. From uploading and scanning to organizing and retrieving your files — everything is simplified.
               </p>
               {/* <div className="flex flex-wrap gap-4">
