@@ -7449,7 +7449,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           </h2>
         )}
         {alertMessage && (
-          <div className="fixed m-3 top-0 left-0 right-0 z-50 bg-deep border border-gray-300  text-black text-center py-3 rounded-lg shadow-md transition-opacity duration-300">
+          <div className="fixed m-3 top-0 left-0 right-0 z-50 bg-gray-200 border border-gray-300  text-black text-center py-3 rounded-lg shadow-md transition-opacity duration-300">
             {alertMessage}
           </div>
         )}
