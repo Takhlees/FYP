@@ -282,7 +282,7 @@ export default function Home() {
             {/* Header Section */}
             <div className="flex items-center justify-center h-screen">
               <div className="text-center mx-auto mb-12 transform -translate-y-20">
-                <h1 className="text-6xl font-bold text-gray-800 mb-4 leading-tight ">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 leading-tight ">
                   <span className="inline-block">Modern Document</span>
                   <br />
                   <span className="inline-block">Management Made</span>{" "}

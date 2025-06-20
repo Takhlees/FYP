@@ -6492,6 +6492,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
   const webcamRef = useRef(null);
   const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -7274,12 +7275,16 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     },
     [cameraFacingMode, zoomLevel]
   );
-
+  const showAlert = (message) => {
+    setAlertMessage(message);
+    setTimeout(() => {
+      setAlertMessage(null);
+    }, 2000);
+  };
   // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
     if (
       (!file && !processedImage) ||
       !selectedDepartment ||
@@ -7289,7 +7294,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       !disposal ||
       !status
     ) {
-      alert(
+      showAlert(
         "Please fill out all fields and either upload a file or capture an image."
       );
       setIsLoading(false);
@@ -7314,7 +7319,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     formData.append("subject", subject);
     formData.append("date", date);
     if (type !== "notification") {
-      formData.append("diaryNo", diaryNo)
+      formData.append("diaryNo", diaryNo);
     }
     formData.append("from", from);
     formData.append("disposal", disposal);
@@ -7335,11 +7340,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       }
 
       const data = await response.json();
-      alert(data.message);
+      showAlert(data.message);
       onClose();
     } catch (error) {
       console.error("Upload error:", error);
-      alert(`An error occurred during upload: ${error.message}`);
+      showAlert(`An error occurred during upload: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -7428,23 +7433,30 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   return (
     <div
       className={
-        isFullScreenScanning ? "fixed inset-0 z-50" : "bg-zinc-800 p-10 overflow-auto"
-     }
-    >
+        isFullScreenScanning
+          ? "fixed inset-0 z-50"
+          : "bg-zinc-800 p-10 overflow-auto"
+      }>
       <div
         className={
           isFullScreenScanning
             ? "h-full max-h-full"
             : "bg-white p-6 rounded-lg max-w-4xl mx-auto overflow-y-auto xl:max-h-[710px] max-h-[860px] relative"
-       }
-      >
+        }>
         {!isFullScreenScanning && (
           <h2 className="text-3xl text-center font-semibold mb-6">
             {action} Form
           </h2>
         )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10" tabIndex="0">
+        {alertMessage && (
+          <div className="fixed m-3 top-0 left-0 right-0 z-50 bg-deep border border-gray-300  text-black text-center py-3 rounded-lg shadow-md transition-opacity duration-300">
+            {alertMessage}
+          </div>
+        )}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 relative z-10"
+          tabIndex="0">
           {!isFullScreenScanning ? (
             <>
               <div className="flex flex-col gap-2 w-full">
@@ -7452,8 +7464,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-md"
-                >
+                  className="p-2 border border-gray-300 rounded-md">
                   <option value="">Select Type</option>
                   <option value="uni">University</option>
                   <option value="admin">Admin</option>
@@ -7468,8 +7479,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
                     required
-                    className="p-2 border border-gray-300 rounded-md"
-                  >
+                    className="p-2 border border-gray-300 rounded-md">
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
                       <option key={dept._id} value={dept._id}>
@@ -7484,8 +7494,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-md"
-                  >
+                    className="p-2 border border-gray-300 rounded-md">
                     <option value="">Select Category</option>
                     {categories.map((cat, index) => (
                       <option key={index} value={cat}>
@@ -7559,8 +7568,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
-                  className="p-2 border border-gray-300 rounded-md"
-                >
+                  className="p-2 border border-gray-300 rounded-md">
                   <option value="">Select Status</option>
                   <option value="open">Open</option>
                   <option value="closed">Closed</option>
@@ -7577,8 +7585,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   type="button"
-                  onClick={handleScanStart}
-                >
+                  onClick={handleScanStart}>
                   Start Scanning
                 </button>
               )}
@@ -7653,8 +7660,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       <button
                         className="p-3 bg-black bg-opacity-50 rounded-full text-white"
                         onClick={handleCloseCamera}
-                        type="button"
-                      >
+                        type="button">
                         <X className="w-6 h-6" />
                       </button>
 
@@ -7662,8 +7668,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                         <button
                           className="p-3 bg-black bg-opacity-50 rounded-full text-white"
                           onClick={toggleFlash}
-                          type="button"
-                        >
+                          type="button">
                           {flashEnabled ? (
                             <Flash className="w-6 h-6" />
                           ) : (
@@ -7674,8 +7679,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                         <button
                           className="p-3 bg-black bg-opacity-50 rounded-full text-white"
                           onClick={toggleCameraFacing}
-                          type="button"
-                        >
+                          type="button">
                           <RefreshCw className="w-6 h-6" />
                         </button>
                       </div>
@@ -7693,8 +7697,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                                 : "text-white"
                             }`}
                             onClick={() => setScanMode("single")}
-                            type="button"
-                          >
+                            type="button">
                             Single
                           </button>
                           <button
@@ -7704,8 +7707,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                                 : "text-white"
                             }`}
                             onClick={() => setScanMode("batch")}
-                            type="button"
-                          >
+                            type="button">
                             Batch
                           </button>
                         </div>
@@ -7716,22 +7718,19 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                         <button
                           className="p-3 bg-black bg-opacity-50 rounded-full text-white"
                           onClick={decreaseZoom}
-                          type="button"
-                        >
+                          type="button">
                           <ZoomOut className="w-6 h-6" />
                         </button>
                         <button
                           className="w-16 h-16 bg-white rounded-full shadow-lg hover:bg-gray-100 transition duration-200"
                           onClick={handleCapture}
-                          type="button"
-                        >
+                          type="button">
                           <Camera className="w-8 h-8 mx-auto text-black" />
                         </button>
                         <button
                           className="p-3 bg-black bg-opacity-50 rounded-full text-white"
                           onClick={increaseZoom}
-                          type="button"
-                        >
+                          type="button">
                           <ZoomIn className="w-6 h-6" />
                         </button>
                       </div>
@@ -7740,8 +7739,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       <div className="flex justify-between mt-4">
                         <button
                           className="p-3 bg-black bg-opacity-50 rounded-full text-white"
-                          type="button"
-                        >
+                          type="button">
                           <ImageIcon className="w-6 h-6" />
                         </button>
                       </div>
@@ -7811,8 +7809,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                           className="bg-[#00e5c9] text-black px-6 py-3 rounded-md font-medium hover:bg-[#00c9b0] transition-colors flex items-center justify-center shadow-md"
                           type="button"
                           onClick={approveDocument}
-                          disabled={isProcessing}
-                        >
+                          disabled={isProcessing}>
                           <Check className="w-5 h-5 mr-2" /> Approve & Extract
                           Text
                         </button>
@@ -7830,8 +7827,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                           className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
                           type="button"
                           onClick={handleScanStart}
-                          disabled={isProcessing}
-                        >
+                          disabled={isProcessing}>
                           <Camera className="w-4 h-4 mr-2" /> Scan Again
                         </button>
 
@@ -7839,8 +7835,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                           className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
                           type="button"
                           onClick={startCropping}
-                          disabled={isProcessing}
-                        >
+                          disabled={isProcessing}>
                           <Crop className="w-4 h-4 mr-2" /> Crop
                         </button>
 
@@ -7851,8 +7846,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                             onClick={() =>
                               setIsFilterMenuOpen(!isFilterMenuOpen)
                             }
-                            disabled={isProcessing}
-                          >
+                            disabled={isProcessing}>
                             <SlidersHorizontal className="w-4 h-4 mr-2" />{" "}
                             Filters
                           </button>
@@ -7861,44 +7855,37 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                             <div className="absolute z-30 mt-2 w-48 bg-white rounded-md shadow-lg p-2 border">
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("original")}
-                              >
+                                onClick={() => applyFilter("original")}>
                                 Original
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("document")}
-                              >
+                                onClick={() => applyFilter("document")}>
                                 Document
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("enhanced")}
-                              >
+                                onClick={() => applyFilter("enhanced")}>
                                 Enhanced
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("bw")}
-                              >
+                                onClick={() => applyFilter("bw")}>
                                 Black & White
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("grayscale")}
-                              >
+                                onClick={() => applyFilter("grayscale")}>
                                 Grayscale
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("high-contrast")}
-                              >
+                                onClick={() => applyFilter("high-contrast")}>
                                 High Contrast
                               </button>
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md"
-                                onClick={() => applyFilter("color-enhance")}
-                              >
+                                onClick={() => applyFilter("color-enhance")}>
                                 Color Enhance
                               </button>
                             </div>
@@ -7916,8 +7903,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     crop={crop}
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    aspect={undefined}
-                  >
+                    aspect={undefined}>
                     <img
                       src={processedImage || "/placeholder.svg"}
                       alt="To crop"
@@ -7928,16 +7914,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     <button
                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                       type="button"
-                      onClick={confirmCrop}
-                    >
+                      onClick={confirmCrop}>
                       <Check className="w-4 h-4 mr-1 inline-block" /> Apply Crop
                     </button>
 
                     <button
                       className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                       type="button"
-                      onClick={cancelCropping}
-                    >
+                      onClick={cancelCropping}>
                       <X className="w-4 h-4 mr-1 inline-block" /> Cancel
                     </button>
                   </div>
@@ -7953,8 +7937,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   isDragActive
                     ? "border-blue-500 bg-gray-200"
                     : "border-gray-400"
-                }`}
-              >
+                }`}>
                 <input {...getInputProps()} />
                 <UploadCloud size={40} className="text-gray-500 mb-3" />
                 {isDragActive ? (
@@ -7997,16 +7980,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <button
                 className="bg-black text-white px-4 py-2 rounded-md font-medium transition-transform transform hover:scale-110 duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 type="submit"
-                disabled={isLoading || (!file && !processedImage)}
-              >
+                disabled={isLoading || (!file && !processedImage)}>
                 {isLoading ? "Saving..." : "Save"}
               </button>
 
               <button
                 className="bg-black text-white px-4 py-2 rounded-md font-medium transition-transform transform hover:scale-110 duration-300 "
                 type="button"
-                onClick={onClose}
-              >
+                onClick={onClose}>
                 Cancel
               </button>
             </div>
