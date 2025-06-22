@@ -274,99 +274,12 @@ export default function Home() {
           <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
+        
         <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
           {/* Floating Box for Overdue Mails */}
-          <div className="fixed bottom-5 right-5 z-50">
-            <div
-              className="bg-white border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
-              onClick={() => setShowOverdueMails(!showOverdueMails)}
-            >
-              <div
-                className={`p-4 font-semibold text-lg flex justify-between items-center ${
-                  showOverdueMails ? "border-b border-gray-100" : ""
-                }`}
-              >
-                <span className="flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-red-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Overdue Mails
-                  {overDueMails.length > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                      {overDueMails.length}
-                    </span>
-                  )}
-                </span>
-                {showOverdueMails && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowOverdueMails(false);
-                    }}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {showOverdueMails && (
-                <div className="max-h-80 overflow-y-auto p-2">
-                  {overDueMails.length > 0 ? (
-                    <ul className="divide-y divide-gray-100">
-                      {overDueMails.map((mail) => (
-                        <li
-                          key={mail._id}
-                          className="py-3 px-2 hover:bg-gray-50 rounded transition-colors cursor-pointer"
-                          onClick={() => handleMailClick(mail)}
-                        >
-                          <div className="font-medium text-gray-800">
-                            {mail.subject}
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1 flex items-center">
-                            <span
-                              className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                                mail.status === "open"
-                                  ? "bg-red-500"
-                                  : mail.status === "in-progress"
-                                  ? "bg-yellow-500"
-                                  : "bg-green-500"
-                              }`}
-                            ></span>
-                            Status: {mail.status}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-center py-4 text-gray-500">
-                      No overdue mails found.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          
+          
           {selectedMail && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001]">
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
@@ -448,7 +361,7 @@ export default function Home() {
             {/* Header Section */}
             <div className="flex items-center justify-center h-screen">
               <div className="text-center mx-auto mb-12 transform -translate-y-20">
-                <h1 className="text-6xl font-bold text-gray-800 mb-4 leading-tight ">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 leading-tight ">
                   <span className="inline-block">Modern Document</span>
                   <br />
                   <span className="inline-block">Management Made</span>{" "}
@@ -726,7 +639,96 @@ export default function Home() {
               </button>
             </div>
           )}
-
+        <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5">
+            <div
+              className="bg-white border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
+              onClick={() => setShowOverdueMails(!showOverdueMails)}
+            >
+              <div
+                className={`p-4 font-semibold text-lg flex justify-between items-center ${
+                  showOverdueMails ? "border-b border-gray-100" : ""
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Overdue Mails
+                  {overDueMails.length > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {overDueMails.length}
+                    </span>
+                  )}
+                </span>
+                {showOverdueMails && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowOverdueMails(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {showOverdueMails && (
+                <div className="max-h-80 overflow-y-auto p-2">
+                  {overDueMails.length > 0 ? (
+                    <ul className="divide-y divide-gray-100">
+                      {overDueMails.map((mail) => (
+                        <li
+                          key={mail._id}
+                          className="py-3 px-2 hover:bg-gray-50 rounded transition-colors cursor-pointer"
+                          onClick={() => handleMailClick(mail)}
+                        >
+                          <div className="font-medium text-gray-800">
+                            {mail.subject}
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1 flex items-center">
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                                mail.status === "open"
+                                  ? "bg-red-500"
+                                  : mail.status === "in-progress"
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
+                              }`}
+                            ></span>
+                            Status: {mail.status}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-center py-4 text-gray-500">
+                      No overdue mails found.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
           <Footer />
         </div>
       )}

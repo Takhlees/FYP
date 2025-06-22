@@ -375,7 +375,18 @@ export default function DepartmentPage() {
           </div>
           
           {showInput && (
-            <div className="mt-4 space-x-2 flex w-full">
+            <div className="mt-6 mb-8 p-6 rounded-lg shadow-lg border border-gray-200 bg-white">
+              <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-[#111827] mb-4">Add New Category</h3>
+          <button
+        onClick={() => setShowInput(false)}
+        className="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none"
+        title="Close"
+      >
+        ×
+      </button>
+      </div >
+      <div className="flex gap-4">
               <input
                 type="text"
                 placeholder="Enter Category Name"
@@ -385,10 +396,11 @@ export default function DepartmentPage() {
               />
               <button
                 onClick={addCategory}
-                className="ml-2 px-4 py-2 bg-[#111c49] text-white rounded-md hover:bg-[#3051C6] transition-colors"
+                className="px-5 py-2.5 bg-black text-white rounded-md shadow-sm relative group text-center transition-transform transform hover:scale-110 duration-300"
               >
                 Add
               </button>
+            </div>
             </div>
           )}
 
@@ -400,7 +412,7 @@ export default function DepartmentPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] cursor-pointer outline-none"
+                className="w-full px-2 py-1 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] cursor-pointer"
               >
                 {Array.isArray(categories) && categories.length > 0 ? (
                   categories.map((category, index) => (
@@ -414,6 +426,7 @@ export default function DepartmentPage() {
                   </option>
                 )}
               </select>
+              
             </div>
           </div>
 

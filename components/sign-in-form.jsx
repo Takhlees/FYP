@@ -5,9 +5,8 @@
 // import {signIn} from "next-auth/react"
 // import Link from '@node_modules/next/link'
 
-
 // export default function SignInForm({ onSignInSuccess }) {
-   
+
 //   const [formData, setFormData] = useState({
 //     email: '',
 //     password: '',
@@ -71,25 +70,23 @@
 //         redirect:false
 //       });
 
-
 //       if(res.error){
 //         setErrors((prev) => ({ ...prev, global: res.error }))
 //         return
 //       }
 //         router.push("/home")
-      
-      
+
 //       if (!validateEmail(formData.email)) {
 //       newErrors.email = 'Please enter a valid email address'
 //     }
-    
+
 //     if (!validatePassword(formData.password)) {
-//       newErrors.password = 
+//       newErrors.password =
 //       'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters'
 //     }
-    
+
 //     setErrors(newErrors)
-    
+
 //     if (Object.keys(newErrors).length === 0) {
 //       setSignInStatus('signing-in')
 //       setTimeout(() => {
@@ -110,7 +107,6 @@
 //         global: 'An unexpected error occurred. Please try again later.',
 //       }))
 //   }
-
 
 //   }
 
@@ -216,15 +212,9 @@
 //   )
 // }
 
-
-
-
-
-
 // test code
 
 // shariq code
-
 
 // 'use client';
 // import { useState, useEffect } from 'react';
@@ -414,123 +404,124 @@
 //   );
 // }
 
+"use client";
 
-
-
-
-"use client"
-
-import { useState, useEffect } from "react"
-import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 export default function SignInForm({ onSignInSuccess }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
-  })
-  const [showPassword, setShowPassword] = useState(false)
+  });
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     global: "",
-  })
-  const [signInStatus, setSignInStatus] = useState(null)
-  const router = useRouter()
+  });
+  const [signInStatus, setSignInStatus] = useState(null);
+  const router = useRouter();
 
   // Load remembered email and password from localStorage on component mount
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail")
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
     // const rememberedPassword = localStorage.getItem("rememberedPassword")
     if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail }))
+      setFormData((prev) => ({ ...prev, email: rememberedEmail }));
     }
     // if (rememberedPassword) {
     //   setFormData((prev) => ({ ...prev, password: rememberedPassword }))
     // }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    localStorage.removeItem("rememberedEmail")
-    localStorage.removeItem("rememberedPassword")
+    localStorage.removeItem("rememberedEmail");
+    localStorage.removeItem("rememberedPassword");
     setFormData({
       email: "",
       password: "",
       rememberMe: false,
-    })
-  }, [])
-  
+    });
+  }, []);
 
   // Handle input focus to show remembered email and password
   const handleEmailFocus = () => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail")
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail && !formData.email) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail }))
+      setFormData((prev) => ({ ...prev, email: rememberedEmail }));
     }
-  }
+  };
 
   const handlePasswordFocus = () => {
-    const rememberedPassword = localStorage.getItem("rememberedPassword")
+    const rememberedPassword = localStorage.getItem("rememberedPassword");
     if (rememberedPassword && !formData.password) {
-      setFormData((prev) => ({ ...prev, password: rememberedPassword }))
+      setFormData((prev) => ({ ...prev, password: rememberedPassword }));
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({ email: "", password: "", global: "" })
+    e.preventDefault();
+    setErrors({ email: "", password: "", global: "" });
 
     if (!formData.email.includes("@")) {
-      setErrors((prev) => ({ ...prev, email: "Please enter a valid email" }))
-      return
+      setErrors((prev) => ({ ...prev, email: "Please enter a valid email" }));
+      return;
     }
     if (formData.password.length < 8) {
-      setErrors((prev) => ({ ...prev, password: "Password must be at least 8 characters long" }))
-      return
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must be at least 8 characters long",
+      }));
+      return;
     }
 
-    setSignInStatus("signing-in")
+    setSignInStatus("signing-in");
 
     try {
       const res = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl:"/home"
-      })
+        callbackUrl: "/home",
+      });
 
       if (res.error) {
-        setErrors((prev) => ({ ...prev, global: res.error }))
-        setSignInStatus(null)
-        return
+        setErrors((prev) => ({ ...prev, global: res.error }));
+        setSignInStatus(null);
+        return;
       }
 
       // Handle "Remember Me" functionality
       if (formData.rememberMe) {
-        localStorage.setItem("rememberedEmail", formData.email)
-        localStorage.setItem("rememberedPassword", formData.password)
+        localStorage.setItem("rememberedEmail", formData.email);
+        localStorage.setItem("rememberedPassword", formData.password);
       } else {
-        localStorage.removeItem("rememberedEmail")
-        localStorage.removeItem("rememberedPassword")
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedPassword");
       }
 
-      router.push("/home")
+      router.push("/home");
     } catch (error) {
-      setErrors((prev) => ({ ...prev, global: "An error occurred. Please try again." }))
-      setSignInStatus(null)
+      setErrors((prev) => ({
+        ...prev,
+        global: "An error occurred. Please try again.",
+      }));
+      setSignInStatus(null);
     }
-  }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden fixed inset-0 bg-gray-100">
@@ -542,8 +533,7 @@ export default function SignInForm({ onSignInSuccess }) {
             backgroundImage: "url('/images.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
-          }}
-        >
+          }}>
           {/* Darker gradient overlay for better text visibility */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-purple-800/60 to-pink-800/60"></div>
 
@@ -558,9 +548,11 @@ export default function SignInForm({ onSignInSuccess }) {
             <div className="mb-6 p-4 rounded-full bg-indigo-600/70 backdrop-blur-md shadow-xl">
               <Mail className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md">DOCULUS</h1>
+            <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md">
+              DOCULUS
+            </h1>
             <p className="text-white text-lg max-w-md text-center font-medium drop-shadow-md">
-            Step into seamless digital file management system.
+              Step into seamless digital file management system.
             </p>
             {/* <div className="mt-8 p-4 bg-white/20 backdrop-blur-md rounded-xl max-w-sm border border-white/40 shadow-lg">
               <p className="text-white italic text-sm drop-shadow-sm">
@@ -575,8 +567,12 @@ export default function SignInForm({ onSignInSuccess }) {
         <div className="w-full md:w-1/2 bg-white flex items-center justify-center rounded-3xl md:rounded-l-none md:rounded-r-3xl">
           <div className="w-full max-w-md px-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome To Doculus!</h2>
-              <p className="text-gray-600 text-sm mt-1">Sign in to manage, upload, and scan your documents effortlessly.</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Welcome To Doculus!
+              </h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Sign in to manage, upload, and scan your documents effortlessly.
+              </p>
             </div>
 
             {errors.global && (
@@ -588,7 +584,9 @@ export default function SignInForm({ onSignInSuccess }) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-gray-700 text-sm font-medium mb-1">
                   Email Address
                 </label>
                 <div className="relative">
@@ -607,18 +605,21 @@ export default function SignInForm({ onSignInSuccess }) {
                     className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
                   />
                 </div>
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="password" className="block text-gray-700 text-sm font-medium">
+                  <label
+                    htmlFor="password"
+                    className="block text-gray-700 text-sm font-medium">
                     Password
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
-                  >
+                    className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -640,12 +641,17 @@ export default function SignInForm({ onSignInSuccess }) {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
-                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                )}
               </div>
 
               <div>
@@ -658,7 +664,9 @@ export default function SignInForm({ onSignInSuccess }) {
                     onChange={handleChange}
                     className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                   />
-                  <label htmlFor="remember" className="ml-2 text-xs text-gray-700">
+                  <label
+                    htmlFor="remember"
+                    className="ml-2 text-xs text-gray-700">
                     Remember me
                   </label>
                 </div>
@@ -667,8 +675,7 @@ export default function SignInForm({ onSignInSuccess }) {
               <button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-all duration-200 text-sm shadow-md hover:shadow-lg"
-                disabled={signInStatus === "signing-in"}
-              >
+                disabled={signInStatus === "signing-in"}>
                 {signInStatus === "signing-in" ? (
                   "Signing in..."
                 ) : (
@@ -681,27 +688,14 @@ export default function SignInForm({ onSignInSuccess }) {
             </form>
 
             <div className="text-center mt-6 text-gray-500 text-xs">
-              <p>© {new Date().getFullYear()} GCU University. All rights reserved.</p>
+              <p>
+                © {new Date().getFullYear()} GCU University. All rights
+                reserved.
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
