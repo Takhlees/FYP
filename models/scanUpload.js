@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 const ScanUploadSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["all", "uni", "admin"],
+    enum: ["uni", "admin"],
     required: true
   },
   diaryNo: {
@@ -17,6 +17,10 @@ const ScanUploadSchema = new mongoose.Schema({
   department: {
     type: String,
     required: [true, 'Department is required'],
+  },
+  fileName: {
+    type: String,
+    required: [true, 'File name is required'],
   },
   category: {
     type: String,
@@ -39,13 +43,11 @@ const ScanUploadSchema = new mongoose.Schema({
     required: [true, 'Disposal is required'],
   },
   file: {
-    data: Buffer,
+    data: String, // Changed from Buffer to String (base64)
     contentType: String,
     name: String
   }
 }, { timestamps: true })
 
 const ScanUpload = mongoose.models.ScanUpload || mongoose.model('ScanUpload', ScanUploadSchema)
-
 export default ScanUpload
-

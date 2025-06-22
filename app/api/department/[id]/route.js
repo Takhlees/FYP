@@ -3,7 +3,7 @@ import { connectToDB } from "@utils/database";
 
 // GET request handler
 export async function GET(req, { params }) {
-  const { id } = await params; // Extract the ID from the route parameters
+  const { id } = await params; 
   await connectToDB(); 
   
   try {
