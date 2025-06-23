@@ -1,17 +1,13 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import ScanUpload from "./ScanUpload";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
-import { Upload } from "lucide-react";
-import { Scan } from "lucide-react";
+import { Upload , Scan } from "lucide-react";
 import { getSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { PulseLoader } from "react-spinners";
-
-
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
@@ -25,9 +21,17 @@ export default function Home() {
   const router = useRouter();
   const [displayText, setDisplayText] = useState("");
   const credibilityWords = ["Simple", "Efficient", "Secure"];
-  const timeoutRef = useRef(null); // To store the timeout ID for cleanup
+  const timeoutRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pdfError, setPdfError] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  // Add these state variables that were missing
+  const [isScanning, setIsScanning] = useState(false);
+  const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
+  const [processedImage, setProcessedImage] = useState(null);
+  const [isApproved, setIsApproved] = useState(false);
+  const [extractedText, setExtractedText] = useState("");
 
   // Effect for session check and fetching overdue mails
   useEffect(() => {
@@ -36,10 +40,9 @@ export default function Home() {
       try {
         const session = await getSession();
         if (!session) {
-          router.push("/"); // Redirect to home if no session
+          router.push("/");
         }
       } catch (error) {
-        console.error("Session check failed:", error);
         console.error("Session check failed:", error);
       } finally {
         setIsLoading(false);
@@ -47,33 +50,32 @@ export default function Home() {
     };
     checkSession();
 
-    // Fetch overdue mails
     async function fetchOverdueMails() {
       try {
         setIsLoading(false);
-        console.log("Fetching overdue mails...");
         const response = await fetch("http://localhost:3000/api/reminder", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
           },
         });
 
-        console.log("Response Status:", response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("API Data:", data); // Debugging line
-        setOverDueMails(data.overdueMails || []); // Ensure it's an array
+        setOverDueMails(data.overdueMails || []);
       } catch (error) {
         console.error("Failed to fetch overdue mails", error);
       }
     }
 
     fetchOverdueMails();
-  }, [router]); // Only re-run if router changes
+  }, [router]);
 
   useEffect(() => {
     const fetchRecentMails = async () => {
@@ -85,11 +87,18 @@ export default function Home() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not JSON");
+        }
+
         const data = await response.json();
         setRecentMails(data);
       } catch (error) {
         console.error("Fetch error:", error);
         setRecentError(error.message);
+        setRecentMails([]); // Reset to empty array on error
       } finally {
         setIsLoadingRecent(false);
       }
@@ -100,13 +109,13 @@ export default function Home() {
 
   // Effect for typing animation
   useEffect(() => {
-    const typingSpeed = 100; // Speed of typing each character (ms)
-    const deletingSpeed = 50; // Speed of deleting each character (ms)
-    const pauseDuration = 1500; // Pause duration after typing (ms)
+    const typingSpeed = 100;
+    const deletingSpeed = 50;
+    const pauseDuration = 1500;
 
-    let currentIndex = 0; // Current word index
-    let charIndex = 0; // Current character index
-    let isTyping = true; // Typing or deleting phase
+    let currentIndex = 0;
+    let charIndex = 0;
+    let isTyping = true;
 
     const typeOrDelete = () => {
       const currentWord = credibilityWords[currentIndex];
@@ -117,7 +126,6 @@ export default function Home() {
           charIndex++;
           timeoutRef.current = setTimeout(typeOrDelete, typingSpeed);
         } else {
-          // Finished typing, pause before deleting
           timeoutRef.current = setTimeout(() => {
             isTyping = false;
             typeOrDelete();
@@ -129,7 +137,6 @@ export default function Home() {
           charIndex--;
           timeoutRef.current = setTimeout(typeOrDelete, deletingSpeed);
         } else {
-          // Finished deleting, move to the next word
           currentIndex = (currentIndex + 1) % credibilityWords.length;
           isTyping = true;
           typeOrDelete();
@@ -137,19 +144,50 @@ export default function Home() {
       }
     };
 
-    // Start the typing effect
     typeOrDelete();
 
-    // Cleanup on unmount
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []); // No dependencies, runs once on mount
+  }, []);
 
-  const handleMailClick = (mail) => {
-    setSelectedMail(mail); // Set the selected mail
+  const handleMailClick = async (mail) => {
+    setSelectedMail(mail);
+  };
+
+  // Updated handleOpenForm function
+  // const handleOpenForm = (actionType) => {
+  //   setAction(actionType);
+  //   setShowForm(true);
+  //   setIsScanning(true);
+  //   setIsFullScreenScanning(true);
+  //   setProcessedImage(null);
+  //   setIsApproved(false);
+  //   setExtractedText("");
+  // };
+
+  const handleOpenUpload = () => {
+    setAction("Upload");
+    setShowForm(true);
+    // Reset states for upload (no scanning states)
+    setIsScanning(false);
+    setIsFullScreenScanning(false);
+    setProcessedImage(null);
+    setIsApproved(false);
+    setExtractedText("");
+  };
+
+  const handleOpenScan = () => {
+    setAction("Scan");
+    setShowForm(true);
+    // Set scanning states for scan
+    setIsScanning(true);
+    setIsFullScreenScanning(true);
+    setProcessedImage(null);
+    setIsApproved(false);
+    setExtractedText("");
   };
 
   const handleStatusChange = async (e) => {
@@ -162,6 +200,11 @@ export default function Home() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
+
+            // Android-specific headers
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
           },
           body: JSON.stringify({ status: newStatus }),
         }
@@ -184,21 +227,31 @@ export default function Home() {
     }
   };
 
-  const handleViewPDF = () => {
-    if (selectedMail?.pdfUrl) {
-      window.open(selectedMail.pdfUrl, "_blank"); // Open PDF in a new tab
-    } else {
-      alert("No PDF available for this mail.");
+  const handleViewPDF = async () => {
+    try {
+      setPdfLoading(true);
+      setPdfError(null);
+
+      const endpoint = selectedMail.isOverdue
+        ? `/api/reminder/${selectedMail._id}`
+        : `/api/recent/${selectedMail._id}`;
+
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error("PDF not available");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      setPdfError(error.message);
+    } finally {
+      setPdfLoading(false);
     }
   };
 
-  const handleOpenForm = (actionType) => {
-    setAction(actionType);
-    setShowForm(true);
-  };
-
   useEffect(() => {
-    // Set random positions for each bubble
     const bubbles = document.querySelectorAll(".animate-bubble");
     bubbles.forEach((bubble) => {
       const randomTop = Math.random() * 100 + "%";
@@ -215,14 +268,10 @@ export default function Home() {
           <PulseLoader color="#e1e4e8" size={17} speedMultiplier={0.8} />
         </div>
       )}
-     
+
       {showForm ? (
-        <div>
-          {showForm && (
-            <div>
-              <ScanUpload action={action} onClose={() => setShowForm(false)} />
-            </div>
-          )}
+        <div className="z-50 bg-white">
+          <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
         
@@ -260,20 +309,50 @@ export default function Home() {
                       <option value="in-progress">In Progress</option>
                     </select>
                   </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                      {selectedMail.category || "Not specified"}
+                    </div>
+                  </div>
+
                   <div className="flex justify-end space-x-3">
                     <button
                       onClick={handleViewPDF}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      disabled={pdfLoading}
+                      className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        pdfLoading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                     >
-                      View PDF
+                      {pdfLoading ? (
+                        <span className="flex items-center">
+                          <PulseLoader
+                            color="#ffffff"
+                            size={8}
+                            className="mr-2"
+                          />
+                          Loading PDF...
+                        </span>
+                      ) : (
+                        "View PDF"
+                      )}
                     </button>
                     <button
-                      onClick={() => setSelectedMail(null)}
+                      onClick={() => {
+                        setSelectedMail(null);
+                        setPdfError(null);
+                      }}
                       className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
                       Close
                     </button>
                   </div>
+                  {pdfError && (
+                    <div className="mt-4 text-red-500 text-sm">{pdfError}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -299,13 +378,13 @@ export default function Home() {
                 </p>
                 <div className="mt-10 flex justify-center gap-4">
                   <button
-                    onClick={() => handleOpenForm("Upload")}
+                    onClick={handleOpenUpload} // Changed from handleOpenForm("Upload")
                     className="flex items-center gap-2 px-10 py-2 bg-black text-white rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
                   >
                     <Upload size={20} /> Upload
                   </button>
                   <button
-                    onClick={() => handleOpenForm("Scan")}
+                    onClick={handleOpenScan} // Changed from handleOpenForm("Scan")
                     className="flex items-center gap-2 px-10 py-2 bg-gray-200 text-black rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
                   >
                     <Scan size={20} /> Scan
@@ -357,9 +436,11 @@ export default function Home() {
                       d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                     />
                   </svg>
-                  <h3 className="text-lg font-medium text-black">Upload and Scan</h3>
+                  <h3 className="text-lg font-medium text-black">
+                    Upload and Scan
+                  </h3>
                   <p className="text-gray-500 text-sm">
-                  Easily upload and scan your documents effectively
+                    Easily upload and scan your documents effectively
                   </p>
                 </div>
                 <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
@@ -376,9 +457,11 @@ export default function Home() {
                       d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                     />
                   </svg>
-                  <h3 className="text-lg font-medium text-black">Search Files</h3>
+                  <h3 className="text-lg font-medium text-black">
+                    Search Files
+                  </h3>
                   <p className="text-gray-500 text-sm">
-                  Quickly find documents with smart search filters.
+                    Quickly find documents with smart search filters.
                   </p>
                 </div>
                 <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
@@ -395,9 +478,12 @@ export default function Home() {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <h3 className="text-lg font-medium text-black">Browse Files</h3>
+                  <h3 className="text-lg font-medium text-black">
+                    Browse Files
+                  </h3>
                   <p className="text-gray-500 text-sm">
-                  View all your uploaded files sorted by departments and categories.
+                    View all your uploaded files sorted by departments and
+                    categories.
                   </p>
                 </div>
               </div>
@@ -429,7 +515,8 @@ export default function Home() {
                     Smart Organization
                   </h3>
                   <p className="text-gray-500 text-sm">
-                  Organize documents automatically by selecting relevant department and category.
+                    Organize documents automatically by selecting relevant
+                    department and category.
                   </p>
                 </div>
                 <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
@@ -447,10 +534,10 @@ export default function Home() {
                     />
                   </svg>
                   <h3 className="text-lg font-medium text-black">
-                  OCR Text Extraction
+                    OCR Text Extraction
                   </h3>
                   <p className="text-gray-500 text-sm">
-                  Extract and manage text from documents efficiently.
+                    Extract and manage text from documents efficiently.
                   </p>
                 </div>
                 <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
@@ -468,10 +555,11 @@ export default function Home() {
                     />
                   </svg>
                   <h3 className="text-lg font-medium text-black">
-                  File Management  
+                    File Management
                   </h3>
                   <p className="text-gray-500 text-sm">
-                  Upload, view, and retrieve documents seamlessly in one place.
+                    Upload, view, and retrieve documents seamlessly in one
+                    place.
                   </p>
                 </div>
               </div>
@@ -489,7 +577,11 @@ export default function Home() {
 
               {isLoadingRecent ? (
                 <div className="flex justify-center">
-                  <PulseLoader color="#6b7280" size={10} speedMultiplier={0.7}/>
+                  <PulseLoader
+                    color="#6b7280"
+                    size={10}
+                    speedMultiplier={0.7}
+                  />
                 </div>
               ) : recentError ? (
                 <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg text-left">
@@ -501,6 +593,7 @@ export default function Home() {
                     <div
                       key={mail._id}
                       className="bg-white p-4 flex items-center justify-between rounded-lg shadow-md transition-transform transform hover:scale-105 duration-300 cursor-pointer text-left"
+                      onClick={() => handleMailClick(mail)}
                     >
                       <div className="flex-1">
                         <p className="text-gray-800 font-medium">

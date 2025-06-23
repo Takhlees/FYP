@@ -344,7 +344,7 @@ const Departments = () => {
                 disabled={isLoading || isNavigating}
               >
                 {isLoading ? (
-                  <PulseLoader className="animate-spin h-5 w-5 mx-auto" color="#d2d4d6" speedMultiplier={0.7} />
+                  "saving..."
                 ) : (
                   "Save"
                 )}

@@ -33,3 +33,29 @@ export async function PUT(req,{params}) {
     }
 
 }
+
+
+
+export async function GET(request, { params }) {
+  const { id } = await params; 
+
+  try {
+    await connectToDB();
+    const mail = await ScanUpload.findOne({ _id: id });
+
+    if (!mail?.file?.data) {
+      return NextResponse.json({ error: 'PDF not found' }, { status: 404 });
+    }
+
+    return new NextResponse(mail.file.data, {
+      status: 200,
+      headers: {
+        'Content-Type': mail.file.contentType || 'application/pdf',
+      },
+    });
+    
+  } catch (error) {
+    console.error('PDF fetch error:', error);
+    return NextResponse.json({ error: 'Failed to load PDF' }, { status: 500 });
+  }
+}
