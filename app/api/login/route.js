@@ -1,9 +1,6 @@
 import User from "../../../models/user";
 import { connectToDB } from "../../../utils/database";
 import { NextResponse } from "next/server";
-// import bcrypt from "bcrypt";
-
-
 
 export const POST = async (req, res) =>{
   try {

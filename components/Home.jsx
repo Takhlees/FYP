@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import ScanUpload from "./ScanUpload";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
-import { Upload , Scan } from "lucide-react";
+import ChatBot from "@components/ChatBot";
+import { Upload, Scan } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PulseLoader } from "react-spinners";
@@ -32,6 +33,7 @@ export default function Home() {
   const [processedImage, setProcessedImage] = useState(null);
   const [isApproved, setIsApproved] = useState(false);
   const [extractedText, setExtractedText] = useState("");
+  const [showChat, setShowChat] = useState(false);
 
   // Effect for session check and fetching overdue mails
   useEffect(() => {
@@ -274,12 +276,10 @@ export default function Home() {
           <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
-        
         <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
           {/* Floating Box for Overdue Mails */}
-          
-          
+
           {selectedMail && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001]">
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
@@ -302,8 +302,7 @@ export default function Home() {
                     <select
                       value={selectedMail.status}
                       onChange={handleStatusChange}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                       <option value="open">Open</option>
                       <option value="closed">Closed</option>
                       <option value="in-progress">In Progress</option>
@@ -325,8 +324,7 @@ export default function Home() {
                       disabled={pdfLoading}
                       className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                         pdfLoading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
+                      }`}>
                       {pdfLoading ? (
                         <span className="flex items-center">
                           <PulseLoader
@@ -345,8 +343,7 @@ export default function Home() {
                         setSelectedMail(null);
                         setPdfError(null);
                       }}
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                       Close
                     </button>
                   </div>
@@ -367,8 +364,7 @@ export default function Home() {
                   <span className="inline-block">Management Made</span>{" "}
                   <span
                     className="inline-block bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent"
-                    style={{ minWidth: "120px", textAlign: "left" }}
-                  >
+                    style={{ minWidth: "120px", textAlign: "left" }}>
                     {displayText}
                   </span>
                 </h1>
@@ -379,14 +375,12 @@ export default function Home() {
                 <div className="mt-10 flex justify-center gap-4">
                   <button
                     onClick={handleOpenUpload} // Changed from handleOpenForm("Upload")
-                    className="flex items-center gap-2 px-10 py-2 bg-black text-white rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
-                  >
+                    className="flex items-center gap-2 px-10 py-2 bg-black text-white rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
                     <Upload size={20} /> Upload
                   </button>
                   <button
                     onClick={handleOpenScan} // Changed from handleOpenForm("Scan")
-                    className="flex items-center gap-2 px-10 py-2 bg-gray-200 text-black rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
-                  >
+                    className="flex items-center gap-2 px-10 py-2 bg-gray-200 text-black rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
                     <Scan size={20} /> Scan
                   </button>
                 </div>
@@ -406,8 +400,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -427,8 +420,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -448,8 +440,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -469,8 +460,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -502,8 +492,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -524,8 +513,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -545,8 +533,7 @@ export default function Home() {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -593,8 +580,7 @@ export default function Home() {
                     <div
                       key={mail._id}
                       className="bg-white p-4 flex items-center justify-between rounded-lg shadow-md transition-transform transform hover:scale-105 duration-300 cursor-pointer text-left"
-                      onClick={() => handleMailClick(mail)}
-                    >
+                      onClick={() => handleMailClick(mail)}>
                       <div className="flex-1">
                         <p className="text-gray-800 font-medium">
                           {mail.subject}
@@ -633,29 +619,30 @@ export default function Home() {
               <span className="block sm:inline">{pdfError}</span>
               <button
                 className="absolute top-0 right-0 px-2 py-1"
-                onClick={() => setPdfError(null)}
-              >
+                onClick={() => setPdfError(null)}>
                 ×
               </button>
             </div>
           )}
-        <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5">
+          <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5 flex flex-col items-end space-y-3">
+            <div
+              className="bg-white p-3 font-semibold border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
+              onClick={() => setShowChat(true)}>
+              💬 Let’s Chat
+            </div>
             <div
               className="bg-white border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
-              onClick={() => setShowOverdueMails(!showOverdueMails)}
-            >
+              onClick={() => setShowOverdueMails(!showOverdueMails)}>
               <div
                 className={`p-4 font-semibold text-lg flex justify-between items-center ${
                   showOverdueMails ? "border-b border-gray-100" : ""
-                }`}
-              >
+                }`}>
                 <span className="flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5 mr-2 text-red-500"
                     viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
+                    fill="currentColor">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -675,14 +662,12 @@ export default function Home() {
                       e.stopPropagation();
                       setShowOverdueMails(false);
                     }}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -700,8 +685,7 @@ export default function Home() {
                         <li
                           key={mail._id}
                           className="py-3 px-2 hover:bg-gray-50 rounded transition-colors cursor-pointer"
-                          onClick={() => handleMailClick(mail)}
-                        >
+                          onClick={() => handleMailClick(mail)}>
                           <div className="font-medium text-gray-800">
                             {mail.subject}
                           </div>
@@ -713,8 +697,7 @@ export default function Home() {
                                   : mail.status === "in-progress"
                                   ? "bg-yellow-500"
                                   : "bg-green-500"
-                              }`}
-                            ></span>
+                              }`}></span>
                             Status: {mail.status}
                           </div>
                         </li>
@@ -729,6 +712,14 @@ export default function Home() {
               )}
             </div>
           </div>
+          {showChat && (
+           <div className="fixed inset-0 z-[1002] bg-black bg-opacity-40 flex justify-end">
+    <div className="w-full sm:w-[400px] h-full bg-white shadow-xl overflow-hidden relative">
+      <ChatBot onClose={() => setShowChat(false)} />
+    </div>
+  </div>
+          )}
+
           <Footer />
         </div>
       )}

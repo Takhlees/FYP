@@ -9,7 +9,7 @@ export default function home() {
     <>
             <Home/>
              <ChatBot />
-             <button
+             {/* <button
   onClick={() =>
     fetch("/api/chatbot/seed", {
       method: "POST",
@@ -19,7 +19,7 @@ export default function home() {
   }
 >
   Seed Chatbot Data
-</button>
+</button> */}
     </>
   )
 }

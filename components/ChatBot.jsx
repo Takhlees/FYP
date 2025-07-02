@@ -1,70 +1,131 @@
 "use client";
+
 import { useState } from "react";
 
-export default function ChatBot() {
-  const [input, setInput] = useState("");
+export default function ChatBot({ onClose }) {
   const [chat, setChat] = useState([]);
+  const [message, setMessage] = useState("");
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!message.trim() && !image) return;
 
-    setChat((prev) => [...prev, { from: "user", text: input }]);
-    setInput("");
+    setChat((prev) => [
+      ...prev,
+      {
+        from: "user",
+        text: message,
+        image: image ? URL.createObjectURL(image) : null,
+      },
+    ]);
     setLoading(true);
 
-    const res = await fetch("/api/chatbot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: input }),
-    });
+    const formData = new FormData();
+    formData.append("text", message);
+    if (image) formData.append("image", image);
 
-    const data = await res.json();
-    setChat((prev) => [...prev, { from: "bot", text: data.answer }]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/chatbot", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data?.response) {
+        setChat((prev) => [
+          ...prev,
+          {
+            from: "bot",
+            text: data.response || data.answer || "No reply received.",
+          },
+        ]);
+      } else {
+        console.error("Empty response from backend:", data);
+        setChat((prev) => [
+          ...prev,
+          { from: "bot", text: "Sorry, I couldn't get an answer." },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setChat((prev) => [
+        ...prev,
+        { from: "bot", text: "Something went wrong!" },
+      ]);
+    } finally {
+      setMessage("");
+      setImage(null);
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white shadow-xl rounded-xl w-[350px] max-h-[500px] flex flex-col z-50 border">
-      <div className="bg-blue-600 text-white px-4 py-2 rounded-t-xl font-semibold">
-        Ask AdminBot
-      </div>
+    <div className="max-w-2xl mx-auto p-4 mt-10 bg-white">
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-lg"
+          title="Close">
+          ×
+        </button>
+      )}
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {chat.map((msg, i) => (
-          <div key={i} className={`text-sm ${msg.from === "user" ? "text-right" : "text-left"}`}>
-            <div
+      <h2 className="text-xl font-semibold mb-4 text-center">
+        📚 DocuLess ChatBot
+      </h2>
+
+      <div className="h-80 overflow-y-auto space-y-3 border p-3 rounded-lg bg-gray-50 mb-4">
+        {chat.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`text-sm ${
+              msg.from === "user" ? "text-right" : "text-left"
+            }`}>
+            {msg.image && (
+              <img
+                src={msg.image}
+                alt="uploaded"
+                className="inline-block max-w-xs mb-1 rounded"
+              />
+            )}
+            <span
               className={`inline-block px-3 py-2 rounded-lg ${
                 msg.from === "user"
-                  ? "bg-blue-100 text-black"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
+                  ? "bg-blue-100 text-blue-900"
+                  : "bg-gray-200 text-gray-900"
+              }`}>
               {msg.text}
-            </div>
+            </span>
           </div>
         ))}
-        {loading && (
-          <div className="text-left text-sm text-gray-400">Bot is typing...</div>
-        )}
+        {loading && <p className="text-gray-500 text-sm italic">Typing...</p>}
       </div>
 
-      <div className="flex p-2 border-t gap-2">
+      <form onSubmit={handleSend} className="flex flex-col gap-2">
         <input
-          type="text"
-          className="flex-grow border rounded px-2 py-1 text-sm focus:outline-none"
-          placeholder="Ask something..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          className="file:mr-3 file:border-none file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-lg file:cursor-pointer"
         />
-        <button
-          onClick={sendMessage}
-          className="bg-blue-600 text-white text-sm px-3 py-1 rounded"
-        >
-          Send
-        </button>
-      </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Ask something or explain with an image..."
+            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Send
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
