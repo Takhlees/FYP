@@ -1,12 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ChatBot({ onClose }) {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+
+useEffect(() => {
+  const fetchChatHistory = async () => {
+    try {
+      const res = await fetch("/api/chatbot");
+      const data = await res.json();
+      if (data?.chats) {
+        setChat(data.chats);
+      }
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    }
+  };
+
+  fetchChatHistory();
+}, []);
+
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -38,22 +56,23 @@ export default function ChatBot({ onClose }) {
         setChat((prev) => [
           ...prev,
           {
-            from: "bot",
+            from: "model",
             text: data.response || data.answer || "No reply received.",
           },
         ]);
+       
       } else {
         console.error("Empty response from backend:", data);
         setChat((prev) => [
           ...prev,
-          { from: "bot", text: "Sorry, I couldn't get an answer." },
+          { from: "model", text: "Sorry, I couldn't get an answer." },
         ]);
       }
     } catch (error) {
       console.error("Error:", error);
       setChat((prev) => [
         ...prev,
-        { from: "bot", text: "Something went wrong!" },
+        { from: "model", text: "Something went wrong!" },
       ]);
     } finally {
       setMessage("");
@@ -91,6 +110,7 @@ export default function ChatBot({ onClose }) {
                 className="inline-block max-w-xs mb-1 rounded"
               />
             )}
+            
             <span
               className={`inline-block px-3 py-2 rounded-lg ${
                 msg.from === "user"

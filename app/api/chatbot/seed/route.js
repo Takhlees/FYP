@@ -145,7 +145,6 @@ export async function POST(req) {
     question: "Can I edit the subject or category of a file after uploading it?",
     answer: "Yes, click on the file in 'View Files' and choose 'Edit'. You can then update the subject, department, or category."
   }
-
 ]
 
   await chatbot.insertMany(faqs);

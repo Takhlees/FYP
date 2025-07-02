@@ -1,14 +1,13 @@
 
 "use client";
 import Home from '@components/Home'
-import ChatBot from "@/components/ChatBot";
 
 export default function home() {
 
   return (
     <>
             <Home/>
-             <ChatBot />
+            
              {/* <button
   onClick={() =>
     fetch("/api/chatbot/seed", {
@@ -19,7 +18,7 @@ export default function home() {
   }
 >
   Seed Chatbot Data
-</button> */}
+</button>  */}
     </>
   )
 }
