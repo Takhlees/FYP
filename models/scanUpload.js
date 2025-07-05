@@ -46,7 +46,15 @@ const ScanUploadSchema = new mongoose.Schema({
     data: String, // Changed from Buffer to String (base64)
     contentType: String,
     name: String
-  }
+  },
+    isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
 }, { timestamps: true })
 
 const ScanUpload = mongoose.models.ScanUpload || mongoose.model('ScanUpload', ScanUploadSchema)

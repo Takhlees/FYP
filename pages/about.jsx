@@ -66,11 +66,11 @@ export default function AboutPage() {
       description: "Handle institutional correspondence, internal memos, and department-level documentation.",
       icon: <Building className="h-6 w-6 text-[#3B5FE3]" />,
     },
-    {
-      name: "Student Services",
-      description: "Maintain internal records, student correspondence, and departmental notices — managed only by authorized admins.",
-      icon: <Users className="h-6 w-6 text-[#3B5FE3]" />,
-    },
+    // {
+    //   name: "Student Services",
+    //   description: "Student communications and records",
+    //   icon: <Users className="h-6 w-6 text-[#3B5FE3]" />,
+    // },
     {
       name: "Research Departments",
       description: "Organize research-related files, approvals, and communication logs — securely stored and easily searchable.",
@@ -90,11 +90,6 @@ export default function AboutPage() {
         "Yes. The system provides a Forgot Password feature to reset password and Change Password feature to change password.",
     },
     {
-      question: "What kind of files can be uploaded or scanned?",
-      answer:
-        "The system supports PDF files. Admins can either upload existing PDF documents or use the Scan feature to convert documents into PDF using a mobile device.",
-    },
-    {
       question: "What is the purpose of the Overdue Mails section?",
       answer:
         "This section shows all files with an open status. Admins can click on a specific file to view details and change its status (e.g., to closed). Once the status is updated, the file no longer appears in this section.",
@@ -105,7 +100,7 @@ export default function AboutPage() {
     // This timeout simulates loading - replace with your actual loading checks
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000); // Adjust time as needed
+    }, 1000); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -191,7 +186,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {departments.map((dept, index) => (
                   <div
                     key={index}

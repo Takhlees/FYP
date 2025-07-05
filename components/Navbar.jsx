@@ -245,7 +245,7 @@ export default function Navbar() {
                 </span>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-white">{session?.user?.email}</div>
+                <div className="text-base font-medium text-black">{session?.user?.email}</div>
               </div>
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
@@ -274,10 +274,9 @@ export default function Navbar() {
                 >
                   Change Password
                 </Link>
-
                 <button
                   onClick={() => signOut()}
-                  className="block w-full text-left px-4 py-3 text-base font-medium text-white hover:text-gray-400"
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
                 >
                   Logout
                 </button>

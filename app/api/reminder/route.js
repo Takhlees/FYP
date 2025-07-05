@@ -10,8 +10,7 @@ export async function GET(req, res) {
   try { 
     await connectToDB();
 
-    // Calculate the date 3 days ago
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000); // Change to 30 if you want 30 days
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000); 
 
     const overdueMails = await ScanUpload.find({
       status: { $in: ["open", "in-progress"] },

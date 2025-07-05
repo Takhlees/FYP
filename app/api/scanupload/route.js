@@ -310,7 +310,7 @@ export async function POST(request) {
   }
 }
 
-// GET function for fetching documents
+
 export async function GET(req) {
   try {
     console.log('GET request received');
@@ -326,20 +326,33 @@ export async function GET(req) {
 
     await connectToDB();
 
-    let query = {};
+    let query = {
+      $or: [
+        { isDeleted: { $exists: false } }, 
+        { isDeleted: false }               
+      ]
+    };
 
+    // Add existing filters
     if (department) query.department = department;
     if (type && ['uni', 'admin'].includes(type)) query.type = type;
     if (status && ['open', 'closed'].includes(status)) query.status = status;
     if (category && category !== "All") query.category = category;
 
     if (search) {
-      query.$or = [
-        { subject: { $regex: search, $options: 'i' } },
-        { from: { $regex: search, $options: 'i' } },
-        { diaryNo: { $regex: search, $options: 'i' } },
-        { disposal: { $regex: search, $options: 'i' } }
-      ];
+      query = {
+        $and: [
+          query, // Existing query with isDeleted filter
+          {
+            $or: [
+              { subject: { $regex: search, $options: 'i' } },
+              { from: { $regex: search, $options: 'i' } },
+              { diaryNo: { $regex: search, $options: 'i' } },
+              { disposal: { $regex: search, $options: 'i' } }
+            ]
+          }
+        ]
+      };
     }
 
     const skip = (page - 1) * limit;
@@ -375,7 +388,6 @@ export async function GET(req) {
   }
 }
 
-// Helper function to extract subject from OCR text
 function extractSubjectFromText(text) {
   try {
     const subjectPatterns = [

@@ -226,170 +226,169 @@ export async function GET(req, { params }) {
 }
 
 
+
 export async function PUT(req, { params }) {
   try {
-    const { id } = await params;
-    
-    if (!id) {
-      return NextResponse.json({ error: "Document ID is required for updating" }, { status: 400 });
-    }
-
     await connectToDB();
+    const { id } =await params;
+
+    // Check Content-Type to determine how to parse the request
+    const contentType = req.headers.get("content-type");
     
-    // Check if document exists
-    const existingDocument = await ScanUpload.findById(id);
-    if (!existingDocument) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
-    }
+    if (contentType && contentType.includes("application/json")) {
+      // Handle JSON requests (like delete operations)
+      const body = await req.json();
+      
+      if (body.action === "soft_delete") {
+        // Handle soft delete
+        const updatedDocument = await ScanUpload.findByIdAndUpdate(
+          id,
+          {
+            isDeleted: body.isDeleted,
+            deletedAt: body.deletedAt
+          },
+          { new: true }
+        );
 
-    const formData = await req.formData();
-    
-    // Extract form data matching your schema
-    const type = formData.get("type");
-    const department = formData.get("department");
-    const category = formData.get("category");
-    const fileName = formData.get("fileName");
-    let subject = formData.get("subject");
-    const date = formData.get("date");
-    const diaryNo = formData.get("diaryNo");
-    const from = formData.get("from");
-    const disposal = formData.get("disposal");
-    const status = formData.get("status");
-    const extractedText = formData.get("extractedText"); // Get OCR text to improve subject
-    const file = formData.get("file");
-
-    // Validate required fields based on your schema
-    if (!type || !department || !subject || !date || !diaryNo || !from || !disposal || !status || !fileName) {
-      return NextResponse.json({ error: "All required fields must be provided" }, { status: 400 });
-    }
-
-    // Validate enum values
-    if (!['uni', 'admin'].includes(type)) {
-      return NextResponse.json({ error: 'Type must be either "uni" or "admin".' }, { status: 400 });
-    }
-
-    if (!['open', 'closed'].includes(status)) {
-      return NextResponse.json({ error: 'Status must be either "open" or "closed".' }, { status: 400 });
-    }
-
-    // Use extracted text ONLY to improve subject if available
-    let finalSubject = subject;
-    if (extractedText && extractedText.trim()) {
-      const extractedSubject = extractSubjectFromText(extractedText);
-      if (extractedSubject && extractedSubject.length > finalSubject.length) {
-        finalSubject = extractedSubject;
-        console.log('Subject improved from OCR during update:', extractedSubject);
-      }
-    }
-
-    // Prepare update data matching your schema structure
-    const updateData = {
-      type,
-      department,
-      category: category || '', // Optional field
-      fileName,
-      subject: finalSubject, // Use the refined subject
-      date: new Date(date),
-      diaryNo,
-      from,
-      disposal,
-      status
-      // updatedAt will be handled by timestamps: true
-    };
-
-    // Handle file update if new file is provided
-    if (file && file.size > 0) {
-      // Validate file type
-      if (file.type !== 'application/pdf') {
-        return NextResponse.json({ error: 'Only PDF files are allowed.' }, { status: 400 });
-      }
-
-      try {
-        // Validate file size
-        if (file.size === 0) {
-          return NextResponse.json({ error: 'File is empty.' }, { status: 400 });
-        }
-        
-        if (file.size > 50 * 1024 * 1024) { // 50MB limit
-          return NextResponse.json({ error: 'File size too large. Maximum 50MB allowed.' }, { status: 400 });
+        if (!updatedDocument) {
+          return NextResponse.json(
+            { error: "Document not found" },
+            { status: 404 }
+          );
         }
 
-        // Convert file to base64 for storage
-        const arrayBuffer = await file.arrayBuffer();
-        const fileBuffer = Buffer.from(arrayBuffer);
-        const fileDataForStorage = fileBuffer.toString('base64');
-        console.log('File buffer created for update, size:', fileBuffer.length);
-        
-        // Validate PDF
-        const pdfDoc = await PDFDocument.load(fileBuffer);
-        console.log('Updated PDF validated successfully, pages:', pdfDoc.getPageCount());
-
-        updateData.file = {
-          data: fileDataForStorage, // Store as base64 string
-          contentType: file.type,
-          name: fileName
-        };
-
-      } catch (error) {
-        console.error('Error processing updated PDF:', error);
-        return NextResponse.json({ error: 'Invalid PDF file or processing error.' }, { status: 400 });
+        return NextResponse.json({
+          message: "Document deleted successfully",
+          document: updatedDocument
+        });
       }
+      
+      // Handle other JSON-based updates here if needed
+      return NextResponse.json(
+        { error: "Unknown action" },
+        { status: 400 }
+      );
+      
+    } else if (contentType && contentType.includes("multipart/form-data")) {
+      // Handle form data requests (like file updates)
+      const formData = await req.formData();
+
+      // Extract form data matching your schema
+      const type = formData.get("type");
+      const department = formData.get("department");
+      const category = formData.get("category");
+      const subject = formData.get("subject");
+      const date = formData.get("date");
+      const diaryNo = formData.get("diaryNo");
+      const from = formData.get("from");
+      const disposal = formData.get("disposal");
+      const status = formData.get("status");
+      const extractedText = formData.get("extractedText");
+      const fileName = formData.get("fileName");
+      const replaceFile = formData.get("replaceFile") === "true";
+
+      // Prepare update data
+      const updateData = {
+        type,
+        department,
+        category,
+        subject,
+        date: date ? new Date(date) : undefined,
+        diaryNo,
+        from,
+        disposal,
+        status,
+        extractedText,
+        fileName,
+        updatedAt: new Date()
+      };
+
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined || updateData[key] === "") {
+          delete updateData[key];
+        }
+      });
+
+      // Handle file replacement if needed
+      if (replaceFile) {
+        const file = formData.get("file");
+        if (file && file.size > 0) {
+          try {
+            // Find existing document to get current file path
+            const existingDoc = await ScanUpload.findById(id);
+            if (!existingDoc) {
+              return NextResponse.json(
+                { error: "Document not found" },
+                { status: 404 }
+              );
+            }
+
+            // Delete old file if it exists
+            if (existingDoc.filePath) {
+              const oldFilePath = path.join(process.cwd(), "public", existingDoc.filePath);
+              try {
+                await fs.unlink(oldFilePath);
+              } catch (err) {
+                console.warn("Could not delete old file:", err.message);
+              }
+            }
+
+            // Save new file
+            const buffer = Buffer.from(await file.arrayBuffer());
+            const filename = `${Date.now()}_${file.name}`;
+            const filepath = path.join(process.cwd(), "public/uploads", filename);
+            
+            await fs.mkdir(path.dirname(filepath), { recursive: true });
+            await fs.writeFile(filepath, buffer);
+            
+            updateData.filePath = `/uploads/${filename}`;
+            updateData.fileName = fileName || file.name;
+          } catch (fileError) {
+            console.error("File handling error:", fileError);
+            return NextResponse.json(
+              { error: "File upload failed" },
+              { status: 500 }
+            );
+          }
+        }
+      }
+
+      // Update the document
+      const updatedDocument = await ScanUpload.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true }
+      );
+
+      if (!updatedDocument) {
+        return NextResponse.json(
+          { error: "Document not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        message: "Document updated successfully",
+        document: updatedDocument
+      });
+      
+    } else {
+      return NextResponse.json(
+        { error: "Unsupported content type" },
+        { status: 400 }
+      );
     }
-
-    // Update the document
-    const updatedDocument = await ScanUpload.findByIdAndUpdate(
-      id, 
-      updateData, 
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedDocument) {
-      return NextResponse.json({ error: "Failed to update document" }, { status: 500 });
-    }
-
-    console.log('Document updated successfully with ID:', updatedDocument._id);
-
-    // Return updated document metadata (matching your schema)
-    const responseData = {
-      _id: updatedDocument._id,
-      type: updatedDocument.type,
-      diaryNo: updatedDocument.diaryNo,
-      date: updatedDocument.date,
-      department: updatedDocument.department,
-      fileName: updatedDocument.fileName,
-      category: updatedDocument.category,
-      subject: updatedDocument.subject, // This is the refined subject
-      status: updatedDocument.status,
-      from: updatedDocument.from,
-      disposal: updatedDocument.disposal,
-      createdAt: updatedDocument.createdAt,
-      updatedAt: updatedDocument.updatedAt
-    };
-
-    return NextResponse.json({ 
-      message: "Document updated successfully", 
-      document: responseData,
-      subjectImproved: finalSubject !== subject
-    }, { status: 200 });
 
   } catch (error) {
-    console.error('Error in PUT route:', error);
-    
-    // Handle Mongoose validation errors
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: validationErrors 
-      }, { status: 400 });
-    }
-    
-    return NextResponse.json({ 
-      error: "Failed to update document", 
-      details: error.message 
-    }, { status: 500 });
+    console.error("Error in PUT route:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
+
 
 export async function DELETE(req, { params }) {
   try {
