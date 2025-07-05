@@ -17,8 +17,9 @@ export default function ChangePassword() {
 
   return (
     <>
+     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex-grow max-w-md mx-auto w-[50%] px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold mb-6">Change Password</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -71,6 +72,7 @@ export default function ChangePassword() {
         </form>
       </div>
       <Footer />
+      </div>
     </>
   )
 }
