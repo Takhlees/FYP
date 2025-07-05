@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-  CheckCircleIcon,
+  
   PlusIcon,
   MinusIcon,
   Mail,

@@ -159,17 +159,6 @@ export default function Home() {
     setSelectedMail(mail);
   };
 
-  // Updated handleOpenForm function
-  // const handleOpenForm = (actionType) => {
-  //   setAction(actionType);
-  //   setShowForm(true);
-  //   setIsScanning(true);
-  //   setIsFullScreenScanning(true);
-  //   setProcessedImage(null);
-  //   setIsApproved(false);
-  //   setExtractedText("");
-  // };
-
   const handleOpenUpload = () => {
     setAction("Upload");
     setShowForm(true);
@@ -626,7 +615,7 @@ export default function Home() {
           )}
           <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5 flex flex-col items-end space-y-3">
             <div
-              className="bg-white p-3 font-semibold border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
+              className="p-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg text-lg font-semibold z-40 transition cursor-pointer"
               onClick={() => setShowChat(true)}>
               💬 Let’s Chat
             </div>
@@ -713,11 +702,8 @@ export default function Home() {
             </div>
           </div>
           {showChat && (
-           <div className="fixed inset-0 z-[1002] bg-black bg-opacity-40 flex justify-end">
-    <div className="w-full sm:w-[400px] h-full bg-white shadow-xl overflow-hidden relative">
-      <ChatBot onClose={() => setShowChat(false)} />
-    </div>
-  </div>
+           <ChatBot onClose={() => setShowChat(false)} />
+   
           )}
 
           <Footer />

@@ -196,40 +196,34 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="sm:hidden bg-[#0353A4]" id="mobile-menu">
-          <div className="pt-2 pb-3 space-y-1">
+        <div className="sm:hidden bg-gray-800" id="mobile-menu">
+          <div className="pt-3 pb-2 flex flex-col">
             <Link
               href="/home"
-              className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
             >
               Home
             </Link>
             <Link
               href="/departments?type=uni"
-              className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
             >
               Department
             </Link>
             <Link
               href="/departments?type=admin"
-              className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
             >
               Admin
             </Link>
             <Link
               href="/about"
-              className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
             >
               About
             </Link>
-            <Link
-              href="/tutorial"
-              className="text-white hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Tutorial
-            </Link>
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-700">
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
                 <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
@@ -255,7 +249,7 @@ export default function Navbar() {
               </div>
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-                className="ml-auto flex-shrink-0 bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="ml-auto bg-gray-700 p-2 rounded-full text-white hover:text-gray-400 transition"
               >
                 <span className="sr-only">Open user menu</span>
                 <svg
@@ -270,20 +264,20 @@ export default function Navbar() {
               </button>
             </div>
             {mobileDropdownOpen && (
-              <div className="mt-3 space-y-1">
-                <Link href="/profile" className="block px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]">
+              <div className="mt-3 px-4 bg-gray-700">
+                <Link href="/profile" className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md">
                   Profile
                 </Link>
                 <Link
                   href="/change-password"
-                  className="block px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
+                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md"
                 >
                   Change Password
                 </Link>
 
                 <button
                   onClick={() => signOut()}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
+                  className="block w-full text-left px-4 py-3 text-base font-medium text-white hover:text-gray-400"
                 >
                   Logout
                 </button>

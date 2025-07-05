@@ -1,4 +1,3 @@
-
 import { connectToDB } from "@utils/database";
 import ChatHistory from "@/models/chatHistory";
 import chatbot from "@/models/chatbot";
@@ -6,6 +5,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/utils/authOptions";
 import stringSimilarity from "string-similarity";
+import { formatMessage } from "@/utils/formatChatResponse";
 
 export async function POST(req) {
   try {
@@ -25,17 +25,19 @@ export async function POST(req) {
 
     // Convert image to base64 if exists
     let imageData = null;
-   if (image) {
-  const arrayBuffer = await image.arrayBuffer();
-  if (arrayBuffer) {
-    const buffer = Buffer.from(arrayBuffer);
-    imageData = buffer.toString("base64");
-  }
-}
-
+    if (image) {
+      const arrayBuffer = await image.arrayBuffer();
+      if (arrayBuffer) {
+        const buffer = Buffer.from(arrayBuffer);
+        imageData = buffer.toString("base64");
+      }
+    }
 
     // Get previous chats
-    const previousChats = await ChatHistory.find({ user: userId }, "role text").lean();
+    const previousChats = await ChatHistory.find(
+      { user: userId },
+      "role text"
+    ).lean();
     const historyParts = previousChats.map((msg) => ({
       role: msg.role,
       parts: [{ text: msg.text }],
@@ -44,12 +46,17 @@ export async function POST(req) {
     // Check similarity with DB questions
     const allQuestions = await chatbot.find({});
     const questionList = allQuestions.map((q) => q.question);
-    const { bestMatch } = stringSimilarity.findBestMatch(textInput, questionList);
+    const { bestMatch } = stringSimilarity.findBestMatch(
+      textInput,
+      questionList
+    );
 
     if (bestMatch.rating > 0.6) {
-     const matched = allQuestions.find(
-  (q) => q.question.trim().toLowerCase() === bestMatch.target.trim().toLowerCase()
-);
+      const matched = allQuestions.find(
+        (q) =>
+          q.question.trim().toLowerCase() ===
+          bestMatch.target.trim().toLowerCase()
+      );
       return NextResponse.json({ response: matched.answer });
     }
 
@@ -134,15 +141,14 @@ Please format all your answers clearly using bullet points or bold text for sect
       parts: [{ text: textInput }],
     };
 
-  if (imageData) {
-  currentInput.parts.push({
-    inline_data: {
-      mime_type: image?.type || "image/jpeg", // Use fallback or null check
-      data: imageData,
-    },
-  });
-}
-
+    if (imageData) {
+      currentInput.parts.push({
+        inline_data: {
+          mime_type: image?.type || "image/jpeg", // Use fallback or null check
+          data: imageData,
+        },
+      });
+    }
 
     const payload = {
       contents: [systemContext, ...historyParts, currentInput],
@@ -158,38 +164,52 @@ Please format all your answers clearly using bullet points or bold text for sect
       }
     );
     const data = await res.json();
-   
-  if (data?.error) {
-  console.error("Gemini Error:", data.error);
-  return NextResponse.json({ response: "AI could not process your request." });
-}
 
-if (
-  !data?.candidates ||
-  !data?.candidates[0]?.content?.parts?.[0]?.text
-) {
-  console.error("Gemini malformed response:", JSON.stringify(data, null, 2));
-  return NextResponse.json({ response: "Sorry, I couldn't understand your question." });
-}
+    if (data?.error) {
+      console.error("Gemini Error:", data.error);
+      return NextResponse.json({
+        response: "AI could not process your request.",
+      });
+    }
 
-if (data.error) {
-  console.error("Gemini API Error:", data.error);
-  return NextResponse.json({ response: "There was an issue with AI response." });
-}
+    if (!data?.candidates || !data?.candidates[0]?.content?.parts?.[0]?.text) {
+      console.error(
+        "Gemini malformed response:",
+        JSON.stringify(data, null, 2)
+      );
+      return NextResponse.json({
+        response: "Sorry, I couldn't understand your question.",
+      });
+    }
 
-const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text
+    if (data.error) {
+      console.error("Gemini API Error:", data.error);
+      return NextResponse.json({
+        response: "There was an issue with AI response.",
+      });
+    }
+
+    const rawAnswer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const answer = formatMessage(rawAnswer);
+console.log("Base64 Image being saved:", imageData);
 
     // Save chat history
-    await ChatHistory.create({ user: userId, role: "user", text: textInput,  image: image?.name || null,
-  base64Image: imageData || null  });
+    await ChatHistory.create({
+      user: userId,
+      role: "user",
+      text: textInput,
+      image: image?.name || null,
+      base64Image: imageData || null,
+    });
     await ChatHistory.create({ user: userId, role: "model", text: answer });
 
     return NextResponse.json({ response: answer });
-
-
   } catch (err) {
     console.error("Chat Error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -203,17 +223,26 @@ export async function GET(req) {
     }
 
     const userId = session.user.id;
-    const chats = await ChatHistory.find({ user: userId }, "role text image base64Image").sort({ createdAt: 1 }).lean();
-const formattedChats = chats.map((chat) => ({
-  from: chat.role === "user" ? "user" : "model",
-  text: chat.text,
-  image: chat.base64Image ? `data:image/jpeg;base64,${chat.base64Image}` : null
-}));
-
+    const chats = await ChatHistory.find(
+      { user: userId },
+      "role text image base64Image"
+    )
+      .sort({ createdAt: 1 })
+      .lean();
+    const formattedChats = chats.map((chat) => ({
+      from: chat.role === "user" ? "user" : "model",
+      text: chat.text,
+      image: chat.base64Image
+        ? `data:image/jpeg;base64,${chat.base64Image}`
+        : null,
+    }));
 
     return NextResponse.json({ chats: formattedChats });
   } catch (err) {
     console.error("Error loading chat history:", err);
-    return NextResponse.json({ error: "Failed to load chat history" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load chat history" },
+      { status: 500 }
+    );
   }
 }

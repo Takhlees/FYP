@@ -19,6 +19,10 @@ const ChatHistorySchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    base64Image: {
+      type: String,
+      default: null, // This will store the actual image content
+    },
   },
   { timestamps: true }
 );
