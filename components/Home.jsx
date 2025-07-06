@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import ScanUpload from "./ScanUpload";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
-import { Upload , Scan } from "lucide-react";
+import ChatBot from "@components/ChatBot";
+import { Upload, Scan } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PulseLoader } from "react-spinners";
@@ -32,6 +33,12 @@ export default function Home() {
   const [processedImage, setProcessedImage] = useState(null);
   const [isApproved, setIsApproved] = useState(false);
   const [extractedText, setExtractedText] = useState("");
+  const [showChat, setShowChat] = useState(false);
+
+  // Add refs for scrolling to sections
+  const recentActivityRef = useRef(null);
+  const uploadScanRef = useRef(null);
+  const featuresRef = useRef(null);
 
   // Effect for controlling body overflow when overdue mails are shown
 useEffect(() => {
@@ -168,17 +175,6 @@ useEffect(() => {
     setSelectedMail(mail);
   };
 
-  // Updated handleOpenForm function
-  // const handleOpenForm = (actionType) => {
-  //   setAction(actionType);
-  //   setShowForm(true);
-  //   setIsScanning(true);
-  //   setIsFullScreenScanning(true);
-  //   setProcessedImage(null);
-  //   setIsApproved(false);
-  //   setExtractedText("");
-  // };
-
   const handleOpenUpload = () => {
     setAction("Upload");
     setShowForm(true);
@@ -201,6 +197,44 @@ useEffect(() => {
     setExtractedText("");
   };
 
+  // Add navigation functions for Quick Actions
+  const handleQuickActionClick = (actionType) => {
+    switch (actionType) {
+      case 'recent':
+        // Scroll to Recent Activity section with offset for navbar
+        setTimeout(() => {
+          const element = recentActivityRef.current;
+          if (element) {
+            const yOffset = -80; // Offset for navbar/spacing
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 100);
+        break;
+      case 'upload-scan':
+        // Scroll to upload/scan section (hero section with buttons)
+        setTimeout(() => {
+          const element = uploadScanRef.current;
+          if (element) {
+            const yOffset = -100; // Offset for better centering
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 100);
+        break;
+      case 'search':
+        // Navigate to search page (you'll need to create this route)
+        router.push('/search');
+        break;
+      case 'overdue':
+        // Toggle the overdue mails panel
+        setShowOverdueMails((prev) => !prev);
+        break;
+      default:
+        break;
+    }
+  };
+
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
 
@@ -212,7 +246,6 @@ useEffect(() => {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-
             // Android-specific headers
             "Cache-Control": "no-cache",
             Pragma: "no-cache",
@@ -285,11 +318,8 @@ useEffect(() => {
           <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
-        
         <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
-          {/* Floating Box for Overdue Mails */}
-          
           
           {selectedMail && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001]">
@@ -313,8 +343,7 @@ useEffect(() => {
                     <select
                       value={selectedMail.status}
                       onChange={handleStatusChange}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                       <option value="open">Open</option>
                       <option value="closed">Closed</option>
                       <option value="in-progress">In Progress</option>
@@ -336,8 +365,7 @@ useEffect(() => {
                       disabled={pdfLoading}
                       className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                         pdfLoading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
+                      }`}>
                       {pdfLoading ? (
                         <span className="flex items-center">
                           <PulseLoader
@@ -356,8 +384,7 @@ useEffect(() => {
                         setSelectedMail(null);
                         setPdfError(null);
                       }}
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                       Close
                     </button>
                   </div>
@@ -368,9 +395,10 @@ useEffect(() => {
               </div>
             </div>
           )}
+          
           <div className="flex-grow w-full flex flex-col items-center p-14">
             {/* Header Section */}
-            <div className="flex items-center justify-center h-screen">
+            <div className="flex items-center justify-center h-screen" ref={uploadScanRef}>
               <div className="text-center mx-auto mb-12 transform -translate-y-20">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 leading-tight ">
                   <span className="inline-block">Modern Document</span>
@@ -378,8 +406,7 @@ useEffect(() => {
                   <span className="inline-block">Management Made</span>{" "}
                   <span
                     className="inline-block bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent"
-                    style={{ minWidth: "120px", textAlign: "left" }}
-                  >
+                    style={{ minWidth: "120px", textAlign: "left" }}>
                     {displayText}
                   </span>
                 </h1>
@@ -389,15 +416,13 @@ useEffect(() => {
                 </p>
                 <div className="mt-10 flex justify-center gap-4">
                   <button
-                    onClick={handleOpenUpload} // Changed from handleOpenForm("Upload")
-                    className="flex items-center gap-2 px-10 py-2 bg-black text-white rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
-                  >
+                    onClick={handleOpenUpload}
+                    className="flex items-center gap-2 px-10 py-2 bg-black text-white rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
                     <Upload size={20} /> Upload
                   </button>
                   <button
-                    onClick={handleOpenScan} // Changed from handleOpenForm("Scan")
-                    className="flex items-center gap-2 px-10 py-2 bg-gray-200 text-black rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
-                  >
+                    onClick={handleOpenScan}
+                    className="flex items-center gap-2 px-10 py-2 bg-gray-200 text-black rounded-lg shadow-md text-lg font-medium relative group text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
                     <Scan size={20} /> Scan
                   </button>
                 </div>
@@ -410,15 +435,17 @@ useEffect(() => {
                 <span className="bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">
                   Quick Actions
                 </span>
-              </h2>{" "}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div 
+                  className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
+                  onClick={() => handleQuickActionClick('recent')}
+                >
                   <svg
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -433,13 +460,15 @@ useEffect(() => {
                     Access your recently viewed documents
                   </p>
                 </div>
-                <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
+                <div 
+                  className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
+                  onClick={() => handleQuickActionClick('upload-scan')}
+                >
                   <svg
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -454,7 +483,10 @@ useEffect(() => {
                     Easily upload and scan your documents effectively
                   </p>
                 </div>
-                <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
+                <div 
+                  className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer"
+                  onClick={() => handleQuickActionClick('overdue')}
+                >
                   <svg
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
@@ -465,56 +497,36 @@ useEffect(() => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
                   <h3 className="text-lg font-medium text-black">
-                    Search Files
+                    Overdue Mails
+                    {overDueMails.length > 0 && (
+                      <span className="ml-2 text-red-500 font-bold">!</span>
+                    )}
                   </h3>
                   <p className="text-gray-500 text-sm">
-                    Quickly find documents with smart search filters.
-                  </p>
-                </div>
-                <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
-                  <svg
-                    className="w-12 h-12 mx-auto mb-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <h3 className="text-lg font-medium text-black">
-                    Browse Files
-                  </h3>
-                  <p className="text-gray-500 text-sm">
-                    View all your uploaded files sorted by departments and
-                    categories.
+                    View and manage overdue mails 
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Powerful Features Section */}
-            <div className="w-full max-w-6xl mb-12">
+            <div className="w-full max-w-6xl mb-12" ref={featuresRef}>
               <h2 className="text-3xl font-bold text-center mb-10 w-full">
                 <span className="bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">
                   Powerful Features
                 </span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="brelative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
+                <div className="relative group bg-white p-6 rounded-lg shadow-md text-center transition-transform transform hover:scale-110 duration-300 cursor-pointer">
                   <svg
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -535,8 +547,7 @@ useEffect(() => {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -556,8 +567,7 @@ useEffect(() => {
                     className="w-12 h-12 mx-auto mb-4 text-gray-400"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -577,7 +587,7 @@ useEffect(() => {
             </div>
 
             {/* Recent Activity Section */}
-            <div className="w-full max-w-6xl mb-12">
+            <div className="w-full max-w-6xl mb-12" ref={recentActivityRef}>
               <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold mb-8 text-left w-full">
                   <span className="bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">
@@ -604,8 +614,7 @@ useEffect(() => {
                     <div
                       key={mail._id}
                       className="bg-white p-4 flex items-center justify-between rounded-lg shadow-md transition-transform transform hover:scale-105 duration-300 cursor-pointer text-left"
-                      onClick={() => handleMailClick(mail)}
-                    >
+                      onClick={() => handleMailClick(mail)}>
                       <div className="flex-1">
                         <p className="text-gray-800 font-medium">
                           {mail.subject}
@@ -644,165 +653,137 @@ useEffect(() => {
               <span className="block sm:inline">{pdfError}</span>
               <button
                 className="absolute top-0 right-0 px-2 py-1"
-                onClick={() => setPdfError(null)}
-              >
+                onClick={() => setPdfError(null)}>
                 ×
               </button>
             </div>
           )}
-        <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5">
+          
+          <div className="sticky bottom-5 z-50 w-fit ml-auto mr-5 mb-5 flex flex-col items-end space-y-3">
             <div
-              className="bg-white border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl"
+              className="p-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg text-lg font-semibold z-40 transition cursor-pointer"
+              onClick={() => setShowChat(true)}>
+              💬 Let's Chat
+            </div>
+            <div
+              className="bg-white border border-gray-200 rounded-lg shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:scale-105"
+              style={{ maxWidth: "345px", minWidth: "220px", overflowX: "hidden" }} // <-- Add this line
               onClick={() => setShowOverdueMails(!showOverdueMails)}
             >
               <div
-                className={`p-4 font-semibold text-lg flex justify-between items-center ${
+                className={`p-3 font-medium text-lg flex justify-between items-center transition-all duration-300 ${
                   showOverdueMails ? "border-b border-gray-100" : ""
                 }`}
+                style={{ overflowX: "hidden" }} // <-- Add this line
               >
-                <span className="flex items-center">
+                <span className="flex items-center overflow-x-hidden"> {/* <-- Add overflow-x-hidden */
+                }
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-red-500"
+                    className={`h-5 w-5 mr-2 text-red-500 transition-transform duration-300 ${
+                      showOverdueMails ? "rotate-12" : ""
+                    }`}
                     viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
+                    fill="currentColor">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
                       clipRule="evenodd"
                     />
                   </svg>
-                  Overdue Mails
+                  <span className="text-lg truncate max-w-[120px]">Overdue Mails</span> {/* <-- Add truncate and max-w */}
                   {overDueMails.length > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full animate-pulse">
                       {overDueMails.length}
                     </span>
                   )}
                 </span>
-                {showOverdueMails && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowOverdueMails(false);
-                    }}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                )}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${
+                    showOverdueMails ? "rotate-180" : ""
+                  }`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </div>
-              {showOverdueMails && (
-                <div className="max-h-80 overflow-y-auto p-2">
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  showOverdueMails 
+                    ? "max-h-60 opacity-100" 
+                    : "max-h-0 opacity-0"
+                }`}
+                style={{ overflowX: "hidden" }} // <-- Add this line
+              >
+                <div className={`p-2 transform transition-all duration-300 ${
+                  showOverdueMails 
+                    ? "translate-y-0 scale-100" 
+                    : "-translate-y-4 scale-95"
+                }`}>
                   {overDueMails.length > 0 ? (
-                    <ul className="divide-y divide-gray-100">
-                      {overDueMails.map((mail) => (
+                    <ul className="divide-y divide-gray-100 space-y-1">
+                      {overDueMails.map((mail, index) => (
                         <li
                           key={mail._id}
-                          className="py-3 px-2 hover:bg-gray-50 rounded transition-colors cursor-pointer"
-                          onClick={() => handleMailClick(mail)}
+                          className={`py-2 px-2 hover:bg-gray-50 rounded transition-all duration-300 cursor-pointer transform hover:scale-102 hover:shadow-sm ${
+                            showOverdueMails 
+                              ? "translate-x-0 opacity-100" 
+                              : "translate-x-4 opacity-0"
+                          }`}
+                          style={{
+                            transitionDelay: showOverdueMails ? `${index * 50}ms` : '0ms',
+                            overflowX: "hidden" // <-- Add this line
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMailClick(mail);
+                          }}
                         >
-                          <div className="font-medium text-gray-800">
+                          <div className="font-medium text-gray-800 text-sm transition-colors duration-200 truncate">
                             {mail.subject}
                           </div>
-                          <div className="text-sm text-gray-500 mt-1 flex items-center">
+                          <div className="text-xs text-gray-500 mt-1 flex items-center">
                             <span
-                              className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                              className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 transition-all duration-300 ${
                                 mail.status === "open"
-                                  ? "bg-red-500"
+                                  ? "bg-red-500 animate-pulse"
                                   : mail.status === "in-progress"
                                   ? "bg-yellow-500"
                                   : "bg-green-500"
                               }`}
                             ></span>
-                            Status: {mail.status}
+                            {mail.status}
                           </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-center py-4 text-gray-500">
-                      No overdue mails found.
+                    <p className={`text-center py-3 text-gray-500 text-sm transition-all duration-300 ${
+                      showOverdueMails 
+                        ? "translate-y-0 opacity-100" 
+                        : "translate-y-2 opacity-0"
+                    }`}>
+                      No overdue mails
                     </p>
                   )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
+          
+          {showChat && (
+            <ChatBot onClose={() => setShowChat(false)} />
+          )}
+
           <Footer />
         </div>
       )}
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
