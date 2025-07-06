@@ -33,6 +33,17 @@ export default function Home() {
   const [isApproved, setIsApproved] = useState(false);
   const [extractedText, setExtractedText] = useState("");
 
+  // Effect for controlling body overflow when overdue mails are shown
+useEffect(() => {
+  if (showOverdueMails) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [showOverdueMails]);
   // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
@@ -735,3 +746,63 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
