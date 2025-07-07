@@ -130,7 +130,7 @@ export default function ChatBot({ onClose }) {
       <div className="flex-1 mb-5 flex overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center w-full">
-            <PulseLoader size={20} />
+            <PulseLoader size={15} />
           </div>
         ) : (
           <div className="bg-gray-50 p-4 space-y-4">
