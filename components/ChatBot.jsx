@@ -39,6 +39,15 @@ export default function ChatBot({ onClose }) {
     fetchChatHistory();
   }, []);
 
+  useEffect(() => {
+  if (!loading) return; 
+  const timeout = setTimeout(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timeout);
+}, [chat.length]); 
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!message.trim() && !image) return;
@@ -51,10 +60,17 @@ export default function ChatBot({ onClose }) {
         image: image ? URL.createObjectURL(image) : null,
       },
     ]);
+
+     setChat((prev) => [
+    ...prev,
+    {
+      from: "bot",
+      isTyping: true,
+    },
+  ]);
+
     setMessage("");
     setImage(null);
-
-    setLoading(true);
 
     const formData = new FormData();
     formData.append("text", message);
@@ -69,28 +85,28 @@ export default function ChatBot({ onClose }) {
       const data = await res.json();
 
       if (data?.response) {
-        setChat((prev) => [
-          ...prev,
+
+        setChat((prev) => {
+           const updated = prev.filter((msg) => !msg.isTyping);
+          return [
+          ...updated,
           {
             from: "model",
             text: data.response || data.answer || "No reply received.",
           },
-        ]);
+        ]});
       } else {
-        console.error("Empty response from backend:", data);
-        setChat((prev) => [
-          ...prev,
-          { from: "model", text: "Sorry, I couldn't get an answer." },
-        ]);
+        setChat((prev) =>  {
+      const updated = prev.filter((msg) => !msg.isTyping);
+      return [...updated, { from: "bot", text: "Something went wrong!" }];
+    });
       }
     } catch (error) {
       console.error("Error:", error);
-      setChat((prev) => [
-        ...prev,
-        { from: "model", text: "Something went wrong!" },
-      ]);
-    } finally {
-      setLoading(false);
+      setChat((prev) =>  {
+      const updated = prev.filter((msg) => !msg.isTyping);
+      return [...updated, { from: "bot", text: "Something went wrong!" }];
+    });
     }
   };
 
@@ -111,7 +127,7 @@ export default function ChatBot({ onClose }) {
         </button>
       </div>
 
-      <div className="flex-1 bg-gray-50 flex overflow-y-auto">
+      <div className="flex-1 mb-5 flex overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center w-full">
             <PulseLoader size={15} />
@@ -143,12 +159,27 @@ export default function ChatBot({ onClose }) {
                         className="mb-2 max-w-full rounded"
                       />
                     )}
-                    <div
-                      className={`text-sm ${
-                        msg.from === "user" ? "text-white" : "text-gray-800"
-                      } `}
-                      dangerouslySetInnerHTML={{ __html: msg.text }}
-                    />
+                     {msg.isTyping ? (
+          <div className="flex space-x-1">
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+            <div
+              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+              style={{ animationDelay: "0.1s" }}
+            />
+            <div
+              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+              style={{ animationDelay: "0.2s" }}
+            />
+          </div>
+        ) : (
+          <div
+            className={`text-sm ${
+              msg.from === "user" ? "text-white" : "text-gray-800"
+            }`}
+            dangerouslySetInnerHTML={{ __html: msg.text }}
+          />
+        )}
+                  
                   </div>
                 </div>
                 <div ref={bottomRef} />
@@ -156,6 +187,7 @@ export default function ChatBot({ onClose }) {
             ))}
           </div>
         )}
+
       </div>
 
       <form onSubmit={handleSend} className="p-4 space-y-4 border-t bg-white">

@@ -182,9 +182,9 @@ const Footer = () => {
   const showAlert = (message) => {
     setAlertMessage(message);
     setTimeout(() => {
-      setAlertMessage(null);
-    }, 3000);
-  };
+      setAlertMessage(null)
+    }, 3000)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -206,9 +206,9 @@ const Footer = () => {
       form.reset();
       setShowContact(false);
     } else {
-      showAlert("Something went wrong. Please try again.");
+      return "bg-red-800 border border-red-700"
     }
-  };
+  }
 
   return (
     <>
@@ -342,7 +342,6 @@ const Footer = () => {
                     className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
-
                 {/* Email Field */}
                 <div>
                   <label
@@ -361,7 +360,6 @@ const Footer = () => {
                     className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
-
                 {/* Message Field */}
                 <div>
                   <label
@@ -380,7 +378,6 @@ const Footer = () => {
                     className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
                   ></textarea>
                 </div>
-
                 {/* Buttons */}
                 <div className="mt-10 flex justify-center gap-4">
                   <button
@@ -405,6 +402,22 @@ const Footer = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes slide-in-right {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out;
+        }
+      `}</style>
     </>
   );
 };
