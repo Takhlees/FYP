@@ -5736,16 +5736,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold mb-2">Scan Document</h2>
             <p className="text-gray-600">
-              Create a professional scanned document with AI enhancement
+              Create a professional scanned and enhanced document  
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-medium text-blue-900 mb-2">Scanning Features:</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• AI-powered document enhancement</li>
-                <li>• Automatic subject extraction</li>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">              <h3 className="font-medium text-blue-900 mb-2">Scanning Features:</h3>              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Document enhancement with AI-assisted libraries</li>
+                <li>• Automatic subject extraction using OCR</li>
                 <li>• PDF optimization for smaller files</li>
                 <li>• Professional scan quality</li>
               </ul>
@@ -5761,7 +5759,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <Camera className="w-6 h-6" />
               {hasCameraPermission === false
                 ? "Allow Camera Access"
-                : "Start AI Scanner"}
+                : "Start Scanner"}
             </button>
 
             <button
@@ -5800,7 +5798,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               >
                 <X className="w-5 h-5" />
               </button>
-              <h2 className="text-lg font-semibold">AI Document Scanner</h2>
+              <h2 className="text-lg font-semibold">Document Scanner</h2>
               <div className="w-9" />
             </div>
 

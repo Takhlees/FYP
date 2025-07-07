@@ -8,12 +8,10 @@ import {
   Mail,
   FileText,
   Clock,
-  Users,
   Search,
   Shield,
   Building,
   BookOpen,
-  ChevronRight,
 } from "lucide-react";
 import { PulseLoader } from "react-spinners";
 import Navbar from "@components/Navbar";
@@ -59,12 +57,12 @@ export default function AboutPage() {
     {
       name: "Academic Affairs",
       description: "Upload and manage faculty-related communications, notices, and official documents.",
-      icon: <BookOpen className="h-6 w-6 text-[#3B5FE3]" />,
+      icon: <BookOpen className="h-6 w-6 text-[#3B5FE3] dark:text-blue-400" />,
     },
     {
       name: "Administration",
       description: "Handle institutional correspondence, internal memos, and department-level documentation.",
-      icon: <Building className="h-6 w-6 text-[#3B5FE3]" />,
+      icon: <Building className="h-6 w-6 text-[#3B5FE3] dark:text-blue-400" />,
     },
     // {
     //   name: "Student Services",
@@ -74,7 +72,7 @@ export default function AboutPage() {
     {
       name: "Research Departments",
       description: "Organize research-related files, approvals, and communication logs — securely stored and easily searchable.",
-      icon: <Mail className="h-6 w-6 text-[#3B5FE3]" />,
+      icon: <Mail className="h-6 w-6 text-[#3B5FE3] dark:text-blue-400" />,
     },
   ];
 
@@ -116,7 +114,7 @@ export default function AboutPage() {
           <PulseLoader color="#d2d4d6" size={17} speedMultiplier={0.7} />
         </div>
       )}
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900">
         <Navbar />
 
         {/* Hero Section */}
@@ -124,11 +122,11 @@ export default function AboutPage() {
 
           <div className="container mx-auto px-4 py-16 relative z-10">
             <div className="max-w-3xl">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-gray-100">
                 Modern Document Management for{" "}
-                <span className="bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">Universities</span>
+                <span className="bg-gradient-to-r from-black via-mid to-light dark:from-white dark:via-blue-300 dark:to-blue-500 bg-clip-text text-transparent">Universities</span>
               </h1>
-              <p className="text-xl text-gray-600 mt-8 mb-8">
+              <p className="text-xl text-gray-600 dark:text-gray-400 mt-8 mb-8">
               Doculus provides an intuitive, efficient solution for managing academic and administrative documents. From uploading and scanning to organizing and retrieving your files — everything is simplified.
               </p>
              
@@ -141,10 +139,10 @@ export default function AboutPage() {
           <section className="py-16">
             <div className="container mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-[#111827] mb-3">
+                <h2 className="text-3xl font-bold text-[#111827] dark:text-gray-100 mb-3">
                   Powerful Features
                 </h2>
-                <p className="text-[#6B7280] max-w-2xl mx-auto">
+                <p className="text-[#6B7280] dark:text-gray-400 max-w-2xl mx-auto">
                 Smart, secure, and efficient document management for universities.
                 </p>
               </div>
@@ -153,7 +151,7 @@ export default function AboutPage() {
                 {features.map((feature) => (
                   <div
                     key={feature.id}
-                    className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+                    className="group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
                   >
                     <div
                       className={`${feature.color} p-6 flex justify-center items-center`}
@@ -163,10 +161,10 @@ export default function AboutPage() {
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-semibold text-[#111827] mb-2 group-hover:text-[#3B5FE3] transition-colors">
+                      <h3 className="text-xl font-semibold text-[#111827] dark:text-gray-100 mb-2 group-hover:text-[#3B5FE3] dark:group-hover:text-blue-400 transition-colors">
                         {feature.title}
                       </h3>
-                      <p className="text-[#6B7280]">{feature.description}</p>
+                      <p className="text-[#6B7280] dark:text-gray-400">{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -178,10 +176,10 @@ export default function AboutPage() {
           <section className="py-16">
             <div className="container mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-[#111827] mb-3">
+                <h2 className="text-3xl font-bold text-[#111827] dark:text-gray-100 mb-3">
                   Serving All University Departments
                 </h2>
-                <p className="text-[#6B7280] max-w-2xl mx-auto">
+                <p className="text-[#6B7280] dark:text-gray-400 max-w-2xl mx-auto">
                   Our system streamlines document management across various departments while maintaining a centralized, secure platform.
                 </p>
               </div>
@@ -190,15 +188,15 @@ export default function AboutPage() {
                 {departments.map((dept, index) => (
                   <div
                     key={index}
-                    className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:border-[#3B5FE3] border border-[#F3F4F6] group"
+                    className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:border-[#3B5FE3] dark:hover:border-blue-400 border border-[#F3F4F6] dark:border-gray-700 group"
                   >
-                    <div className="p-3 rounded-lg bg-[#F3F4F6] inline-flex mb-4 group-hover:bg-[#3B5FE3]/10 transition-colors">
+                    <div className="p-3 rounded-lg bg-[#F3F4F6] dark:bg-gray-700 inline-flex mb-4 group-hover:bg-[#3B5FE3]/10 dark:group-hover:bg-blue-400/10 transition-colors">
                       {dept.icon}
                     </div>
-                    <h3 className="text-lg font-semibold text-[#111827] mb-2">
+                    <h3 className="text-lg font-semibold text-[#111827] dark:text-gray-100 mb-2">
                       {dept.name}
                     </h3>
-                    <p className="text-[#6B7280]">{dept.description}</p>
+                    <p className="text-[#6B7280] dark:text-gray-400">{dept.description}</p>
                   </div>
                 ))}
               </div>
@@ -209,10 +207,10 @@ export default function AboutPage() {
           <section className="py-16">
             <div className="container mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-[#111827] mb-3">
+                <h2 className="text-3xl font-bold text-[#111827] dark:text-gray-100 mb-3">
                   Frequently Asked Questions
                 </h2>
-                <p className="text-[#6B7280] max-w-2xl mx-auto">
+                <p className="text-[#6B7280] dark:text-gray-400 max-w-2xl mx-auto">
                   Everything you need to know about our mailing system.
                 </p>
               </div>
@@ -221,30 +219,32 @@ export default function AboutPage() {
                 {faqs.map((faq, index) => (
                   <div
                     key={index}
-                    className="mb-4 bg-gray-100 rounded-lg shadow-sm overflow-hidden transition-all duration-200"
+                    className="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden transition-all duration-200 border border-gray-200 dark:border-gray-700"
                   >
                     <button
                       className="flex justify-between items-center w-full text-left p-6"
                       onClick={() => toggleFAQ(index)}
                       aria-expanded={openFAQ === index}
                     >
-                      <h3 className="text-lg font-semibold text-[#111827]">
+                      <h3 className="text-lg font-semibold text-[#111827] dark:text-gray-100">
                         {faq.question}
                       </h3>
                       <div
                         className={`p-1 rounded-full ${
-                          openFAQ === index ? "bg-[#3B5FE3]/10" : "bg-white"
+                          openFAQ === index 
+                            ? "bg-[#3B5FE3]/10 dark:bg-blue-400/10" 
+                            : "bg-white dark:bg-gray-700"
                         } transition-colors`}
                       >
                         {openFAQ === index ? (
-                          <MinusIcon className="h-5 w-5 text-[#3B5FE3]" />
+                          <MinusIcon className="h-5 w-5 text-[#3B5FE3] dark:text-blue-400" />
                         ) : (
-                          <PlusIcon className="h-5 w-5 text-[#6B7280]" />
+                          <PlusIcon className="h-5 w-5 text-[#6B7280] dark:text-gray-400" />
                         )}
                       </div>
                     </button>
                     {openFAQ === index && (
-                      <div className="px-6 pb-6 text-[#6B7280] animate-in fade-in duration-200">
+                      <div className="px-6 pb-6 text-[#6B7280] dark:text-gray-400 animate-in fade-in duration-200">
                         {faq.answer}
                       </div>
                     )}

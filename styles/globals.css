@@ -1,75 +1,348 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
- /* :root {
-  --background: #ffffff;
-  --foreground: #000000;
+/* CSS Variables for Theme Colors */
+:root {
+  /* Light mode colors */
+  --color-text-primary: 0 0 0;
+  --color-text-secondary: 107 114 128;
+  --color-text-muted: 156 163 175;
+  
+  --color-bg-primary: 255 255 255;
+  --color-bg-secondary: 249 250 251;
+  --color-bg-tertiary: 243 244 246;
+  
+  --color-border: 209 213 219;
+  --color-border-light: 229 231 235;
 }
 
-.dark {
-  --background: #1a202c;
-  --foreground: #f7fafc;
-}
-
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-} */
-
-/* globals.css */
-[data-theme="light"] {
-  --icon-color: #000000; /* Dark color for light theme */
-  --background-color: #ffffff;
-  --text-color: #000000;
-}
-
+/* Dark mode variables */
 [data-theme="dark"] {
-  --icon-color: #ffffff; /* Light color for dark theme */
-  --background-color: #1a1a1a;
-  --text-color: #ffffff;
+  --color-text-primary: 255 255 255;
+  --color-text-secondary: 209 213 219;
+  --color-text-muted: 156 163 175;
+  
+  --color-bg-primary: 17 24 39;
+  --color-bg-secondary: 31 41 55;
+  --color-bg-tertiary: 55 65 81;
+  
+  --color-border: 75 85 99;
+  --color-border-light: 55 65 81;
 }
 
+/* Base HTML and body styling */
+html, body {
+  background-color: rgb(var(--color-bg-primary));
+  color: rgb(var(--color-text-primary));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure dark mode class inheritance */
+html.dark, html.dark body {
+  background-color: rgb(17, 24, 39);
+  color: rgb(255, 255, 255);
+}
+
+/* AUTOMATIC DARK MODE OVERRIDES */
+
+/* Background overrides */
+html.dark [class*="bg-white"]:not([class*="dark:"]) {
+  background-color: rgb(31, 41, 55) !important;
+  color: white !important;
+}
+
+html.dark [class*="bg-gray-50"]:not([class*="dark:"]) {
+  background-color: rgb(55, 65, 81) !important;
+}
+
+html.dark [class*="bg-gray-100"]:not([class*="dark:"]) {
+  background-color: rgb(75, 85, 99) !important;
+}
+
+html.dark [class*="bg-gray-200"]:not([class*="dark:"]) {
+  background-color: rgb(55, 65, 81) !important;
+}
+
+/* Text color overrides */
+html.dark [class*="text-black"]:not([class*="dark:"]),
+html.dark [class*="text-gray-900"]:not([class*="dark:"]) {
+  color: white !important;
+}
+
+html.dark [class*="text-gray-800"]:not([class*="dark:"]) {
+  color: rgb(229, 231, 235) !important;
+}
+
+html.dark [class*="text-gray-700"]:not([class*="dark:"]) {
+  color: rgb(209, 213, 219) !important;
+}
+
+html.dark [class*="text-gray-600"]:not([class*="dark:"]),
+html.dark [class*="text-gray-500"]:not([class*="dark:"]) {
+  color: rgb(156, 163, 175) !important;
+}
+
+html.dark [class*="text-secondary"]:not([class*="dark:"]) {
+  color: rgb(209, 213, 219) !important;
+}
+
+/* Border overrides */
+html.dark [class*="border-gray-200"]:not([class*="dark:"]),
+html.dark [class*="border-gray-300"]:not([class*="dark:"]),
+html.dark [class*="divide-gray-200"]:not([class*="dark:"]),
+html.dark [class*="divide-gray-100"]:not([class*="dark:"]) {
+  border-color: rgb(75, 85, 99) !important;
+}
+
+/* Form elements */
+html.dark input:not([class*="dark:"]):not([type="radio"]):not([type="checkbox"]),
+html.dark textarea:not([class*="dark:"]),
+html.dark select:not([class*="dark:"]) {
+  background-color: rgb(55, 65, 81) !important;
+  border-color: rgb(75, 85, 99) !important;
+  color: white !important;
+}
+
+html.dark option {
+  background-color: rgb(55, 65, 81) !important;
+  color: white !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: rgb(156, 163, 175) !important;
+  opacity: 1;
+}
+
+/* Typography elements */
+html.dark h1:not([class*="text-"]), 
+html.dark h2:not([class*="text-"]), 
+html.dark h3:not([class*="text-"]), 
+html.dark h4:not([class*="text-"]), 
+html.dark h5:not([class*="text-"]), 
+html.dark h6:not([class*="text-"]) {
+  color: white !important;
+}
+
+html.dark p:not([class*="text-"]):not([class*="bg-"]) {
+  color: rgb(209, 213, 219) !important;
+}
+
+html.dark label:not([class*="text-"]) {
+  color: rgb(209, 213, 219) !important;
+}
+
+/* Links */
+html.dark a:not([class*="text-"]):not([class*="bg-"]) {
+  color: rgb(96, 165, 250) !important;
+}
+
+html.dark a:hover:not([class*="text-"]):not([class*="bg-"]) {
+  color: rgb(147, 197, 253) !important;
+}
+
+/* Buttons without specific styling */
+html.dark button:not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-yellow"]):not([class*="bg-primary"]):not([class*="dark:"]) {
+  background-color: rgb(75, 85, 99) !important;
+  color: white !important;
+  border-color: rgb(107, 114, 128) !important;
+}
+
+/* Focus states */
+html.dark input:focus:not([class*="dark:"]),
+html.dark textarea:focus:not([class*="dark:"]),
+html.dark select:focus:not([class*="dark:"]) {
+  border-color: rgb(59, 130, 246) !important;
+  box-shadow: 0 0 0 3px rgb(59, 130, 246, 0.1) !important;
+  outline: none;
+}
+
+/* Scrollbar styling */
+html.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: rgb(31, 41, 55);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgb(75, 85, 99);
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(107, 114, 128);
+}
+
+/* Utility classes for manual overrides */
+.text-theme-primary {
+  color: rgb(var(--color-text-primary));
+}
+
+.text-theme-secondary {
+  color: rgb(var(--color-text-secondary));
+}
+
+.text-theme-muted {
+  color: rgb(var(--color-text-muted));
+}
+
+.bg-theme-primary {
+  background-color: rgb(var(--color-bg-primary));
+}
+
+.bg-theme-secondary {
+  background-color: rgb(var(--color-bg-secondary));
+}
+
+.bg-theme-tertiary {
+  background-color: rgb(var(--color-bg-tertiary));
+}
+
+.border-theme {
+  border-color: rgb(var(--color-border));
+}
+
+.border-theme-light {
+  border-color: rgb(var(--color-border-light));
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* SVG icons */
+html.dark svg:not([class*="text-"]):not([fill]):not([class*="lucide"]) {
+  color: rgb(209, 213, 219);
+}
+
+/* React-toastify dark mode support */
+html.dark .Toastify__toast {
+  background-color: rgb(31, 41, 55) !important;
+  color: white !important;
+}
+
+html.dark .Toastify__toast--success {
+  background-color: rgb(34, 197, 94) !important;
+}
+
+html.dark .Toastify__toast--error {
+  background-color: rgb(239, 68, 68) !important;
+}
+
+html.dark .Toastify__toast--warning {
+  background-color: rgb(245, 158, 11) !important;
+}
+
+html.dark .Toastify__toast--info {
+  background-color: rgb(59, 130, 246) !important;
+}
+
+html.dark .Toastify__close-button {
+  color: white !important;
+  opacity: 0.7;
+}
+
+html.dark .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Specific fixes for custom color classes */
+html.dark .text-\[\#111827\] {
+  color: white !important;
+}
+
+html.dark .text-\[\#6B7280\] {
+  color: rgb(156, 163, 175) !important;
+}
+
+html.dark .bg-\[\#F3F4F6\] {
+  background-color: rgb(55, 65, 81) !important;
+}
+
+html.dark .border-\[\#F3F4F6\] {
+  border-color: rgb(75, 85, 99) !important;
+}
+
+/* Keep brand colors */
+html.dark .text-\[\#3B5FE3\] {
+  color: rgb(59, 95, 227) !important;
+}
+
+html.dark .bg-\[\#3B5FE3\] {
+  background-color: rgb(59, 95, 227) !important;
+}
+
+/* Status colors */
+html.dark .text-success {
+  color: rgb(34, 197, 94) !important;
+}
+
+html.dark .text-error {
+  color: rgb(239, 68, 68) !important;
+}
+
+html.dark .text-warning {
+  color: rgb(245, 158, 11) !important;
+}
+
+html.dark .text-info {
+  color: rgb(59, 130, 246) !important;
+}
+
+/* Custom gradient for dark mode */
+.gradient-text {
+  background: linear-gradient(90deg, #ffffff, #2196f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
 }
 
-  body, html {
-    height: 100%;
-  }
-  
-  button {
-    cursor: pointer;
-  }
+body, html {
+  height: 100%;
+}
 
-  .form-group , .form-groupf {
-    @apply flex flex-col mb-2 w-full ;
-  }
+button {
+  cursor: pointer;
+}
 
-  .form-group label, .form-groupf label {
-    @apply text-lg font-medium ;
-  }
+/* Form components */
+.form-group, .form-groupf {
+  @apply flex flex-col mb-2 w-full;
+}
 
-  .form-group input, .form-groupf input
-{
+.form-group label, .form-groupf label {
+  @apply text-lg font-medium;
+}
+
+.form-group input, .form-groupf input {
   @apply block w-full px-2 py-1.5 border border-gray-300 rounded-md text-lg focus:border-zinc-800 outline-none;
 }
 
-.form-group select , .form-groupf select {
+.form-group select, .form-groupf select {
   @apply block w-full px-2 py-2 border border-gray-300 rounded-md cursor-pointer text-lg focus:border-zinc-800 outline-none;
 }
 
 .form-group input[type="date"],
 .form-group input[type="file"] {
-  @apply cursor-pointer ;
+  @apply cursor-pointer;
 }
 
 .subutton {
   @apply px-6 py-3 mt-4 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 cursor-pointer text-xl font-medium;
 }
-

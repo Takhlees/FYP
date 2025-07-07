@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -6,13 +5,13 @@ import Link from "next/link"
 import "@styles/globals.css"
 import { getSession, signOut } from "next-auth/react"
 import Image from "next/image"
+import DirectThemeToggle from "./ThemeToggel"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
   const [session, setSession] = useState(null)
-  const [theme, setTheme] = useState("light") // Default theme is light
   const [profileImage, setProfileImage] = useState(null)
 
   // Fetch session data
@@ -35,34 +34,15 @@ export default function Navbar() {
     }
   }, [])
 
-  // Toggle theme function
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    localStorage.setItem("theme", newTheme) // Save theme preference to localStorage
-  }
-
-  // Apply theme to the document
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light"
-    setTheme(savedTheme)
-    document.documentElement.setAttribute("data-theme", savedTheme)
-  }, [])
-
-  // Update the document when the theme changes
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme)
-  }, [theme])
-
   return (
-    <nav className="bg-gray-200 shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-200 dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link
                 href="#"
-                className="text-2xl bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent font-bold "
+                className="text-2xl bg-gradient-to-r from-black via-mid to-light dark:from-white dark:via-blue-300 dark:to-blue-500 bg-clip-text text-transparent font-bold transition-all duration-300"
               >
                 Doculus
               </Link>
@@ -70,43 +50,47 @@ export default function Navbar() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/home"
-                className="text-black inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300"
+                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
               >
                 Home
               </Link>
               <Link
                 href="/departments?type=uni"
-                className="text-black inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300"
+                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
               >
                 University
               </Link>
               <Link
                 href="/departments?type=admin"
-                className="text-black inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300"
+                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
               >
                 Admin
               </Link>
-             
               <Link
                 href="/about"
-                className="text-black inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300"
+                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
               >
                 About
               </Link>
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          
+          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+            {/* Direct Theme Toggle */}
+            <DirectThemeToggle />
+            
+            {/* Profile Dropdown */}
             <div className="ml-3 relative">
               <div>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="bg-primary flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="bg-primary flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors duration-300"
                   id="user-menu"
                   aria-expanded="false"
                   aria-haspopup="true"
                 >
                   <span className="sr-only">Open user menu</span>
-                  <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100">
+                  <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
                     {profileImage ? (
                       <div className="relative h-10 w-10">
                         <Image
@@ -118,7 +102,7 @@ export default function Navbar() {
                         />
                       </div>
                     ) : (
-                      <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                     )}
@@ -127,29 +111,28 @@ export default function Navbar() {
               </div>
               {showDropdown && (
                 <div
-                  className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-[#ededee] ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 focus:outline-none transition-colors duration-300"
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="user-menu"
                 >
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 text-sm text-black hover:bg-[#e0e2e4]"
+                    className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
                     role="menuitem"
                   >
                     Profile
                   </Link>
                   <Link
                     href="/change-password"
-                    className="block px-4 py-2 text-sm text-black hover:bg-[#e0e2e4]"
+                    className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
                     role="menuitem"
                   >
                     Change Password
                   </Link>
-
                   <button
                     onClick={() => signOut()}
-                    className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-[#e0e2e4]"
+                    className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
                     role="menuitem"
                   >
                     Logout
@@ -158,11 +141,16 @@ export default function Navbar() {
               )}
             </div>
           </div>
-          <div className="-mr-2 flex items-center sm:hidden">
+          
+          {/* Mobile menu button */}
+          <div className="-mr-2 flex items-center sm:hidden space-x-2">
+            {/* Mobile Direct Theme Toggle */}
+            <DirectThemeToggle />
+            
             <button
               onClick={() => setIsOpen(!isOpen)}
               type="button"
-              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              className="bg-white dark:bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors duration-300"
               aria-controls="mobile-menu"
               aria-expanded="false"
             >
@@ -195,8 +183,9 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {isOpen && (
-        <div className="sm:hidden bg-gray-800" id="mobile-menu">
+        <div className="sm:hidden bg-gray-800 dark:bg-gray-900 transition-colors duration-300" id="mobile-menu">
           <div className="pt-3 pb-2 flex flex-col">
             <Link
               href="/home"
@@ -208,7 +197,7 @@ export default function Navbar() {
               href="/departments?type=uni"
               className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
             >
-              Department
+              University
             </Link>
             <Link
               href="/departments?type=admin"
@@ -223,10 +212,12 @@ export default function Navbar() {
               About
             </Link>
           </div>
-          <div className="pt-4 border-t border-gray-700">
+          
+          {/* Mobile profile section */}
+          <div className="pt-4 border-t border-gray-700 dark:border-gray-600">
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
-                <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
                   {profileImage ? (
                     <div className="relative h-12 w-12">
                       <Image
@@ -238,18 +229,18 @@ export default function Navbar() {
                       />
                     </div>
                   ) : (
-                    <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   )}
                 </span>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-black">{session?.user?.email}</div>
+                <div className="text-base font-medium text-white">{session?.user?.email}</div>
               </div>
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-                className="ml-auto bg-gray-700 p-2 rounded-full text-white hover:text-gray-400 transition"
+                className="ml-auto bg-gray-700 dark:bg-gray-600 p-2 rounded-full text-white hover:text-gray-400 transition-colors duration-300"
               >
                 <span className="sr-only">Open user menu</span>
                 <svg
@@ -264,19 +255,22 @@ export default function Navbar() {
               </button>
             </div>
             {mobileDropdownOpen && (
-              <div className="mt-3 px-4 bg-gray-700">
-                <Link href="/profile" className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md">
+              <div className="mt-3 px-4 bg-gray-700 dark:bg-gray-800">
+                <Link 
+                  href="/profile" 
+                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md transition-colors duration-300"
+                >
                   Profile
                 </Link>
                 <Link
                   href="/change-password"
-                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md"
+                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md transition-colors duration-300"
                 >
                   Change Password
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-[#006DAA]"
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-red-600 dark:hover:bg-red-700 rounded-md transition-colors duration-300"
                 >
                   Logout
                 </button>
