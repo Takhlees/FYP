@@ -530,12 +530,13 @@ export default function SignInForm({ onSignInSuccess }) {
         <div
           className="hidden md:block w-1/2 relative rounded-l-3xl overflow-hidden"
           style={{
-            backgroundImage: "url('/images.jpg')",
+            backgroundImage: "url('/new.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}>
           {/* Darker gradient overlay for better text visibility */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-purple-800/60 to-pink-800/60"></div>
+          {/* <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-purple-800/60 to-pink-800/60"></div> */}
+ <div className="absolute inset-0 bg-gray-600/70"></div>
 
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-full h-full">
@@ -554,12 +555,6 @@ export default function SignInForm({ onSignInSuccess }) {
             <p className="text-white text-lg max-w-md text-center font-medium drop-shadow-md">
               Step into seamless digital file management system.
             </p>
-            {/* <div className="mt-8 p-4 bg-white/20 backdrop-blur-md rounded-xl max-w-sm border border-white/40 shadow-lg">
-              <p className="text-white italic text-sm drop-shadow-sm">
-                "Education is the passport to the future, for tomorrow belongs to those who prepare for it today."
-              </p>
-              <p className="text-white text-sm mt-2 font-medium">— Malcolm X</p>
-            </div> */}
           </div>
         </div>
 
