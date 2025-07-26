@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -28,30 +27,34 @@ export default function Home() {
   const [pdfError, setPdfError] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  // Add these state variables that were missing
+  // Add these state variables that were missing 
   const [isScanning, setIsScanning] = useState(false);
   const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
   const [processedImage, setProcessedImage] = useState(null);
   const [isApproved, setIsApproved] = useState(false);
-  const [extractedText, setExtractedText] = useState("");
-  const [showChat, setShowChat] = useState(false);
+  const [extractedText, setExtractedText] = useState("");  const [showChat, setShowChat] = useState(false);
 
   // Add refs for scrolling to sections
   const recentActivityRef = useRef(null);
   const uploadScanRef = useRef(null);
-  const featuresRef = useRef(null);
-
-  // Effect for controlling body overflow when overdue mails are shown
+  const featuresRef = useRef(null);  // Add footer intersection state and ref
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const footerRef = useRef(null);
 useEffect(() => {
-  if (showOverdueMails) {
+  if (showForm || selectedMail) {
+    // Get current scroll bar width to prevent layout shift
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = `${scrollBarWidth}px`;
   } else {
     document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
   }
   return () => {
     document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
   };
-}, [showOverdueMails]);
+}, [showForm, selectedMail]);
   // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
@@ -295,7 +298,6 @@ useEffect(() => {
       setPdfLoading(false);
     }
   };
-
   useEffect(() => {
     const bubbles = document.querySelectorAll(".animate-bubble");
     bubbles.forEach((bubble) => {
@@ -305,6 +307,58 @@ useEffect(() => {
       bubble.style.left = randomLeft;
     });
   }, []);
+  // Footer intersection observer for responsive positioning
+  useEffect(() => {
+    const footerElement = document.querySelector('footer');
+    if (!footerElement) return;
+
+    const createObserver = () => {
+      // Adjust margins based on screen size for better mobile experience
+      const isMobile = window.innerWidth <= 768;
+      const isTablet = window.innerWidth <= 1024;
+        let rootMargin;
+      if (isMobile) {
+        rootMargin = '0px 0px -150px 0px'; // More margin for mobile - trigger much earlier
+      } else if (isTablet) {
+        rootMargin = '0px 0px -120px 0px'; // Medium margin for tablet
+      } else {
+        rootMargin = '0px 0px -150px 0px'; // Larger margin for desktop
+      }      return new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            setIsFooterVisible(entry.isIntersecting);
+          });
+        },
+        {
+          threshold: 0,
+          rootMargin
+        }
+      );
+    };
+
+    let observer = createObserver();
+    observer.observe(footerElement);
+
+    // Handle window resize to update observer with new margins
+    const handleResize = () => {
+      observer.disconnect();
+      observer = createObserver();
+      observer.observe(footerElement);
+    };
+
+    // Debounce resize handler for better performance
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 250);
+    };
+
+    window.addEventListener('resize', debouncedResize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', debouncedResize);      clearTimeout(resizeTimeout);    };
+  }, []);
 
   return (
     <>
@@ -312,10 +366,8 @@ useEffect(() => {
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <PulseLoader color="#e1e4e8" size={17} speedMultiplier={0.8} />
         </div>
-      )}
-
-      {showForm ? (
-        <div className="z-50 bg-white dark:bg-gray-900">
+      )}      {showForm ? (
+        <div className="fixed inset-0 z-50 overflow-auto">
           <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
       ) : (
@@ -396,11 +448,10 @@ useEffect(() => {
               </div>
             </div>
           )}
-          
-          <div className="flex-grow w-full flex flex-col items-center px-4 sm:px-8 lg:px-14 py-8 lg:py-14">
+            <div className="flex-grow w-full flex flex-col items-center px-4 sm:px-8 lg:px-14 py-2 sm:py-8 lg:py-14">
             {/* Header Section */}
-            <div className="flex items-center justify-center min-h-screen w-full" ref={uploadScanRef}>
-              <div className="text-center mx-auto mb-12 transform lg:-translate-y-20">
+            <div className="flex items-center justify-center min-h-[100vh] sm:min-h-screen w-full pt-4 sm:pt-0" ref={uploadScanRef}>
+              <div className="text-center mx-auto mb-12 transform -translate-y-20 sm:-translate-y-16 lg:-translate-y-20">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mb-4 leading-tight px-4">
                   <span className="inline-block">Modern Document</span>
                   <br />
@@ -658,10 +709,14 @@ useEffect(() => {
                 ×
               </button>
             </div>
-          )}
-          
-          {/* Responsive Floating Action Buttons */}
-          <div className="fixed bottom-4 sm:bottom-5 right-4 sm:right-5 z-50 flex flex-col items-end space-y-3">
+          )}         
+          <div 
+            className={`fixed right-4 sm:right-5 z-50 flex flex-col items-end space-y-3 transition-all duration-300 ${
+              isFooterVisible 
+                ? 'bottom-[500px] sm:bottom-[200px] md:bottom-[220px]' // Fixed positioning when footer is visible
+                : 'bottom-4 sm:bottom-5 md:bottom-6'
+            }`}
+          >
             {/* Chat Button */}
             <div
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg text-sm sm:text-lg font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap"
@@ -718,9 +773,8 @@ useEffect(() => {
                     clipRule="evenodd"
                   />
                 </svg>
-              </div>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+              </div>              <div
+                className={`overflow-hidden overflow-x-hidden transition-all duration-500 ease-in-out ${
                   showOverdueMails 
                     ? "max-h-64 sm:max-h-72 opacity-100" 
                     : "max-h-0 opacity-0"
@@ -732,7 +786,7 @@ useEffect(() => {
                     : "-translate-y-4 scale-95"
                 }`}>
                   {overDueMails.length > 0 ? (
-                    <ul className="divide-y divide-gray-100 dark:divide-gray-600 space-y-1 max-h-48 sm:max-h-56 overflow-y-auto">
+                    <ul className="divide-y divide-gray-100 dark:divide-gray-600 space-y-1 max-h-48 sm:max-h-56 overflow-y-auto overflow-x-hidden">
                       {overDueMails.map((mail, index) => (
                         <li
                           key={mail._id}

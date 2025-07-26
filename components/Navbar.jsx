@@ -181,40 +181,36 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Mobile menu */}
+      </div>      {/* Mobile menu */}
       {isOpen && (
-        <div className="sm:hidden bg-gray-800 dark:bg-gray-900 transition-colors duration-300" id="mobile-menu">
-          <div className="pt-3 pb-2 flex flex-col">
+        <div className="sm:hidden bg-white dark:bg-gray-800 transition-colors duration-300" id="mobile-menu">          <div className="pt-3 pb-2 flex flex-col">
             <Link
               href="/home"
-              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
+              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               Home
             </Link>
             <Link
               href="/departments?type=uni"
-              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
+              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               University
             </Link>
             <Link
               href="/departments?type=admin"
-              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
+              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               Admin
             </Link>
             <Link
               href="/about"
-              className="px-4 py-2 rounded-md text-base font-medium text-white hover:text-gray-400 transition-colors duration-200"
+              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               About
             </Link>
           </div>
-          
-          {/* Mobile profile section */}
-          <div className="pt-4 border-t border-gray-700 dark:border-gray-600">
+            {/* Mobile profile section */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
                 <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
@@ -236,11 +232,11 @@ export default function Navbar() {
                 </span>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-white">{session?.user?.email}</div>
+                <div className="text-base font-medium text-black dark:text-white">{session?.user?.email}</div>
               </div>
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-                className="ml-auto bg-gray-700 dark:bg-gray-600 p-2 rounded-full text-white hover:text-gray-400 transition-colors duration-300"
+                className="ml-auto bg-gray-200 dark:bg-gray-700 p-2 rounded-full text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
               >
                 <span className="sr-only">Open user menu</span>
                 <svg
@@ -253,24 +249,23 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-            </div>
-            {mobileDropdownOpen && (
-              <div className="mt-3 px-4 bg-gray-700 dark:bg-gray-800">
+            </div>            {mobileDropdownOpen && (
+              <div className="mt-3 px-4 bg-gray-100 dark:bg-gray-800">
                 <Link 
                   href="/profile" 
-                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md transition-colors duration-300"
+                  className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
                 >
                   Profile
                 </Link>
                 <Link
                   href="/change-password"
-                  className="block w-full px-4 py-2 text-base font-medium text-white hover:text-gray-400 rounded-md transition-colors duration-300"
+                  className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
                 >
                   Change Password
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-white hover:bg-red-600 dark:hover:bg-red-700 rounded-md transition-colors duration-300"
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-black dark:text-white hover:bg-red-100 dark:hover:bg-red-600 hover:text-red-600 dark:hover:text-white rounded-md transition-colors duration-300"
                 >
                   Logout
                 </button>

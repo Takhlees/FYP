@@ -1,4 +1,3 @@
-
 "use client"
 
 import "@styles/globals.css"
@@ -6,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import { useSearchParams } from "next/navigation"
 import { Edit, Trash, Folder, Building, BookOpen, FileText, Users } from "lucide-react"
-import { PulseLoader } from "react-spinners" // Import PulseLoader
+import { PulseLoader } from "react-spinners" 
 
 const Departments = () => {
   const searchParams = useSearchParams()
@@ -70,10 +69,21 @@ const Departments = () => {
       }
     }
   }
-
   useEffect(() => {
     setDepartmentType(type === "uni" ? "uni" : "admin")
   }, [type])
+
+  // Control body scroll when edit modal is open
+  useEffect(() => {
+    if (editingDepartmentId) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [editingDepartmentId])
 
   const goToDepartment = (department) => {
     setIsNavigating(true)
@@ -166,8 +176,7 @@ const Departments = () => {
     }
   }
 
-  return (
-    <div className="p-5 bg-white relative">
+  return (    <div className="p-3 sm:p-5 bg-white relative">
       {/* Full-screen overlay spinner only for navigation */}
       {isNavigating && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
@@ -175,63 +184,62 @@ const Departments = () => {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-black">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-black">
             {type === "uni" ? "University Departments" : "Admin Departments"}
           </h1>
-          <p className="text-[#6B7280] mt-1">Manage and access your departments</p>
-        </div>
-        <button
+          <p className="text-[#6B7280] mt-1 text-sm sm:text-base">Manage and access your departments</p>
+        </div>        <button
           onClick={() => setShowInput(!showInput)}
-          className="px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform transform hover:scale-110 duration-300 flex items-center gap-2 shadow-sm"
+          className="max-w-[180px] w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform sm:hover:scale-105 duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-sm text-sm sm:text-base touch-none"
           disabled={isLoading || isNavigating}
         >
           <Folder size={18} />
           Add Department
         </button>
-      </div>
-
-      {showInput && (
-        <div className="mt-1 mb-8 p-6 rounded-lg shadow-lg border border-gray-200 bg-white">
-           <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-[#111827] mb-4">Add New Department</h3>
-          <button
-        onClick={() => setShowInput(false)}
-        className="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none"
-        title="Close"
-      >
-        ×
-      </button>
-      </div>
-          <div className="flex flex-col sm:flex-row gap-4">
+      </div>      {showInput && (
+        <div className="mt-1 mb-6 sm:mb-8 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-200 bg-white">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-base sm:text-lg font-medium text-[#111827]">Add New Department</h3>
+            <button
+              onClick={() => setShowInput(false)}
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none"
+              title="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-col gap-3 sm:gap-4">
             <input
               type="text"
               placeholder="Enter Department Name"
               value={newDepartment}
               onChange={(e) => setNewDepartment(e.target.value)}
-              className="px-3 py-2.5 flex-1 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none"
+              className="px-3 py-2.5 w-full border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none text-sm sm:text-base"
               disabled={isLoading || isNavigating}
             />
-            <select
-              value={departmentType}
-              onChange={(e) => setDepartmentType(e.target.value)}
-              className="px-3 py-2.5 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none cursor-pointer sm:w-40"
-            >
-              <option value="uni">University</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button
-              onClick={addDepartment}
-              className="px-5 py-2.5 bg-black text-white rounded-md shadow-sm relative group text-center transition-transform transform hover:scale-110 duration-300"
-              disabled={isLoading || isNavigating}
-            >
-              {isLoading ? (
-                <PulseLoader className="animate-spin h-5 w-5" color="#d2d4d6" speedMultiplier={0.7} />
-              ) : (
-                "Add"
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <select
+                value={departmentType}
+                onChange={(e) => setDepartmentType(e.target.value)}
+                className="px-3 py-2.5 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none cursor-pointer w-full sm:w-40 text-sm sm:text-base"
+              >
+                <option value="uni">University</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button
+                onClick={addDepartment}
+                className="w-full sm:w-auto px-5 py-2.5 bg-black text-white rounded-md shadow-sm relative group text-center transition-transform transform sm:hover:scale-105 duration-300 text-sm sm:text-base touch-none"
+                disabled={isLoading || isNavigating}
+              >
+                {isLoading ? (
+                  <PulseLoader className="animate-spin h-5 w-5" color="#d2d4d6" speedMultiplier={0.7} />
+                ) : (
+                  "Add"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -248,8 +256,7 @@ const Departments = () => {
           <p className="text-[#6B7280] text-lg">No departments available</p>
           <p className="text-[#6B7280] text-sm mt-2">Click "Add Department" to create your first department</p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
+      ) : (        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mt-4 sm:mt-6">
           {departments.map((dept, index) => (
             <div
               key={dept._id}
@@ -260,28 +267,28 @@ const Departments = () => {
               <div className={`absolute inset-0 ${getPatternClass(index)}`}></div>
 
               {/* Card content */}
-              <div className="relative p-6 h-full flex flex-col">
+              <div className="relative p-4 sm:p-6 h-full flex flex-col">
                 {/* Department icon and name */}
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="p-3 rounded-lg bg-white shadow-md text-[#3B5FE3] group-hover:text-white group-hover:bg-[#3B5FE3] transition-colors border border-gray-300">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-white shadow-md text-[#3B5FE3] group-hover:text-white group-hover:bg-[#3B5FE3] transition-colors border border-gray-300">
                     {getDepartmentIcon(dept.type, index)}
                   </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-[#111827] group-hover:text-[#3B5FE3] transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[#111827] group-hover:text-[#3B5FE3] transition-colors truncate">
                       {dept.name}
                     </h2>
                   </div>
                 </div>
 
                 {/* Action buttons */}
-                <div className=" flex justify-end items-center w-full">
+                <div className="flex justify-end items-center w-full">
                   <div className="flex gap-2">
                     <button
                       onClick={(e) => startEditing(dept, e)}
                       className="p-2 rounded-md bg-white shadow-sm text-[#6B7280] hover:text-[#3B5FE3] transition-colors border border-gray-300"
                       disabled={isLoading || isNavigating}
                     >
-                      <Edit size={20} />
+                      <Edit size={18} className="sm:w-5 sm:h-5" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -292,9 +299,9 @@ const Departments = () => {
                       disabled={isLoading || deletingId || isNavigating}
                     >
                       {deletingId === dept._id ? (
-                        <PulseLoader color="#d2d4d6" className="animate-spin h-5 w-5" speedMultiplier={0.7} />
+                        <PulseLoader color="#d2d4d6" className="animate-spin h-4 w-4 sm:h-5 sm:w-5" speedMultiplier={0.7} />
                       ) : (
-                        <Trash size={20} />
+                        <Trash size={18} className="sm:w-5 sm:h-5" />
                       )}
                     </button>
                   </div>
@@ -303,55 +310,69 @@ const Departments = () => {
             </div>
           ))}
         </div>
-      )}
-
-      {editingDepartmentId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in duration-300 border-2 border-gray-300">
-            <h3 className="text-xl font-semibold text-[#111827] mb-6">Edit Department</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2 text-[#6B7280]">Department Name</label>
-              <input
-                className="px-3 py-2.5 border-2 border-gray-300 rounded-md w-full focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none"
-                type="text"
-                value={editedDepartmentName}
-                onChange={(e) => setEditedDepartmentName(e.target.value)}
-                disabled={isLoading || isNavigating}
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-[#6B7280]">Department Type</label>
-              <select
-                className="px-3 py-2.5 border-2 border-gray-300 rounded-md w-full focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none"
-                value={editedType}
-                onChange={(e) => setEditedType(e.target.value)}
-                disabled={isLoading || isNavigating}
-              >
-                <option value="uni">University</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setEditingDepartmentId(null)}
-                className="flex-1 px-4 py-2.5 text-[#6B7280] rounded-md hover:bg-[#F3F4F6] transition-colors border border-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveEdit}
-                className="flex-1 px-4 py-2.5 bg-[#3B5FE3] text-white rounded-md hover:bg-[#3051C6] transition-colors"
-                disabled={isLoading || isNavigating}
-              >
-                {isLoading ? (
-                  "saving..."
-                ) : (
-                  "Save"
-                )}
-              </button>
+      )}      {editingDepartmentId && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setEditingDepartmentId(null)}></div>
+          <div className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 touch-none">
+            <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto">
+              <div className="w-12 h-1 rounded-full bg-gray-300 mx-auto mb-4 mt-2 sm:hidden"></div>
+              <div className="px-4 sm:px-6 pb-6 pt-2 sm:pt-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-[#111827]">Edit Department</h3>
+                  <button
+                    onClick={() => setEditingDepartmentId(null)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none -mt-2"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-[#6B7280]">Department Name</label>
+                    <input
+                      className="px-3 py-2.5 border-2 border-gray-300 rounded-md w-full focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none text-base"
+                      type="text"
+                      value={editedDepartmentName}
+                      onChange={(e) => setEditedDepartmentName(e.target.value)}
+                      disabled={isLoading || isNavigating}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-[#6B7280]">Department Type</label>
+                    <select
+                      className="px-3 py-2.5 border-2 border-gray-300 rounded-md w-full focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] outline-none text-base mb-4"
+                      value={editedType}
+                      onChange={(e) => setEditedType(e.target.value)}
+                      disabled={isLoading || isNavigating}
+                    >
+                      <option value="uni">University</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      onClick={() => setEditingDepartmentId(null)}
+                      className="w-full sm:w-1/2 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-md text-base font-medium order-2 sm:order-1"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveEdit}
+                      className="w-full sm:w-1/2 px-5 py-3 bg-[#3B5FE3] text-white rounded-md text-base font-medium order-1 sm:order-2"
+                      disabled={isLoading || isNavigating}
+                    >
+                      {isLoading ? (
+                        <PulseLoader className="animate-spin h-5 w-5" color="#ffffff" speedMultiplier={0.7} />
+                      ) : (
+                        "Save Changes"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
