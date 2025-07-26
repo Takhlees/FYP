@@ -3,7 +3,7 @@ import "@styles/globals.css"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import ScanUpload from "@components/ScanUpload"
-import { Edit, Download, ArrowLeft, Trash2, X, CheckCircle, AlertTriangle } from "lucide-react"
+import { Edit, Download, ArrowLeft, Trash2, X, CheckCircle, AlertTriangle, Save } from "lucide-react"
 import SearchBar from "@components/SearchBar"
 
 export default function DepartmentPage() {
@@ -32,6 +32,9 @@ export default function DepartmentPage() {
   // Add new state for category deletion dialog
   const [showCategoryDeleteDialog, setShowCategoryDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  // Add new state for category editing
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editedCategoryName, setEditedCategoryName] = useState("");
 
   const fetchCategories = async () => {
     try {
@@ -347,10 +350,54 @@ export default function DepartmentPage() {
     setCategoryToDelete(null);
   };
 
+  // Handler to start editing a category
+  const handleCategoryEditClick = (category) => {
+    setEditingCategory(category);
+    setEditedCategoryName(category);
+  };
+
+  // Handler to save category edit
+  const saveCategoryEdit = async () => {
+    if (!editingCategory || !editedCategoryName.trim() || !id) return;
+    
+    try {
+      const params = new URLSearchParams({ 
+        departmentId: id, 
+        oldCategory: editingCategory, 
+        newCategory: editedCategoryName.trim() 
+      });
+      const response = await fetch(`/api/department/category?${params.toString()}`, {
+        method: 'PUT',
+      });
+      
+      if (response.ok) {
+        setEditingCategory(null);
+        setEditedCategoryName("");
+        await fetchCategories(); // refresh categories
+        setShowCategorySelect(true); // reopen modal
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to update category:", errorData.error);
+        // Optionally show error message to user
+      }
+    } catch (error) {
+      console.error("Error updating category:", error);
+    }
+  };
+
+  // Handler to cancel category editing
+  const cancelCategoryEdit = () => {
+    setEditingCategory(null);
+    setEditedCategoryName("");
+  };
+
   // Add useEffect to control body scroll when category selector is open
   useEffect(() => {
     if (showCategorySelect) {
       document.body.style.overflow = 'hidden';
+      setCategorySearch("");
+      setEditingCategory(null);
+      setEditedCategoryName("");
     } else {
       document.body.style.overflow = 'unset';
     }    return () => {
@@ -620,21 +667,67 @@ export default function DepartmentPage() {
                           <div className="divide-y divide-gray-200">
                             {filteredCategories.map((category, index) => (
                               <div key={index} className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selectedCategory === category ? 'bg-indigo-50' : ''}`}>
-                                <button
-                                  onClick={() => handleCategorySelect(category)}
-                                  className={`flex-1 text-left focus:outline-none truncate ${selectedCategory === category ? 'text-indigo-600 font-medium' : 'text-gray-900'}`}
-                                  style={{ maxWidth: '70vw' }}
-                                >
-                                  {category}
-                                </button>
-                                {category !== 'All' && (
-                                  <button
-                                    onClick={() => handleCategoryDeleteClick(category)}
-                                    className="ml-2 text-red-500 hover:text-red-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
-                                    title="Delete category"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
+                                {editingCategory === category ? (
+                                  // Edit mode
+                                  <div className="flex-1 flex items-center gap-2">
+                                    <input
+                                      type="text"
+                                      value={editedCategoryName}
+                                      onChange={(e) => setEditedCategoryName(e.target.value)}
+                                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                                      onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                          saveCategoryEdit();
+                                        } else if (e.key === 'Escape') {
+                                          cancelCategoryEdit();
+                                        }
+                                      }}
+                                      autoFocus
+                                    />
+                                    <button
+                                      onClick={saveCategoryEdit}
+                                      className="text-green-600 hover:text-green-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
+                                      title="Save category"
+                                    >
+                                      <Save size={18} />
+                                    </button>
+                                    <button
+                                      onClick={cancelCategoryEdit}
+                                      className="text-gray-500 hover:text-gray-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
+                                      title="Cancel edit"
+                                    >
+                                      <X size={18} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  // View mode
+                                  <>
+                                    <button
+                                      onClick={() => handleCategorySelect(category)}
+                                      className={`flex-1 text-left focus:outline-none truncate ${selectedCategory === category ? 'text-indigo-600 font-medium' : 'text-gray-900'}`}
+                                      style={{ maxWidth: '70vw' }}
+                                    >
+                                      {category}
+                                    </button>
+                                    {category !== 'All' && (
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          onClick={() => handleCategoryEditClick(category)}
+                                          className="text-blue-600 hover:text-blue-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
+                                          title="Edit category"
+                                        >
+                                          <Edit size={18} />
+                                        </button>
+                                        <button
+                                          onClick={() => handleCategoryDeleteClick(category)}
+                                          className="text-red-500 hover:text-red-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
+                                          title="Delete category"
+                                        >
+                                          <Trash2 size={18} />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             ))}
