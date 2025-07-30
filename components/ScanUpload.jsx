@@ -3790,7 +3790,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
-import { jsPDF } from "jspdf";
 import { useDropzone } from "react-dropzone";
 import {
   ZoomIn,
@@ -3867,7 +3866,7 @@ const DocumentPreviewModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-[60] bg-black bg-opacity-75 flex items-center justify-center p-4 overflow-auto"
+      className="fixed inset-0 z-[60] bg-black bg-opacity-75 flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -3875,7 +3874,7 @@ const DocumentPreviewModal = ({
       }}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 flex flex-col max-h-[calc(100vh-4rem)]"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[calc(100vh-2rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -3899,20 +3898,22 @@ const DocumentPreviewModal = ({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0">
+        {/* Content Area - Scrollable */}
+        <div className="flex-1 overflow-hidden">
           {viewMode === "image" ? (
-            <div className="h-full overflow-auto bg-gray-100 flex items-center justify-center p-4">
+            <div className="h-full overflow-auto bg-gray-100 p-4">
               {hasValidDocument ? (
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-transform duration-200">
-                  <img
-                    src={document || "/placeholder.svg"}
-                    alt="Document preview"
-                    className="max-w-full h-auto block"
-                    style={{ aspectRatio: "210/297" }}
-                  />
+                <div className="flex justify-center min-h-full">
+                  <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-transform duration-200">
+                    <img
+                      src={document || "/placeholder.svg"}
+                      alt="Document preview"
+                      className="max-w-full h-auto block"
+                    />
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center text-gray-400 space-y-4">
+                <div className="flex flex-col items-center justify-center text-gray-400 space-y-4 h-full">
                   <FileText className="w-16 h-16" />
                   <p className="text-lg">No document preview available</p>
                 </div>
@@ -3939,7 +3940,7 @@ const DocumentPreviewModal = ({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer - Always at bottom */}
         <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>Document processed and enhanced</div>
@@ -3958,7 +3959,10 @@ const DocumentPreviewModal = ({
 const extractSubjectFromText = (text) => {
   if (!text || text.trim().length === 0) return "";
 
-  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 
   // Look for explicit "Subject:" patterns
   const subjectPatterns = [
@@ -3967,7 +3971,7 @@ const extractSubjectFromText = (text) => {
     /^subj\s*:\s*(.+)/i,
     /\bsubj\s*:\s*(.+)/i,
     /^re\s*:\s*(.+)/i,
-    /\bre\s*:\s*(.+)/i
+    /\bre\s*:\s*(.+)/i,
   ];
 
   // Search through each line for subject patterns
@@ -3977,8 +3981,10 @@ const extractSubjectFromText = (text) => {
       if (match && match[1] && match[1].trim().length > 0) {
         let subject = match[1].trim();
         // Clean up the subject
-        subject = subject.replace(/[.,;:]+$/, '').trim();
-        return subject.length > 150 ? subject.substring(0, 150) + '...' : subject;
+        subject = subject.replace(/[.,;:]+$/, "").trim();
+        return subject.length > 150
+          ? subject.substring(0, 150) + "..."
+          : subject;
       }
     }
   }
@@ -3987,22 +3993,27 @@ const extractSubjectFromText = (text) => {
 };
 
 // API call to document scanner service
-const callDocumentScannerAPI = async (file, action = 'enhance_and_extract', quality = 'high') => {
+const callDocumentScannerAPI = async (
+  file,
+  action = "enhance_and_extract",
+  quality = "high"
+) => {
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('action', action);
-  formData.append('quality', quality);
+  formData.append("file", file);
+  formData.append("action", action);
+  formData.append("quality", quality);
 
-  const response = await fetch('/api/document-scanner', {
-    method: 'POST',
+  const response = await fetch("/api/document-scanner", {
+    method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
-    let errorMessage = 'API request failed';
+    let errorMessage = "API request failed";
     try {
       const errorData = await response.json();
-      errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+      errorMessage =
+        errorData.error || `HTTP error! status: ${response.status}`;
     } catch (parseError) {
       errorMessage = `HTTP error! status: ${response.status}`;
     }
@@ -4014,7 +4025,6 @@ const callDocumentScannerAPI = async (file, action = 'enhance_and_extract', qual
 
 const ScanUpload = ({ fileData, action, onClose }) => {
   const isUploadMode = action === "Upload";
-  const isScanMode = action === "Scan";
   const isEditMode = fileData && fileData.isEditMode;
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -4022,11 +4032,17 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const [file, setFile] = useState(fileData?.file || null);
   const [fileName, setFileName] = useState(fileData?.file?.name || "");
   const [departments, setDepartments] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState(fileData?.department || "");
+  const [selectedDepartment, setSelectedDepartment] = useState(
+    fileData?.department || ""
+  );
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(fileData?.category || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    fileData?.category || ""
+  );
   const [subject, setSubject] = useState(fileData?.subject || "");
-  const [date, setDate] = useState(fileData?.date || new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(
+    fileData?.date || new Date().toISOString().split("T")[0]
+  );
   const [diaryNo, setDiaryNo] = useState(fileData?.diaryNo || "");
   const [from, setFrom] = useState(fileData?.from || "");
   const [disposal, setDisposal] = useState(fileData?.disposal || "");
@@ -4054,7 +4070,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
 
   const webcamRef = useRef(null);
   const videoRef = useRef(null);
-
   const showNotification = useCallback((type, message, duration = 3000) => {
     setNotification({ type, message });
     if (duration) {
@@ -4063,6 +4078,23 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       }, duration);
     }
   }, []);
+
+  const scrollToTop = useCallback(() => {
+    const scrollableContainer = document.querySelector(
+      ".fixed.inset-0.z-50.overflow-auto"
+    );
+    if (scrollableContainer) {
+      scrollableContainer.scrollTop = 0; // Immediate scroll
+      scrollableContainer.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+  }, []);
+
+  // Single useEffect to handle all scroll scenarios
+  useEffect(() => {
+    scrollToTop();
+  }, [scrollToTop, currentStep]); // Triggers on mount and step changes
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -4192,67 +4224,87 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   }, [showNotification]);
 
   // Handle file change for upload mode with API integration
-  const handleFileChange = useCallback(async (file) => {
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (file) => {
+      if (!file) return;
 
-    setIsProcessing(true);
-    setFile(file);
-    setFileName(file.name);
+      setIsProcessing(true);
+      setFile(file);
+      setFileName(file.name);
 
-    try {
-      showNotification("info", "Processing document...", 0);
+      try {
+        showNotification("info", "Processing document...", 0);
 
-      // Call the document scanner API
-      const result = await callDocumentScannerAPI(file, 'enhance_and_extract', 'high');
+        // Call the document scanner API
+        const result = await callDocumentScannerAPI(
+          file,
+          "enhance_and_extract",
+          "high"
+        );
 
-      if (result.success) {
-        // Handle enhanced image
-        if (result.enhancedImage) {
-          const enhancedImageUrl = `data:${result.enhancedImage.mimeType};base64,${result.enhancedImage.base64}`;
-          setProcessedImage(enhancedImageUrl);
-        }
-
-        // Handle text extraction and subject extraction
-        if (result.textExtraction && result.textExtraction.text) {
-          setExtractedText(result.textExtraction.text);
-          
-          // Extract subject using the specific pattern
-          const extractedSubject = extractSubjectFromText(result.textExtraction.text);
-          if (extractedSubject && !subject) {
-            setSubject(extractedSubject);
+        if (result.success) {
+          // Handle enhanced image
+          if (result.enhancedImage) {
+            const enhancedImageUrl = `data:${result.enhancedImage.mimeType};base64,${result.enhancedImage.base64}`;
+            setProcessedImage(enhancedImageUrl);
           }
-        }
 
-        // Handle optimized PDF
-        if (result.optimizedPdf) {
-          const pdfBlob = new Blob(
-            [Uint8Array.from(atob(result.optimizedPdf.base64), c => c.charCodeAt(0))],
-            { type: 'application/pdf' }
+          // Handle text extraction and subject extraction
+          if (result.textExtraction && result.textExtraction.text) {
+            setExtractedText(result.textExtraction.text);
+
+            // Extract subject using the specific pattern
+            const extractedSubject = extractSubjectFromText(
+              result.textExtraction.text
+            );
+            if (extractedSubject && !subject) {
+              setSubject(extractedSubject);
+            }
+          }
+
+          // Handle optimized PDF
+          if (result.optimizedPdf) {
+            const pdfBlob = new Blob(
+              [
+                Uint8Array.from(atob(result.optimizedPdf.base64), (c) =>
+                  c.charCodeAt(0)
+                ),
+              ],
+              { type: "application/pdf" }
+            );
+            const optimizedFile = new File(
+              [pdfBlob],
+              result.optimizedPdf.filename,
+              {
+                type: "application/pdf",
+              }
+            );
+            setFile(optimizedFile);
+          }
+
+          const sizeInfo = result.optimizedPdf
+            ? `${(result.optimizedPdf.size / 1024).toFixed(1)} KB`
+            : `${(file.size / 1024).toFixed(1)} KB`;
+
+          showNotification(
+            "success",
+            `Document processed successfully (${sizeInfo})`
           );
-          const optimizedFile = new File([pdfBlob], result.optimizedPdf.filename, {
-            type: "application/pdf"
-          });
-          setFile(optimizedFile);
+        } else {
+          throw new Error(result.error || "Processing failed");
         }
+      } catch (error) {
+        console.error("File processing error:", error);
+        showNotification("error", `Processing failed: ${error.message}`);
 
-        const sizeInfo = result.optimizedPdf ? 
-          `${(result.optimizedPdf.size / 1024).toFixed(1)} KB` : 
-          `${(file.size / 1024).toFixed(1)} KB`;
-        
-        showNotification("success", `Document processed successfully (${sizeInfo})`);
-      } else {
-        throw new Error(result.error || 'Processing failed');
+        // Fallback to original file
+        setProcessedImage(URL.createObjectURL(file));
+      } finally {
+        setIsProcessing(false);
       }
-    } catch (error) {
-      console.error("File processing error:", error);
-      showNotification("error", `Processing failed: ${error.message}`);
-      
-      // Fallback to original file
-      setProcessedImage(URL.createObjectURL(file));
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [subject, showNotification]);
+    },
+    [subject, showNotification]
+  );
 
   const handleRetake = useCallback(() => {
     if (cameraTrack) {
@@ -4358,7 +4410,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
 
       // Call the document scanner API
       showNotification("info", "Enhancing document with AI...", 0);
-      const result = await callDocumentScannerAPI(capturedFile, 'enhance_and_extract', 'high');
+      const result = await callDocumentScannerAPI(
+        capturedFile,
+        "enhance_and_extract",
+        "high"
+      );
 
       if (result.success) {
         // Handle enhanced image
@@ -4370,8 +4426,12 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         // Handle optimized PDF
         if (result.optimizedPdf) {
           const pdfBlob = new Blob(
-            [Uint8Array.from(atob(result.optimizedPdf.base64), c => c.charCodeAt(0))],
-            { type: 'application/pdf' }
+            [
+              Uint8Array.from(atob(result.optimizedPdf.base64), (c) =>
+                c.charCodeAt(0)
+              ),
+            ],
+            { type: "application/pdf" }
           );
           const pdfFile = new File([pdfBlob], result.optimizedPdf.filename, {
             type: "application/pdf",
@@ -4386,7 +4446,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         // Handle text extraction and go to form
         await extractTextAndGoToForm(result);
       } else {
-        throw new Error(result.error || 'Processing failed');
+        throw new Error(result.error || "Processing failed");
       }
     } catch (error) {
       console.error("Capture error:", error);
@@ -4398,39 +4458,48 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   }, [cameraTrack, showNotification, turnOffTorch]);
 
   // Extract text and go to form with API results
-  const extractTextAndGoToForm = useCallback(async (apiResult) => {
-    setIsExtracting(true);
-    setExtractionFailed(false);
+  const extractTextAndGoToForm = useCallback(
+    async (apiResult) => {
+      setIsExtracting(true);
+      setExtractionFailed(false);
 
-    try {
-      showNotification("info", "Extracting subject from document...", 0);
+      try {
+        showNotification("info", "Extracting subject from document...", 0);
 
-      if (apiResult.textExtraction && apiResult.textExtraction.text) {
-        const extractedText = apiResult.textExtraction.text;
-        setExtractedText(extractedText);
+        if (apiResult.textExtraction && apiResult.textExtraction.text) {
+          const extractedText = apiResult.textExtraction.text;
+          setExtractedText(extractedText);
 
-        // Extract subject using the specific pattern
-        const extractedSubject = extractSubjectFromText(extractedText);
-        if (extractedSubject && !subject) {
-          setSubject(extractedSubject);
+          // Extract subject using the specific pattern
+          const extractedSubject = extractSubjectFromText(extractedText);
+          if (extractedSubject && !subject) {
+            setSubject(extractedSubject);
+          }
+
+          // Go directly to form completion step (step 3)
+          setCurrentStep(3);
+          showNotification(
+            "success",
+            "Subject extracted! Complete the form below."
+          );
+        } else {
+          throw new Error("No text was extracted from the document");
         }
-
-        // Go directly to form completion step (step 3)
-        setCurrentStep(3);
-        showNotification("success", "Subject extracted! Complete the form below.");
-      } else {
-        throw new Error("No text was extracted from the document");
+      } catch (error) {
+        console.error("Subject extraction failed:", error);
+        setExtractionFailed(true);
+        // On failure, go to step 1 to show enhanced image and manual options
+        setCurrentStep(1);
+        showNotification(
+          "error",
+          "Subject extraction failed. Please complete the form manually."
+        );
+      } finally {
+        setIsExtracting(false);
       }
-    } catch (error) {
-      console.error("Subject extraction failed:", error);
-      setExtractionFailed(true);
-      // On failure, go to step 1 to show enhanced image and manual options
-      setCurrentStep(1);
-      showNotification("error", "Subject extraction failed. Please complete the form manually.");
-    } finally {
-      setIsExtracting(false);
-    }
-  }, [subject, showNotification]);
+    },
+    [subject, showNotification]
+  );
 
   // Retry text extraction with API
   const retryTextExtraction = useCallback(async () => {
@@ -4442,12 +4511,18 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     try {
       showNotification("info", "Retrying text extraction...", 0);
 
-      const result = await callDocumentScannerAPI(file, 'extract_only', 'high');
+      const result = await callDocumentScannerAPI(file, "extract_only", "high");
 
-      if (result.success && result.textExtraction && result.textExtraction.text) {
+      if (
+        result.success &&
+        result.textExtraction &&
+        result.textExtraction.text
+      ) {
         setExtractedText(result.textExtraction.text);
-        
-        const extractedSubject = extractSubjectFromText(result.textExtraction.text);
+
+        const extractedSubject = extractSubjectFromText(
+          result.textExtraction.text
+        );
         if (extractedSubject && !subject) {
           setSubject(extractedSubject);
         }
@@ -4460,7 +4535,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     } catch (error) {
       console.error("Retry extraction failed:", error);
       setExtractionFailed(true);
-      showNotification("error", "Text extraction failed again. Please fill the form manually.");
+      showNotification(
+        "error",
+        "Text extraction failed again. Please fill the form manually."
+      );
     } finally {
       setIsExtracting(false);
     }
@@ -4522,9 +4600,12 @@ const handleAlphabetOnlyInput = (e, setter) => {
         if (!from) missingFields.push("From");
         if (!disposal) missingFields.push("Disposal");
         if (!status) missingFields.push("Status");
-        
+
         if (missingFields.length > 0) {
-          showNotification("error", `Please fill required fields: ${missingFields.join(", ")}`);
+          showNotification(
+            "error",
+            `Please fill required fields: ${missingFields.join(", ")}`
+          );
           setIsLoading(false);
           return;
         }
@@ -4559,7 +4640,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
           formData.append("status", status || "");
           formData.append("extractedText", extractedText || "");
           formData.append("fileName", fileName || subject || "document");
-          
+
           if (file) {
             formData.append("file", file);
             formData.append("replaceFile", "true");
@@ -4575,16 +4656,28 @@ const handleAlphabetOnlyInput = (e, setter) => {
             // Fallback: if no file but have enhanced image, create PDF
             const response = await fetch(enhancedImage);
             const blob = await response.blob();
-            const imageFile = new File([blob], `enhanced_scan_${Date.now()}.jpg`, {
-              type: "image/jpeg",
-            });
-            
+            const imageFile = new File(
+              [blob],
+              `enhanced_scan_${Date.now()}.jpg`,
+              {
+                type: "image/jpeg",
+              }
+            );
+
             // Use API to create optimized PDF
-            const result = await callDocumentScannerAPI(imageFile, 'enhance_only', 'high');
+            const result = await callDocumentScannerAPI(
+              imageFile,
+              "enhance_only",
+              "high"
+            );
             if (result.success && result.optimizedPdf) {
               const pdfBlob = new Blob(
-                [Uint8Array.from(atob(result.optimizedPdf.base64), c => c.charCodeAt(0))],
-                { type: 'application/pdf' }
+                [
+                  Uint8Array.from(atob(result.optimizedPdf.base64), (c) =>
+                    c.charCodeAt(0)
+                  ),
+                ],
+                { type: "application/pdf" }
               );
               formData.append("file", pdfBlob, result.optimizedPdf.filename);
               formData.append("fileName", result.optimizedPdf.filename);
@@ -4607,37 +4700,52 @@ const handleAlphabetOnlyInput = (e, setter) => {
         }
 
         const method = isEditMode ? "PUT" : "POST";
-        const url = isEditMode ? `/api/scanupload/${fileData._id}` : "/api/scanupload";
+        const url = isEditMode
+          ? `/api/scanupload/${fileData._id}`
+          : "/api/scanupload";
 
-        showNotification("info", isEditMode ? "Updating document..." : "Saving document...", 0);
+        showNotification(
+          "info",
+          isEditMode ? "Updating document..." : "Saving document...",
+          0
+        );
 
         const response = await fetch(url, { method, body: formData });
-        
+
         if (!response.ok) {
           let errorMessage = "HTTP error";
           try {
             const errorData = await response.json();
-            errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+            errorMessage =
+              errorData.error || `HTTP error! status: ${response.status}`;
           } catch (parseError) {
             errorMessage = `HTTP error! status: ${response.status}`;
           }
           throw new Error(errorMessage);
         }
 
-        showNotification("success", isEditMode ? "Document updated successfully!" : "Document saved successfully!");
+        showNotification(
+          "success",
+          isEditMode
+            ? "Document updated successfully!"
+            : "Document saved successfully!"
+        );
 
         setTimeout(() => {
           onClose();
         }, 1500);
       } catch (error) {
         console.error("Submit error:", error);
-        showNotification("error", `${isEditMode ? 'Update' : 'Upload'} failed: ${error.message}`);
+        showNotification(
+          "error",
+          `${isEditMode ? "Update" : "Upload"} failed: ${error.message}`
+        );
       } finally {
         setIsLoading(false);
       }
     },
     [
-      isEditMode, 
+      isEditMode,
       file,
       enhancedImage,
       processedImage,
@@ -4658,7 +4766,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
     ]
   );
 
-  // Edit mode render
   if (isEditMode) {
     return (
       <div className="bg-zinc-800 p-10">
@@ -4668,10 +4775,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
             message={notification.message}
             onDismiss={() => setNotification(null)}
           />
-        )}
-
-        <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center font-semibold mb-6">
+        )}{" "}
+        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-full sm:max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl text-center font-semibold mb-4 sm:mb-6">
             Edit Document
           </h2>
 
@@ -4690,14 +4796,16 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-3">
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 Replace Document (Optional)
               </label>
               <div
                 className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
-                onClick={() => document.getElementById('edit-file-input').click()}
+                onClick={() =>
+                  document.getElementById("edit-file-input").click()
+                }
               >
                 <UploadCloud size={24} className="text-gray-400 mb-2" />
                 <p className="text-gray-600 text-sm text-center">
@@ -4716,14 +4824,16 @@ const handleAlphabetOnlyInput = (e, setter) => {
                   className="hidden"
                 />
               </div>
-              
+
               {file && (
                 <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="w-5 h-5 mr-3 text-green-500" />
                       <div>
-                        <p className="font-medium text-sm text-green-900">New file selected</p>
+                        <p className="font-medium text-sm text-green-900">
+                          New file selected
+                        </p>
                         <p className="text-xs text-green-700">
                           {file.name} ({(file.size / 1024).toFixed(1)} KB)
                         </p>
@@ -4763,7 +4873,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Department *</label>
+              <label className="block text-sm font-medium mb-1">
+                Department *
+              </label>
               <select
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -4796,7 +4908,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Subject *</label>
+              <label className="block text-sm font-medium mb-1">
+                Subject *
+              </label>
               <input
                 type="text"
                 value={subject}
@@ -4819,7 +4933,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Diary No *</label>
+                <label className="block text-sm font-medium mb-1">
+                  Diary No *
+                </label>
                 <input
                   type="text"
                   value={diaryNo}
@@ -4842,7 +4958,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Disposal *</label>
+              <label className="block text-sm font-medium mb-1">
+                Disposal *
+              </label>
               <input
                 type="text"
                 value={disposal}
@@ -4900,29 +5018,26 @@ const handleAlphabetOnlyInput = (e, setter) => {
       </div>
     );
   }
-
   // UPLOAD MODE RENDER
   if (isUploadMode) {
     return (
-      <div className="bg-zinc-800 p-10">
+      <div className="bg-zinc-800 p-4 sm:p-10">
         {notification && (
           <Notification
             type={notification.type}
             message={notification.message}
             onDismiss={() => setNotification(null)}
           />
-        )}
-
+        )}{" "}
         <DocumentPreviewModal
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
           document={processedImage}
           extractedText={extractedText}
           fileName={fileName}
-        />
-
-        <div className="bg-white p-6 rounded-lg max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center font-semibold mb-6">
+        />{" "}
+        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-full sm:max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl text-center font-semibold mb-4 sm:mb-6">
             {action} Form
           </h2>
 
@@ -5250,7 +5365,10 @@ const handleAlphabetOnlyInput = (e, setter) => {
                   }}
                   onUserMedia={initializeCamera}
                   onUserMediaError={(error) => {
-                    console.warn("Webcam component error (handled):", error.name);
+                    console.warn(
+                      "Webcam component error (handled):",
+                      error.name
+                    );
                     setHasCameraPermission(false);
                     setIsCameraActive(false);
                     showNotification(
@@ -5521,7 +5639,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
 
       case 3: // Form completion
         return (
-          <div className="space-y-6 p-4">
+          <div className="space-y-6 px-2 py-4 sm:p-6">
             <DocumentPreviewModal
               isOpen={isPreviewOpen}
               onClose={() => setIsPreviewOpen(false)}
@@ -5529,7 +5647,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
               extractedText={extractedText}
               fileName={fileName}
             />
-
             <div className="text-center">
               <h3 className="text-xl font-semibold mb-2">
                 Complete Document Details
@@ -5538,156 +5655,165 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 Fill in the required information
               </p>
             </div>
-
             {enhancedImage && (
               <div className="flex justify-center mb-4">
                 <button
                   type="button"
                   onClick={() => setIsPreviewOpen(true)}
-                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <Eye className="w-5 h-5" />
                   <span>Enhanced Document Preview</span>
                 </button>
               </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Type *
-                  </label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Select Type</option>
-                    <option value="uni">University</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Department *
-                  </label>
-                  <select
-                    value={selectedDepartment}
-                    onChange={(e) => setSelectedDepartment(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept._id} value={dept._id}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat, index) => (
-                      <option key={index} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Subject *
-                  </label>
-                  <input
-                    type="text"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    required
-                  />
-                  {isExtracting && (
-                    <div className="text-sm text-blue-500 flex items-center mt-1">
-                      <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                      Extracting subject from document...
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+            )}{" "}
+            <form onSubmit={handleSubmit} className="space-y-6 px-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {/* Type and Department - Full width on mobile, side by side on desktop */}
+                <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-1 md:gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium mb-2">
+                      Type *
+                    </label>
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                      required
+                    >
+                      <option value="">Select Type</option>
+                      <option value="uni">University</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Department *
+                    </label>
+                    <select
+                      value={selectedDepartment}
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                      required
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((dept) => (
+                        <option key={dept._id} value={dept._id}>
+                          {dept.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Category and Subject */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Category
+                    </label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((cat, index) => (
+                        <option key={index} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Subject *
+                    </label>
+                    <input
+                      type="text"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                    {isExtracting && (
+                      <div className="text-sm text-blue-500 flex items-center mt-2">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Extracting subject...
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Date and Diary No - Side by side */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
                       Date *
                     </label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium mb-2">
                       Diary No *
                     </label>
                     <input
                       type="text"
                       value={diaryNo} 
                       onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
-                      className="w-full p-3 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    From *
-                  </label>
-                  <input
-                    type="text"
-                    value={from}
-                    onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    required
-                  />
+                {/* From and Disposal */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      From *
+                    </label>
+                    <input
+                      type="text"
+                      value={from}
+                      onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Disposal *
+                    </label>
+                    <input
+                      type="text"
+                      value={disposal}
+                      onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Disposal *
-                  </label>
-                  <input
-                    type="text"
-                    value={disposal}
-                    onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
+                {/* Status - Full width */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">
                     Status *
                   </label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                     required
                   >
                     <option value="">Select Status</option>
@@ -5695,13 +5821,12 @@ const handleAlphabetOnlyInput = (e, setter) => {
                     <option value="closed">Closed</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
+              </div>{" "}
+              <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
+                  className="w-full sm:flex-1 px-4 py-3.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 font-medium"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   Back
@@ -5750,12 +5875,17 @@ const handleAlphabetOnlyInput = (e, setter) => {
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold mb-2">Scan Document</h2>
             <p className="text-gray-600">
-              Create a professional scanned and enhanced document  
+              Create a professional scanned and enhanced document
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">              <h3 className="font-medium text-blue-900 mb-2">Scanning Features:</h3>              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              {" "}
+              <h3 className="font-medium text-blue-900 mb-2">
+                Scanning Features:
+              </h3>{" "}
+              <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Document enhancement with AI-assisted libraries</li>
                 <li>• Automatic subject extraction using OCR</li>
                 <li>• PDF optimization for smaller files</li>
