@@ -536,7 +536,7 @@ export default function SignInForm({ onSignInSuccess }) {
           }}>
           {/* Darker gradient overlay for better text visibility */}
           {/* <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-purple-800/60 to-pink-800/60"></div> */}
- <div className="absolute inset-0 bg-gray-600/70"></div>
+     <div className="absolute inset-0 bg-gray-600/70"></div>
 
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-full h-full">
