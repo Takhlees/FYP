@@ -524,19 +524,18 @@ export default function SignInForm({ onSignInSuccess }) {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden fixed inset-0 bg-gray-100">
-      <div className="container mx-auto my-auto max-w-5xl h-[90vh] flex shadow-2xl rounded-3xl overflow-hidden">
+    <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900">
+      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row min-h-screen shadow-2xl">
         {/* Left side - Image background with GCU Mailbox */}
         <div
-          className="hidden md:block w-1/2 relative rounded-l-3xl overflow-hidden"
+          className="hidden md:block w-1/2 relative overflow-hidden"
           style={{
             backgroundImage: "url('/new.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}>
           {/* Darker gradient overlay for better text visibility */}
-          {/* <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-purple-800/60 to-pink-800/60"></div> */}
- <div className="absolute inset-0 bg-gray-600/70"></div>
+          <div className="absolute inset-0 bg-gray-600/70"></div>
 
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-full h-full">
@@ -559,13 +558,25 @@ export default function SignInForm({ onSignInSuccess }) {
         </div>
 
         {/* Right side - Sign in form */}
-        <div className="w-full md:w-1/2 bg-white flex items-center justify-center rounded-3xl md:rounded-l-none md:rounded-r-3xl">
-          <div className="w-full max-w-md px-8">
+        <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 flex items-center justify-center">
+          <div className="w-full max-w-md px-6 md:px-8 py-8 md:py-0">
+            {/* Mobile Header - Show on mobile only */}
+            <div className="md:hidden text-center mb-8">
+              <div className="mb-4 p-3 rounded-full bg-indigo-600/70 backdrop-blur-md shadow-xl w-fit mx-auto">
+                <Mail className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                DOCULUS
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Digital file management system
+              </p>
+            </div>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                 Welcome To Doculus!
               </h2>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
                 Sign in to manage, upload, and scan your documents effortlessly.
               </p>
             </div>
@@ -577,11 +588,11 @@ export default function SignInForm({ onSignInSuccess }) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-gray-700 text-sm font-medium mb-1">
+                  className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                   Email Address
                 </label>
                 <div className="relative">
@@ -597,7 +608,7 @@ export default function SignInForm({ onSignInSuccess }) {
                     onFocus={handleEmailFocus}
                     autoComplete="new-email"
                     placeholder="your.email@gcu.edu"
-                    className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                    className="w-full pl-9 pr-3 py-3 md:py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 {errors.email && (
@@ -606,15 +617,15 @@ export default function SignInForm({ onSignInSuccess }) {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-2">
                   <label
                     htmlFor="password"
-                    className="block text-gray-700 text-sm font-medium">
+                    className="block text-gray-700 dark:text-gray-300 text-sm font-medium">
                     Password
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors">
+                    className="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -631,7 +642,7 @@ export default function SignInForm({ onSignInSuccess }) {
                     onFocus={handlePasswordFocus}
                     autoComplete="new-password"
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-9 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                    className="w-full pl-9 pr-9 py-3 md:py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm dark:text-white dark:placeholder-gray-400"
                   />
                   <button
                     type="button"
@@ -657,11 +668,11 @@ export default function SignInForm({ onSignInSuccess }) {
                     type="checkbox"
                     checked={formData.rememberMe}
                     onChange={handleChange}
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 dark:bg-gray-700"
                   />
                   <label
                     htmlFor="remember"
-                    className="ml-2 text-xs text-gray-700">
+                    className="ml-2 text-xs text-gray-700 dark:text-gray-300">
                     Remember me
                   </label>
                 </div>
@@ -669,7 +680,7 @@ export default function SignInForm({ onSignInSuccess }) {
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-all duration-200 text-sm shadow-md hover:shadow-lg"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 md:py-2 px-4 rounded-lg flex items-center justify-center transition-all duration-200 text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={signInStatus === "signing-in"}>
                 {signInStatus === "signing-in" ? (
                   "Signing in..."
@@ -682,7 +693,7 @@ export default function SignInForm({ onSignInSuccess }) {
               </button>
             </form>
 
-            <div className="text-center mt-6 text-gray-500 text-xs">
+            <div className="text-center mt-6 text-gray-500 dark:text-gray-400 text-xs">
               <p>
                 © {new Date().getFullYear()} GCU University. All rights
                 reserved.

@@ -29,10 +29,3 @@ export async function GET(req) {
     });
   }
 }
-
-// Optionally add other HTTP methods
-export async function POST() {
-  return new Response(JSON.stringify({ message: "Method not allowed" }), {
-    status: 405
-  });
-}

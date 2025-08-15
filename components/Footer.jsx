@@ -172,19 +172,13 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
+
 
 const Footer = () => {
   const [showContact, setShowContact] = useState(false);
-  const [alertMessage, setAlertMessage] = useState(null);
   const [sending, setSending] = useState(false);
   const [showCookieModal, setShowCookieModal] = useState(false);
-
-  const showAlert = (message) => {
-    setAlertMessage(message);
-    setTimeout(() => {
-      setAlertMessage(null)
-    }, 3000)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -202,21 +196,16 @@ const Footer = () => {
     setSending(false);
 
     if (response.ok) {
-      showAlert("Your message has been submitted!");
+      showSuccessToast("Message Sent!", "Your message has been submitted successfully.");
       form.reset();
       setShowContact(false);
     } else {
-      return "bg-red-800 border border-red-700"
+      showErrorToast("Submission Failed", "Something went wrong. Please try again.");
     }
   }
 
   return (
     <>
-      {alertMessage && (
-        <div className="fixed m-3 top-0 left-0 right-0 z-50 bg-green-100 border border-green-300 text-green-800 text-center py-3 rounded-lg shadow-md transition-opacity duration-300">
-          {alertMessage}
-        </div>
-      )}
 
       <footer className="bg-gray-200 text-black border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-4 py-12">

@@ -42,7 +42,6 @@ export default function ChatBot({ onClose }) {
           setChat(data.chats);
         }
       } catch (err) {
-        console.error("Failed to load chat history:", err);
       } finally {
         setLoading(false);
       }
@@ -105,7 +104,6 @@ export default function ChatBot({ onClose }) {
         });
       }
     } catch (error) {
-      console.error("Error:", error);
       setChat((prev) => {
         const updated = prev.filter((msg) => !msg.isTyping);
         return [...updated, { from: "bot", text: "Something went wrong!" }];
@@ -120,7 +118,7 @@ export default function ChatBot({ onClose }) {
       <div className="fixed bottom-0 right-0 left-0 sm:bottom-0 sm:right-4 sm:left-auto sm:w-[400px] h-[100dvh] sm:h-[70vh] bg-white shadow-xl z-50 rounded-t-lg flex flex-col max-w-full">
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div>
-            <h2 className="text-2xl font-semibold bg-gradient-to-r from-black via-mid to-light bg-clip-text text-transparent">
+            <h2 className="text-2xl font-semibold bg-gradient-to-r from-black via-mid to-light dark:from-white dark:via-blue-300 dark:to-blue-500 bg-clip-text text-transparent">
               Doculus AI
             </h2>
             <p className="text-sm opacity-90">Your intelligent assistant</p>

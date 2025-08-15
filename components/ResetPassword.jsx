@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { showSuccessToast } from "@/utils/toast";
 
 export default function ResetPassword({ params }) {
   const [password, setPassword] = useState("");
@@ -66,7 +67,6 @@ export default function ResetPassword({ params }) {
         setVerified(false);
 
       } catch (error) {
-        console.error("Token verification error:", error);
         setError("An unexpected error occurred. Please try again later.");
         setVerified(false);
       }
@@ -122,12 +122,11 @@ export default function ResetPassword({ params }) {
         return;
       }
 
-      // Success
-      alert("Password reset successfully!");
-      router.push("/login"); // Redirect to login page
+          // Success
+        showSuccessToast("Password Reset!", "Your password has been reset successfully.");
+        router.push("/login"); // Redirect to login page
       
     } catch (error) {
-      console.error("Reset password error:", error);
       setError("An unexpected error occurred. Please try again later.");
     } finally {
       setLoading(false);

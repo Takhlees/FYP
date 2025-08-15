@@ -1,5 +1,6 @@
-import User from "../../../models/user";
-import { connectToDB } from "../../../utils/database";
+
+import User from "@models/user";
+import { connectToDB } from "@utils/database";
 import { NextResponse } from "next/server";
 
 export const POST = async (req, res) =>{
@@ -7,7 +8,6 @@ export const POST = async (req, res) =>{
     await connectToDB()
     const {email} = await req.json();
     const user = await User.findOne({ email }).select("_id");
-    console.log("User", user);
     return new NextResponse.json({user})
     
   } catch (error) {

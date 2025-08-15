@@ -41,7 +41,6 @@ export default function ForgotPassword() {
 
       router.push("/");
     } catch (error) {
-      console.error("Forgot password error:", error);
       setError("An unexpected error occurred. Please try again later.");
     } finally {
       setLoading(false);
@@ -83,3 +82,4 @@ export default function ForgotPassword() {
     </div>
   );
 }
+

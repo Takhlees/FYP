@@ -4,12 +4,12 @@ import { NextResponse } from "next/server";
 
 export async function PUT(req, {params}) {
     try {
-        const { id } = await params; // Removed await since params is not a promise
+        const { id } = await params; 
 
         if (!id) {
             return NextResponse.json(
                 { message: "Missing id parameter" },
-                { status: 400 } // Changed to 400 (Bad Request) for missing parameter
+                { status: 400 } 
             );
         }
 
@@ -20,7 +20,7 @@ export async function PUT(req, {params}) {
             id,
             { status },
             { new: true }
-        ).select('_id subject status fileUrl pdfUrl documentUrl'); // Explicitly select fields
+        ).select('_id subject status fileUrl pdfUrl documentUrl');
 
         if (!updatedMail) {
             return NextResponse.json(
@@ -29,7 +29,6 @@ export async function PUT(req, {params}) {
             );
         }
 
-        // Return all relevant fields including potential PDF URL fields
         return NextResponse.json(updatedMail, { status: 200 });
     } catch (error) {
         return NextResponse.json(

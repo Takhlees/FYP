@@ -3,7 +3,7 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import Departments from "@components/Departments";
 
-const adminDep = () => {
+const AdminDep = () => {
   return (
     <>
       <Navbar />
@@ -15,4 +15,5 @@ const adminDep = () => {
   );
 };
 
-export default adminDep;
+export default AdminDep;
+

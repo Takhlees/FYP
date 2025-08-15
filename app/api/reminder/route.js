@@ -18,8 +18,6 @@ export async function GET(req, res) {
       category: { $exists: true, $ne: null }
     }).exec();
 
-    console.log('Overdue Mails:', overdueMails); // Debugging line
-
     
     if (!overdueMails || overdueMails.length === 0) {
       return NextResponse.json({ message: 'No overdue mails found' }, { status: 200 });

@@ -10,7 +10,7 @@ export default function DirectThemeToggle() {
     setMounted(true);
     
     // Check initial theme
-    const stored = localStorage.getItem('theme');
+    const stored = localStorage.getItem('ui-theme');
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const shouldBeDark = stored === 'dark' || (!stored && isSystemDark);
     
@@ -29,8 +29,6 @@ export default function DirectThemeToggle() {
   }, []);
 
   const toggleTheme = () => {
-    console.log("Direct toggle clicked, current isDark:", isDark);
-    
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     
@@ -41,17 +39,13 @@ export default function DirectThemeToggle() {
       root.classList.add('dark');
       root.classList.remove('light');
       root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      console.log("Applied dark theme");
+      localStorage.setItem('ui-theme', 'dark');
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
       root.setAttribute('data-theme', 'light');
-      localStorage.setItem('theme', 'light');
-      console.log("Applied light theme");
+      localStorage.setItem('ui-theme', 'light');
     }
-    
-    console.log("HTML classes:", root.className);
   };
 
   if (!mounted) {

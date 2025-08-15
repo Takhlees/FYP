@@ -1,13 +1,11 @@
 import Department from "@models/department";
 import { connectToDB } from "@utils/database";
 
-// GET request handler
 export async function GET(req, { params }) {
   const { id } = await params; 
   await connectToDB(); 
   
   try {
-    // Fetch the department using the provided id
     const department = await Department.findById(id);
 
     if (!department) {
@@ -16,12 +14,11 @@ export async function GET(req, { params }) {
         { status: 404 }
       );
     }
-    // Return both the department details and its categories
     return new Response(
       JSON.stringify({
         department: department.name,
         type: department.type,
-        categories: department.categories, // Return the categories
+        categories: department.categories, 
       }),
       { status: 200 }
     );
@@ -36,8 +33,8 @@ export async function GET(req, { params }) {
 
 // PUT request handler for adding a category to a department or edit department
 export async function PUT(req, { params }) {
-    const { id } = await params; // Extract the department ID from the route parameters
-    const body = await req.json(); // Parse the request body
+    const { id } = await params; 
+    const body = await req.json(); 
   
     await connectToDB();
   
@@ -45,19 +42,17 @@ export async function PUT(req, { params }) {
       let updatedDepartment;
   
       if (body.name && body.type) {
-        // Update department name
         updatedDepartment = await Department.findByIdAndUpdate(
           id,
           { name: body.name ,
            type: body.type},
-          { new: true } // Return the updated department
+          { new: true } 
         );
       } else if (body.category) {
-        // Add category to the department
         updatedDepartment = await Department.findByIdAndUpdate(
           id,
-          { $push: { categories: body.category } }, // Use $push to add the new category
-          { new: true } // Return the updated department
+          { $push: { categories: body.category } }, 
+          { new: true }
         );
       }
   
@@ -77,26 +72,48 @@ export async function PUT(req, { params }) {
   }
   
 
-// DELETE request handler
 export async function DELETE(req, { params }) {
-  const { id } = await params; // Extract the ID from the route parameters
+  const { id } = await params; 
   await connectToDB();
 
   try {
-    const deletedDepartment = await Department.findByIdAndDelete(id);
-
-    if (!deletedDepartment) {
-      return new Response(JSON.stringify({ error: "Department not found" }), {
-        status: 404,
-      });
+    // Only allow category deletion, not department deletion
+    // First check if we have a category to delete in the request body
+    const body = await req.json();
+    
+    if (!body.category) {
+      return new Response(
+        JSON.stringify({ error: "Category deletion requires a category name" }), 
+        { status: 400 }
+      );
     }
 
-    return new Response(JSON.stringify({ message: "Department deleted successfully" }), {
-      status: 200,
-    });
+    // Update the department by removing the specified category
+    const updatedDepartment = await Department.findByIdAndUpdate(
+      id,
+      { $pull: { categories: body.category } },
+      { new: true }
+    );
+
+    if (!updatedDepartment) {
+      return new Response(
+        JSON.stringify({ error: "Department not found" }), 
+        { status: 404 }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        message: "Category deleted successfully",
+        categories: updatedDepartment.categories 
+      }), 
+      { status: 200 }
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to delete department" }), {
-      status: 500,
-    });
+    console.error("Delete error:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to delete category" }), 
+      { status: 500 }
+    );
   }
 }

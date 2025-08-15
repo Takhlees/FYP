@@ -2,10 +2,12 @@
 
 import "@styles/globals.css"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
 import { Edit, Trash, Folder, Building, BookOpen, FileText, Users } from "lucide-react"
-import { PulseLoader } from "react-spinners" 
+import { PulseLoader } from "react-spinners"
+import { showLoadingToast, updateToast } from "@/utils/toast"
+ 
 
 const Departments = () => {
   const searchParams = useSearchParams()
@@ -18,8 +20,10 @@ const Departments = () => {
   const [editedDepartmentName, setEditedDepartmentName] = useState("")
   const [editedType, setEditedType] = useState(type)
   const [isLoading, setIsLoading] = useState(false)
-  const [deletingId, setDeletingId] = useState(null)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [departmentToDelete, setDepartmentToDelete] = useState(null)
 
   const router = useRouter()
 
@@ -42,9 +46,11 @@ const Departments = () => {
   }, [type])
 
   const addDepartment = async () => {
-    if (newDepartment.trim()) {
-      setIsLoading(true)
-      try {
+          if (newDepartment.trim()) {
+        setIsLoading(true)
+        const loadingToast = showLoadingToast("Adding Department")
+ 
+        try {
         const response = await fetch("/api/department", {
           method: "POST",
           headers: {
@@ -59,14 +65,16 @@ const Departments = () => {
           setNewDepartment("")
           setDepartmentType("uni")
           setShowInput(false)
+          updateToast(loadingToast, 'success', "Department Added!", "Department has been added successfully.")
         } else {
-          alert("Failed to add department")
+          updateToast(loadingToast, 'error', "Failed to Add", "Failed to add department. Please try again.")
         }
-      } catch (error) {
-        console.error("Error adding department:", error)
-      } finally {
-        setIsLoading(false)
-      }
+              } catch (error) {
+          console.error("Error adding department:", error)
+          updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred. Please try again.")
+        } finally {
+          setIsLoading(false)
+        }
     }
   }
   useEffect(() => {
@@ -85,12 +93,19 @@ const Departments = () => {
     }
   }, [editingDepartmentId])
 
+  // Reset navigation state after navigation
+  useEffect(() => {
+    if (isNavigating) {
+      const timer = setTimeout(() => {
+        setIsNavigating(false)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isNavigating])
+
   const goToDepartment = (department) => {
     setIsNavigating(true)
-    router.push({
-      pathname: `/departments/${department._id}`,
-      query: { name: department.name },
-    })
+    router.push(`/departments/${department._id}?name=${encodeURIComponent(department.name)}`)
   }
 
   const startEditing = (department, e) => {
@@ -101,9 +116,11 @@ const Departments = () => {
   }
 
   const saveEdit = async () => {
-    if (editedDepartmentName.trim() && editedType.trim()) {
-      setIsLoading(true)
-      try {
+          if (editedDepartmentName.trim() && editedType.trim()) {
+        setIsLoading(true)
+        const loadingToast = showLoadingToast("Updating Department")
+ 
+        try {
         const response = await fetch(`/api/department/${editingDepartmentId}`, {
           method: "PUT",
           headers: {
@@ -121,38 +138,54 @@ const Departments = () => {
           setEditingDepartmentId(null)
           setEditedDepartmentName("")
           setEditedType("")
+          updateToast(loadingToast, 'success', "Department Updated!", "Department has been updated successfully.")
         } else {
-          alert("Failed to update department")
+          updateToast(loadingToast, 'error', "Update Failed", "Failed to update department. Please try again.")
         }
-      } catch (error) {
-        console.error("Error updating department:", error)
-      } finally {
-        setIsLoading(false)
-      }
+              } catch (error) {
+          console.error("Error updating department:", error)
+          updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred. Please try again.")
+        } finally {
+          setIsLoading(false)
+        }
     }
   }
 
-  const deleteDepartment = async (id) => {
-    const isConfirmed = confirm("Are you sure you want to delete this item?")
-    if (isConfirmed) {
-      setDeletingId(id)
-      try {
-        const response = await fetch(`/api/department/${id}`, {
+  const handleDeleteClick = (id) => {
+    setDepartmentToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!departmentToDelete) return
+    
+          setDeletingId(departmentToDelete)
+      const loadingToast = showLoadingToast("Deleting Department")
+      
+            try {
+        const response = await fetch(`/api/department?id=${departmentToDelete}`, {
           method: "DELETE",
         })
 
-        if (response.ok) {
-          setDepartments(departments.filter((dept) => dept._id !== id))
-          alert("Item deleted successfully!")
+      if (response.ok) {
+        setDepartments(departments.filter((dept) => dept._id !== departmentToDelete))
+                  updateToast(loadingToast, 'success', "Department Deleted!", "Department has been deleted successfully.")
         } else {
-          alert("Failed to delete department")
+          updateToast(loadingToast, 'error', "Delete Failed", "Failed to delete department. Please try again.")
         }
       } catch (error) {
         console.error("Error deleting department:", error)
-      } finally {
-        setDeletingId(null)
-      }
+        updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred. Please try again.")
+    } finally {
+      setDeletingId(null)
+      setShowDeleteDialog(false)
+      setDepartmentToDelete(null)
     }
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteDialog(false)
+    setDepartmentToDelete(null)
   }
 
   // Function to get a random background pattern class
@@ -176,13 +209,18 @@ const Departments = () => {
     }
   }
 
-  return (    <div className="p-3 sm:p-5 bg-white relative">
-      {/* Full-screen overlay spinner only for navigation */}
+  return (
+    <>
+      {/* Navigation Loading Overlay */}
       {isNavigating && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <PulseLoader size={17} color="#d2d4d6" speedMultiplier={0.7} />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="text-center">
+            <PulseLoader size={17} color="#d2d4d6" speedMultiplier={0.7} />
+          </div>
         </div>
       )}
+      
+      <div className="p-3 sm:p-5 bg-white relative">
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <div>
@@ -233,11 +271,7 @@ const Departments = () => {
                 className="w-full sm:w-auto px-5 py-2.5 bg-black text-white rounded-md shadow-sm relative group text-center transition-transform transform sm:hover:scale-105 duration-300 text-sm sm:text-base touch-none"
                 disabled={isLoading || isNavigating}
               >
-                {isLoading ? (
-                  <PulseLoader className="animate-spin h-5 w-5" color="#d2d4d6" speedMultiplier={0.7} />
-                ) : (
-                  "Add"
-                )}
+                {isLoading ? "Adding..." : "Add"}
               </button>
             </div>
           </div>
@@ -261,7 +295,7 @@ const Departments = () => {
             <div
               key={dept._id}
               className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white border-2 border-gray-300"
-              onClick={() => !isNavigating && goToDepartment(dept)}
+              onClick={() => goToDepartment(dept)}
             >
               {/* Card background with pattern */}
               <div className={`absolute inset-0 ${getPatternClass(index)}`}></div>
@@ -293,16 +327,12 @@ const Departments = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        deleteDepartment(dept._id)
+                        handleDeleteClick(dept._id)
                       }}
                       className="p-2 rounded-md bg-white shadow-sm text-[#6B7280] hover:text-red-600 transition-colors border border-gray-300"
-                      disabled={isLoading || deletingId || isNavigating}
+                      disabled={isLoading || isNavigating}
                     >
-                      {deletingId === dept._id ? (
-                        <PulseLoader color="#d2d4d6" className="animate-spin h-4 w-4 sm:h-5 sm:w-5" speedMultiplier={0.7} />
-                      ) : (
-                        <Trash size={18} className="sm:w-5 sm:h-5" />
-                      )}
+                      <Trash size={18} className="sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </div>
@@ -361,11 +391,7 @@ const Departments = () => {
                       className="w-full sm:w-1/2 px-5 py-3 bg-[#3B5FE3] text-white rounded-md text-base font-medium order-1 sm:order-2"
                       disabled={isLoading || isNavigating}
                     >
-                      {isLoading ? (
-                        <PulseLoader className="animate-spin h-5 w-5" color="#ffffff" speedMultiplier={0.7} />
-                      ) : (
-                        "Save Changes"
-                      )}
+                      {isLoading ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </div>
@@ -374,7 +400,57 @@ const Departments = () => {
           </div>
         </>
       )}
-    </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={cancelDelete}></div>
+          <div className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 touch-none">
+            <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto">
+              <div className="w-12 h-1 rounded-full bg-gray-300 mx-auto mb-4 mt-2 sm:hidden"></div>
+              <div className="px-4 sm:px-6 pb-6 pt-2 sm:pt-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-[#111827]">Delete Department</h3>
+                  <button
+                    onClick={cancelDelete}
+                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none -mt-2"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                      <Trash className="h-6 w-6 text-red-600" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Department</h3>
+                    <p className="text-sm text-gray-500">
+                      Are you sure you want to delete this department? This action cannot be undone.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      onClick={cancelDelete}
+                      className="w-full sm:w-1/2 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-md text-base font-medium order-2 sm:order-1"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmDelete}
+                      className="w-full sm:w-1/2 px-5 py-3 bg-red-600 text-white rounded-md text-base font-medium order-1 sm:order-2 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={deletingId}
+                    >
+                      {deletingId ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      </div>
+    </>
   )
 }
 

@@ -21,7 +21,7 @@
 // tailwind.config.js
 export const darkMode = 'class'; // ✅ Perfect - this is correct
 export const content = [
-  "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+  "./screens/**/*.{js,ts,jsx,tsx,mdx}",
   "./components/**/*.{js,ts,jsx,tsx,mdx}",
   "./app/**/*.{js,ts,jsx,tsx,mdx}",
 ];

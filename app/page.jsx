@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/navigation";
 import SignInForm from '@components/sign-in-form'
-import Loading from './loading';
+import Loading from '@components/Loading';
 
 const Page=()=> {
   const router = useRouter();
@@ -26,7 +26,9 @@ const Page=()=> {
       <main className="flex-grow max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {!isSignedIn ? (
-            <SignInForm onSignInSuccess={handleSignInSuccess} />
+            <>
+              <SignInForm onSignInSuccess={handleSignInSuccess} />
+            </>
           ) : (
            
             // <p>Redirecting to home...</p> 

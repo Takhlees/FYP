@@ -1,7 +1,6 @@
 import Department from "@models/department";
 import { connectToDB } from "@utils/database";
 
-// GET all departments
 export async function GET(req) {
   await connectToDB();
   const { searchParams } = new URL(req.url);
@@ -12,10 +11,10 @@ export async function GET(req) {
     let departments ;
     
     if (type === "all") {
-      departments = await Department.find(); // Fetch all departments
+      departments = await Department.find(); 
     }
     else {
-      departments = await Department.find(query); // Fetch specific type
+      departments = await Department.find(query); 
     }
     return new Response(JSON.stringify(departments), { status: 200 });
   } catch (error) {
@@ -25,9 +24,8 @@ export async function GET(req) {
   }
 }
 
-// add new department
 export async function POST(req) {
-  const body = await req.json(); // Parse the request body
+  const body = await req.json(); 
   const { name , type } = body;
 
   if (!name || !type) {
@@ -49,9 +47,15 @@ export async function POST(req) {
 }
 
 
-// DELETE department
-export async function DELETE(req, { params }) {
-  const { id } = await params; // Get the department id from URL params
+export async function DELETE(req) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return new Response(JSON.stringify({ error: "Department ID is required" }), {
+      status: 400,
+    });
+  }
 
   await connectToDB();
 

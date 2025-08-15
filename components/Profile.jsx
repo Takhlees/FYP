@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { X, Mail, Briefcase, Pencil, Check, Camera, User } from "lucide-react"
 import Image from "next/image"
 
-export default function ProfilePage() {
+export default function Profile() {
   const router = useRouter()
   const fileInputRef = useRef(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -57,7 +57,6 @@ export default function ProfilePage() {
         setFormData((prev) => ({ ...prev, image: reader.result }))
       }
       reader.onerror = () => {
-        console.error("An error occurred reading the file")
       }
       reader.readAsDataURL(file)
     }
@@ -100,77 +99,85 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <button
-                  className="absolute bottom-0 right-0 bg-gray-800 text-white p-3 rounded-full"
                   onClick={triggerFileInput}
-                  type="button"
+                  className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
                 >
-                  <Camera className="h-5 w-5" />
+                  <Camera className="h-4 w-4" />
                 </button>
                 <input
-                  type="file"
                   ref={fileInputRef}
-                  onChange={handleImageUpload}
+                  type="file"
                   accept="image/*"
+                  onChange={handleImageUpload}
                   className="hidden"
                 />
               </div>
-              <div className="w-full space-y-6">
-                <div className="flex items-center">
-                  <span className="text-gray-500 mr-4">
-                    <User className="h-6 w-6" />
-                  </span>
+              
+              <div className="w-full space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name
+                  </label>
                   <input
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-lg"
+                    type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
-                <div className="flex items-center">
-                  <span className="text-gray-500 mr-4">
-                    <Mail className="h-6 w-6" />
-                  </span>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <input
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-lg"
+                    type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Email"
-                    type="email"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
-                <div className="flex items-center">
-                  <span className="text-gray-500 mr-4">
-                    <Briefcase className="h-6 w-6" />
-                  </span>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Job Title
+                  </label>
                   <input
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-lg"
+                    type="text"
                     name="job"
                     value={formData.job}
                     onChange={handleInputChange}
-                    placeholder="Job Title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
             </div>
-
-            <button
-              className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800 flex items-center justify-center text-lg"
-              onClick={handleSave}
-            >
-              <Check className="mr-2 h-5 w-5" /> Save Changes
-            </button>
+            
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
+              >
+                <Check className="h-4 w-4" />
+                <span>Save Changes</span>
+              </button>
+            </div>
           </>
         ) : (
           <>
-            <div className="flex flex-col items-center space-y-8 mb-8">
+            <div className="flex flex-col items-center space-y-6 mb-8">
               <div className="relative w-40 h-40">
                 {profile.image ? (
                   <Image
-                    src={profile.image || "/placeholder.svg"}
+                    src={profile.image}
                     alt="Profile"
                     layout="fill"
                     objectFit="cover"
@@ -182,27 +189,26 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-              <div className="text-center space-y-6">
-                <h2 className="text-3xl font-bold">{profile.name}</h2>
-
-                <div className="flex items-center justify-center text-gray-600 text-lg">
-                  <Mail className="h-5 w-5 mr-3" />
+              
+              <div className="text-center">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">{profile.name}</h1>
+                <p className="text-gray-600 mb-1">{profile.job}</p>
+                <div className="flex items-center justify-center space-x-2 text-gray-500">
+                  <Mail className="h-4 w-4" />
                   <span>{profile.email}</span>
-                </div>
-
-                <div className="flex items-center justify-center text-gray-600 text-lg">
-                  <Briefcase className="h-5 w-5 mr-3" />
-                  <span>{profile.job}</span>
                 </div>
               </div>
             </div>
-
-            <button
-              className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800 flex items-center justify-center text-lg"
-              onClick={() => setIsEditing(true)}
-            >
-              <Pencil className="mr-2 h-5 w-5" /> Edit Profile
-            </button>
+            
+            <div className="flex justify-center">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
+              >
+                <Pencil className="h-4 w-4" />
+                <span>Edit Profile</span>
+              </button>
+            </div>
           </>
         )}
       </div>

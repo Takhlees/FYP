@@ -24,7 +24,6 @@ export function ThemeProvider({
     
     try {
       const storedTheme = localStorage.getItem(storageKey);
-      console.log("Stored theme:", storedTheme); // Debug log
       
       if (storedTheme && (storedTheme === "light" || storedTheme === "dark")) {
         setTheme(storedTheme);
@@ -32,7 +31,6 @@ export function ThemeProvider({
         const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "light";
-        console.log("System theme:", systemTheme); // Debug log
         setTheme(systemTheme);
       }
     } catch (error) {
@@ -60,7 +58,6 @@ export function ThemeProvider({
         root.setAttribute("data-theme", theme);
       }
 
-      console.log("Applied theme:", theme, "Classes:", root.classList.toString()); // Debug log
       localStorage.setItem(storageKey, theme);
     } catch (error) {
       console.error("Error applying theme:", error);
@@ -70,7 +67,6 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (newTheme) => {
-      console.log("Theme change requested:", newTheme); // Debug log
       setTheme(newTheme);
     },
   };

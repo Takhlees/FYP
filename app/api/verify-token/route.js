@@ -93,7 +93,6 @@ export async function POST(req) {
     return NextResponse.json({ email: user.email }, { status: 200 });
 
   } catch (error) {
-    console.error("Verification error:", error);
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
   }
 }

@@ -65,7 +65,6 @@ useEffect(() => {
           router.push("/");
         }
       } catch (error) {
-        console.error("Session check failed:", error);
       } finally {
         setIsLoading(false);
       }
@@ -74,7 +73,6 @@ useEffect(() => {
 
     async function fetchOverdueMails() {
       try {
-        setIsLoading(false);
         const response = await fetch("http://localhost:3000/api/reminder", {
           method: "GET",
           headers: {
@@ -92,7 +90,6 @@ useEffect(() => {
         const data = await response.json();
         setOverDueMails(data.overdueMails || []);
       } catch (error) {
-        console.error("Failed to fetch overdue mails", error);
       }
     }
 
@@ -118,7 +115,6 @@ useEffect(() => {
         const data = await response.json();
         setRecentMails(data);
       } catch (error) {
-        console.error("Fetch error:", error);
         setRecentError(error.message);
         setRecentMails([]); // Reset to empty array on error
       } finally {
@@ -226,10 +222,7 @@ useEffect(() => {
           }
         }, 100);
         break;
-      case 'search':
-        // Navigate to search page (you'll need to create this route)
-        router.push('/search');
-        break;
+
       case 'overdue':
         // Toggle the overdue mails panel
         setShowOverdueMails((prev) => !prev);
@@ -271,7 +264,6 @@ useEffect(() => {
 
       setSelectedMail(null);
     } catch (error) {
-      console.error("Failed to update mail status:", error);
     }
   };
 
@@ -361,12 +353,7 @@ useEffect(() => {
   }, []);
 
   return (
-    <>
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <PulseLoader color="#e1e4e8" size={17} speedMultiplier={0.8} />
-        </div>
-      )}      {showForm ? (
+    <>      {showForm ? (
         <div className="fixed inset-0 z-50 overflow-auto">
           <ScanUpload action={action} onClose={() => setShowForm(false)} />
         </div>
@@ -429,7 +416,7 @@ useEffect(() => {
                           Loading PDF...
                         </span>
                       ) : (
-                        "View PDF"
+                        "View PDF" 
                       )}
                     </button>
                     <button
@@ -452,7 +439,7 @@ useEffect(() => {
             {/* Header Section */}
             <div className="flex items-center justify-center min-h-[100vh] sm:min-h-screen w-full pt-4 sm:pt-0" ref={uploadScanRef}>
               <div className="text-center mx-auto mb-12 transform -translate-y-20 sm:-translate-y-16 lg:-translate-y-20">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mb-4 leading-tight px-4">
+                <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mb-4 leading-tight px-4">
                   <span className="inline-block">Modern Document</span>
                   <br />
                   <span className="inline-block">Management Made</span>{" "}
@@ -649,10 +636,10 @@ useEffect(() => {
               </div>
 
               {isLoadingRecent ? (
-                <div className="flex justify-center">
+                <div className="flex justify-center py-8">
                   <PulseLoader
-                    color="#6b7280"
-                    size={10}
+                    color="#d2d4d6"
+                    size={17}
                     speedMultiplier={0.7}
                   />
                 </div>

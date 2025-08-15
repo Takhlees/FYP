@@ -28,7 +28,6 @@ try {
   }
 
   const body = await req.json();
-  console.log("Request received:",body);
 
     const { currentPassword, newPassword,confirmPassword} = body;
     

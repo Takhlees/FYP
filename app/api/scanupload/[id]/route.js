@@ -407,7 +407,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    console.log('Document deleted successfully with ID:', id);
+
 
     return NextResponse.json({ 
       message: "Document deleted successfully",

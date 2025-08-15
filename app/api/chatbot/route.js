@@ -191,7 +191,7 @@ Please format all your answers clearly using bullet points or bold text for sect
 
     const rawAnswer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     const answer = formatMessage(rawAnswer);
-console.log("Base64 Image being saved:", imageData);
+
 
     // Save chat history
     await ChatHistory.create({

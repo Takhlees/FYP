@@ -1,14 +1,18 @@
 "use client"
 import "@styles/globals.css"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
+import { useRouter, useParams, useSearchParams } from "next/navigation"
 import ScanUpload from "@components/ScanUpload"
 import { Edit, Download, ArrowLeft, Trash2, X, CheckCircle, AlertTriangle, Save } from "lucide-react"
 import SearchBar from "@components/SearchBar"
 
+
 export default function DepartmentPage() {
   const router = useRouter()
-  const { id, name } = router.query
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const id = params.id
+  const name = searchParams.get('name')
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState(["All"])
   const [newCategory, setNewCategory] = useState("")
@@ -45,10 +49,10 @@ export default function DepartmentPage() {
         const data = await response.json()
         setCategories(["All", ...data.categories])
       } else {
-        console.error("Failed to fetch categories")
+        // Failed to fetch categories
       }
     } catch (error) {
-      console.error("Error fetching categories:", error)
+      // Error fetching categories
     }
   }
 
@@ -105,10 +109,10 @@ export default function DepartmentPage() {
           setShowInput(false)
           fetchCategories()
         } else {
-          console.error("Failed to add category")
+          // Failed to add category
         }
       } catch (error) {
-        console.error("Error adding category:", error)
+        // Error adding category
       }
     }
   }
@@ -127,10 +131,10 @@ export default function DepartmentPage() {
         setFiles(files)
         setFilteredFiles(files)
       } else {
-        console.error("Failed to fetch files")
+        // Failed to fetch files
       }
     } catch (error) {
-      console.error("Error fetching files:", error)
+      // Error fetching files
     } finally {
       setIsLoading(false)
     }
@@ -147,11 +151,9 @@ export default function DepartmentPage() {
         const url = URL.createObjectURL(blob)
         setPdfUrl(url)
       } else {
-        console.error("Failed to load PDF preview")
         setShowPreview(false)
       }
     } catch (error) {
-      console.error("Preview error:", error)
       setShowPreview(false)
     }
   }
@@ -194,7 +196,7 @@ export default function DepartmentPage() {
       setAction(originalMode)
       setShowForm(true)
     } catch (error) {
-      console.error("Error setting up edit:", error)
+      // Error setting up edit
     }
   }
 
@@ -212,7 +214,7 @@ export default function DepartmentPage() {
       }
       downloadBlob(blob, doc)
     } catch (error) {
-      console.error("Download failed:", error)
+      // Download failed
     }
   }
 
@@ -243,7 +245,7 @@ export default function DepartmentPage() {
         window.URL.revokeObjectURL(url)
       }, 100)
     } catch (error) {
-      console.error("Error creating download:", error)
+      // Error creating download
     }
   }
 
@@ -285,7 +287,6 @@ export default function DepartmentPage() {
       // Show success toast
       setShowSuccessToast(true)
     } catch (error) {
-      console.error("Delete failed:", error)
       setShowDeleteConfirm(false)
       setDocToDelete(null)
     }
@@ -304,7 +305,6 @@ export default function DepartmentPage() {
     setShowForm(false)
     setEditingFile(null)
     setAction("")
-    // Refresh the files list after edit
     if (selectedCategory && id) {
       fetchFiles(id, selectedCategory)
     }
@@ -315,7 +315,6 @@ export default function DepartmentPage() {
     setShowCategorySelect(false)
   }
 
-  // Handler to open delete dialog for a category
   const handleCategoryDeleteClick = (category) => {
     setCategoryToDelete(category);
     setShowCategoryDeleteDialog(true);
@@ -335,7 +334,6 @@ export default function DepartmentPage() {
         await fetchCategories(); // refresh categories
         setShowCategorySelect(true); // reopen modal
       } else {
-        // Optionally show error
         setShowCategoryDeleteDialog(false);
         setCategoryToDelete(null);
       }
@@ -343,7 +341,7 @@ export default function DepartmentPage() {
       setShowCategoryDeleteDialog(false);
       setCategoryToDelete(null);
     }
-  };
+  }; 
   // Handler to cancel category deletion
   const cancelCategoryDelete = () => {
     setShowCategoryDeleteDialog(false);
@@ -374,14 +372,14 @@ export default function DepartmentPage() {
         setEditingCategory(null);
         setEditedCategoryName("");
         await fetchCategories(); // refresh categories
-        setShowCategorySelect(true); // reopen modal
+        setShowCategorySelect(true); 
       } else {
         const errorData = await response.json();
-        console.error("Failed to update category:", errorData.error);
+        // Failed to update category
         // Optionally show error message to user
       }
     } catch (error) {
-      console.error("Error updating category:", error);
+      // Error updating category
     }
   };
 
@@ -404,7 +402,7 @@ export default function DepartmentPage() {
       document.body.style.overflow = 'unset';
     };
   }, [showCategorySelect]);
-
+ 
   // Filter categories based on search
   const filteredCategories = categories.filter(category => 
     category.toLowerCase().includes(categorySearch.toLowerCase())
@@ -779,9 +777,10 @@ export default function DepartmentPage() {
                         Loading files...
                       </td>
                     </tr>
-                  ) : Array.isArray(filteredFiles) && filteredFiles.length > 0 ? (
-                    filteredFiles.map((doc) => (
-                      <tr key={doc._id}>                        <td className="px-3 sm:px-6 py-4">
+                                     ) : Array.isArray(filteredFiles) && filteredFiles.length > 0 ? (
+                     filteredFiles.map((doc) => (
+                       <tr key={doc._id}>
+                         <td className="px-3 sm:px-6 py-4">
                           <button
                             onClick={() => handlePreview(doc)}
                             className="text-light hover:text-mid hover:underline focus:outline-none cursor-pointer text-left text-sm sm:text-base"
@@ -888,7 +887,7 @@ export default function DepartmentPage() {
         .animate-slide-in-right {
           animation: slide-in-right 0.3s ease-out;
         }
-      `}</style>
-    </>
-  );
-}
+             `}</style>
+     </>
+   );
+ }

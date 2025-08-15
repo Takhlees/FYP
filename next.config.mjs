@@ -22,17 +22,19 @@ const nextConfig = {
       });
     }
     
-    // Handle canvas and other problematic modules
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      canvas: false,
-    };
+    // Handle canvas - only disable for client-side
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        canvas: false,
+      };
+    }
     
     return config;
   },
   
 
-  serverExternalPackages: ['tesseract.js', 'sharp', 'pdf-parse'],
+  serverExternalPackages: ['tesseract.js', 'sharp', 'pdf-parse', 'pdfjs-dist', 'canvas'],
   
   // Optional: Additional optimizations for image processing
   // images: {

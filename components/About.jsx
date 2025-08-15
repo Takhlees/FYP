@@ -18,7 +18,6 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 
 export default function AboutPage() {
-  const [activeFeature, setActiveFeature] = useState("smart");
   const [isLoading, setIsLoading] = useState(true);
   const [openFAQ, setOpenFAQ] = useState(null);
 
@@ -64,11 +63,6 @@ export default function AboutPage() {
       description: "Handle institutional correspondence, internal memos, and department-level documentation.",
       icon: <Building className="h-6 w-6 text-[#3B5FE3] dark:text-blue-400" />,
     },
-    // {
-    //   name: "Student Services",
-    //   description: "Student communications and records",
-    //   icon: <Users className="h-6 w-6 text-[#3B5FE3]" />,
-    // },
     {
       name: "Research Departments",
       description: "Organize research-related files, approvals, and communication logs — securely stored and easily searchable.",
@@ -95,7 +89,6 @@ export default function AboutPage() {
   ];
 
   useEffect(() => {
-    // This timeout simulates loading - replace with your actual loading checks
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000); 
@@ -119,7 +112,6 @@ export default function AboutPage() {
 
         {/* Hero Section */}
         <header className="relative overflow-hidden">
-
           <div className="container mx-auto px-4 py-16 relative z-10">
             <div className="max-w-3xl">
               <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-gray-100">
