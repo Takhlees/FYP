@@ -875,6 +875,20 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     []
   );
 
+  const handleNumberOnlyInput = (e, setter) => {
+  const value = e.target.value;
+  if (/^\d*$/.test(value)) {
+    setter(value);
+  }
+};
+
+const handleAlphabetOnlyInput = (e, setter) => {
+  const value = e.target.value;
+  if (/^[a-zA-Z]*$/.test(value)) {
+    setter(value);
+  }
+};
+
   // Form submission
   const handleSubmit = useCallback(
     async (e) => {
@@ -1231,7 +1245,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 <input
                   type="text"
                   value={diaryNo}
-                  onChange={(e) => setDiaryNo(e.target.value)}
+                  onChange= {(e) => handleNumberOnlyInput(e, setDiaryNo)}
                   className="w-full p-3 border border-gray-300 rounded-lg"
                   required
                 />
@@ -1243,7 +1257,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={from}
-                onChange={(e) => setFrom(e.target.value)}
+                onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
@@ -1256,7 +1270,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={disposal}
-                onChange={(e) => setDisposal(e.target.value)}
+                onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
@@ -1536,9 +1550,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   Diary No *
                 </label>
                 <input
-                  type="text"
+                  type="text" 
                   value={diaryNo}
-                  onChange={(e) => setDiaryNo(e.target.value)}
+                  onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
                   className="w-full p-3 border border-gray-300 rounded-lg"
                   required
                 />
@@ -1550,7 +1564,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={from}
-                onChange={(e) => setFrom(e.target.value)}
+                onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
@@ -1563,7 +1577,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={disposal}
-                onChange={(e) => setDisposal(e.target.value)}
+                onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
@@ -2080,8 +2094,8 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     </label>
                     <input
                       type="text"
-                      value={diaryNo}
-                      onChange={(e) => setDiaryNo(e.target.value)}
+                      value={diaryNo} 
+                      onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
@@ -2097,7 +2111,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     <input
                       type="text"
                       value={from}
-                      onChange={(e) => setFrom(e.target.value)}
+                      onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
@@ -2110,7 +2124,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     <input
                       type="text"
                       value={disposal}
-                      onChange={(e) => setDisposal(e.target.value)}
+                      onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />

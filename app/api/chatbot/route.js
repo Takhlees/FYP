@@ -1,10 +1,8 @@
 import { connectToDB } from "@utils/database";
 import ChatHistory from "@/models/chatHistory";
-import chatbot from "@/models/chatbot";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/utils/authOptions";
-import stringSimilarity from "string-similarity";
 import { formatMessage } from "@/utils/formatChatResponse";
 
 export async function POST(req) {
@@ -43,23 +41,6 @@ export async function POST(req) {
       parts: [{ text: msg.text }],
     }));
 
-    // Check similarity with DB questions
-    const allQuestions = await chatbot.find({});
-    const questionList = allQuestions.map((q) => q.question);
-    const { bestMatch } = stringSimilarity.findBestMatch(
-      textInput,
-      questionList
-    );
-
-    if (bestMatch.rating > 0.6) {
-      const matched = allQuestions.find(
-        (q) =>
-          q.question.trim().toLowerCase() ===
-          bestMatch.target.trim().toLowerCase()
-      );
-      return NextResponse.json({ response: matched.answer });
-    }
-
     // Prepare Gemini prompt
     const systemContext = {
       role: "user",
@@ -80,7 +61,7 @@ Forgot password and Change password functionalities.
 
 Scan: Allows users to scan documents using a mobile device. These are converted to PDF and uploaded.
 Upload: Allows users to upload PDF documents.
-Upon upload/scan, the system extracts the subject automatically; users manually enter diary number, department, category, type, and status.
+Upon upload/scan, the system extracts the subject automatically; users manually enter type(university or admin), diary number, department, category, and status.
 🏢 Department & Admin Pages:
 
 Both Department and Admin pages are similar.
@@ -113,6 +94,8 @@ Contains explanation of all above features and purpose of the website.
 
 Questions strictly related to the above functionalities.
 Queries about uploading, scanning, managing files, departments, categories, mail status, and searching.
+If a user uploads a mail (image), the chatbot should analyze its content and provide a clear explanation of what the mail is about. The API should extract the key details and summarize the message in simple, understandable language.
+
 ❌ Disallowed Text Inputs:
 
 Do not respond to personal, unrelated, or general questions (e.g., life advice, jokes, programming questions, etc.).
@@ -191,7 +174,6 @@ Please format all your answers clearly using bullet points or bold text for sect
 
     const rawAnswer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     const answer = formatMessage(rawAnswer);
-
 
     // Save chat history
     await ChatHistory.create({
