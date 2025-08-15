@@ -23,51 +23,25 @@ import {
   AlertCircle,
   Eye,
 } from "lucide-react";
-
-// Notification Component
-const Notification = ({ type, message, onDismiss }) => {
-  return (
-    <div
-      className={`fixed top-4 left-4 right-4 z-50 flex items-center p-3 rounded-md shadow-lg mx-auto max-w-sm ${
-        type === "success"
-          ? "bg-green-100 text-green-800"
-          : type === "error"
-          ? "bg-red-100 text-red-800"
-          : "bg-blue-100 text-blue-800"
-      }`}
-    >
-      <div className="flex-shrink-0 mr-2">
-        {type === "success" ? (
-          <Check className="w-4 h-4" />
-        ) : type === "error" ? (
-          <X className="w-4 h-4" />
-        ) : (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        )}
-      </div>
-      <div className="text-sm flex-1">{message}</div>
-      {onDismiss && (
-        <button
-          onClick={onDismiss}
-          className="ml-2 text-gray-500 hover:text-gray-700"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-};
+import {
+  showSuccessToast,
+  showErrorToast,
+  showWarningToast,
+  showLoadingToast,
+  updateToast,
+  clearAllToasts,
+  dismissToast,
+  updateLoadingToast,
+} from "@/utils/toast";
 
 // Document Preview Modal Component
 const DocumentPreviewModal = ({
   isOpen,
   onClose,
   document,
-  extractedText,
   fileName,
   pdfPreviewData,
 }) => {
-  const [viewMode, setViewMode] = useState("image");
 
   if (!isOpen) return null;
 
@@ -85,7 +59,11 @@ const DocumentPreviewModal = ({
       const imageSource = `data:${pdfPreviewData.previewImage.mimeType};base64,${pdfPreviewData.previewImage.base64}`;
       return imageSource;
     }
-    if (document && document !== "/placeholder.svg" && !document.includes("placeholder.svg")) {
+    if (
+      document &&
+      document !== "/placeholder.svg" &&
+      !document.includes("placeholder.svg")
+    ) {
       return document;
     }
     return null;
@@ -116,33 +94,14 @@ const DocumentPreviewModal = ({
               </h2>
               <p className="text-sm text-gray-600">
                 {fileName || "Enhanced Document"}
-                {pdfPreviewData?.pageCount && ` • ${pdfPreviewData.pageCount} page${pdfPreviewData.pageCount > 1 ? 's' : ''}`}
+                {pdfPreviewData?.pageCount &&
+                  ` • ${pdfPreviewData.pageCount} page${
+                    pdfPreviewData.pageCount > 1 ? "s" : ""
+                  }`}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-              <button
-                onClick={() => setViewMode("image")}
-                className={`px-3 py-1 text-sm font-medium ${
-                  viewMode === "image"
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {pdfPreviewData ? "Preview" : "Image"}
-              </button>
-              <button
-                onClick={() => setViewMode("text")}
-                className={`px-3 py-1 text-sm font-medium ${
-                  viewMode === "text"
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Text
-              </button>
-            </div>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -154,7 +113,6 @@ const DocumentPreviewModal = ({
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-hidden">
-          {viewMode === "image" ? (
             <div className="h-full overflow-auto bg-gray-100 p-4">
               {hasValidDocument && imageSource ? (
                 <div className="flex justify-center min-h-full">
@@ -171,45 +129,29 @@ const DocumentPreviewModal = ({
                   <FileText className="w-16 h-16" />
                   <p className="text-lg">No document preview available</p>
                   <p className="text-sm text-center">
-                    {pdfPreviewData ? 
-                      "PDF preview data is available but image could not be generated" : 
-                      "Document has not been processed yet"
-                    }
+                  {pdfPreviewData
+                    ? "PDF preview data is available but image could not be generated"
+                    : "Document has not been processed yet"}
                   </p>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="h-full overflow-auto p-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-6 max-w-4xl mx-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Extracted Text Content
-                  </h3>
-                  <div className="text-sm text-gray-500">
-                    {extractedText?.length || 0} characters
-                  </div>
-                </div>
-                <div className="prose max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono bg-gray-50 p-4 rounded-lg border">
-                    {extractedText || "No text content available"}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer - Always at bottom */}
         <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>
-              {pdfPreviewData ? 'PDF document with preview' : 'Document processed and enhanced'}
+              {pdfPreviewData
+                ? "PDF document with preview"
+                : "Document processed and enhanced"}
             </div>
             <div className="flex items-center gap-4">
               <span>Quality: High</span>
-              <span>Format: {pdfPreviewData ? 'PDF' : 'Optimized'}</span>
-              {pdfPreviewData?.pageCount && <span>Pages: {pdfPreviewData.pageCount}</span>}
+              <span>Format: {pdfPreviewData ? "PDF" : "Optimized"}</span>
+              {pdfPreviewData?.pageCount && (
+                <span>Pages: {pdfPreviewData.pageCount}</span>
+              )}
             </div>
           </div>
         </div>
@@ -295,10 +237,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const [file, setFile] = useState(fileData?.file || null);
   const [fileName, setFileName] = useState(fileData?.file?.name || "");
   const [departments, setDepartments] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(
     fileData?.department || ""
   );
-  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
     fileData?.category || ""
   );
@@ -328,9 +270,12 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionFailed, setExtractionFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
+
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const webcamRef = useRef(null);
   const videoRef = useRef(null);
@@ -348,11 +293,21 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   }, []);
 
   const showNotification = useCallback((type, message, duration = 3000) => {
-    setNotification({ type, message });
-    if (duration) {
-      setTimeout(() => {
-        setNotification(null);
-      }, duration);
+    switch (type) {
+      case "success":
+        showSuccessToast(message);
+        break;
+      case "error":
+        showErrorToast(message);
+        break;
+      case "warning":
+        showWarningToast(message);
+        break;
+      case "info":
+        const toastId = showLoadingToast(message);
+        return toastId;
+      default:
+        showSuccessToast(message);
     }
   }, []);
 
@@ -378,6 +333,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       if (!type) return;
 
       try {
+        setDepartmentsLoading(true);
         const response = await fetch(`/api/department?type=${type}`, {
           method: "GET",
         });
@@ -385,21 +341,26 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setDepartments(data);
+        setDepartmentsLoading(false);
       } catch (error) {
         console.error("Failed to fetch departments", error);
-        showNotification("error", "Failed to load departments");
+        showErrorToast("Failed to load departments");
+        setDepartmentsLoading(false);
       }
     };
 
     if (type) fetchDepartments();
-  }, [type, showNotification]);
+  }, [type]);
 
   useEffect(() => {
     if (selectedDepartment) {
+      setCategoriesLoading(true);
       const department = departments.find(
         (dept) => dept._id === selectedDepartment
       );
-      setCategories(department?.categories || []);
+      const deptCategories = department?.categories || [];
+      setCategories(deptCategories);
+      setCategoriesLoading(false);
     }
   }, [selectedDepartment, departments]);
 
@@ -410,8 +371,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       }
     };
   }, [cameraTrack]);
-
-
 
   const turnOffTorch = useCallback(async () => {
     if (cameraTrack && isTorchAvailable && isTorchOn) {
@@ -460,10 +419,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   }, []);
 
   const startCamera = useCallback(async () => {
-    setNotification(null);
-
     try {
-      showNotification("info", "Requesting camera access...", 0);
+      // Show loading toast immediately
+      const cameraToast = showLoadingToast("Requesting camera access...");
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -473,7 +431,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         },
       });
 
-      setNotification(null);
+      // Dismiss camera access toast when successful (no success message needed)
+      if (cameraToast) {
+        dismissToast(cameraToast);
+      }
+
       setHasCameraPermission(true);
       setIsCameraActive(true);
       setCurrentStep(0);
@@ -486,21 +448,17 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       setHasCameraPermission(false);
       setIsCameraActive(false);
 
-      showNotification(
-        "error",
-        "Camera access denied. Please allow camera access and try again.",
-        2000
+      showErrorToast(
+        "Camera access denied. Please allow camera access and try again."
       );
     }
-  }, [cameraFacingMode, showNotification, initializeCamera]);
+  }, [cameraFacingMode, initializeCamera]);
 
   const retryCamera = useCallback(() => {
-    showNotification(
-      "error",
-      "Please enable camera permissions in your browser settings and refresh the page.",
-      3000
+    showErrorToast(
+      "Please enable camera permissions in your browser settings and refresh the page."
     );
-  }, [showNotification]);
+  }, []);
 
   // Handle file change for upload mode with API integration
   const handleFileChange = useCallback(
@@ -512,7 +470,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       setFileName(file.name);
 
       try {
-        showNotification("info", "Processing document...", 0);
+        // Force a re-render to ensure toast is shown
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // Show loading toast immediately
+        const processingToast = showLoadingToast("Processing document...");
 
         // Call the document scanner API
         const result = await callDocumentScannerAPI(
@@ -520,6 +482,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           "enhance_and_extract",
           "high"
         );
+
+        // Update to show text extraction progress
+        if (processingToast) {
+          updateLoadingToast(
+            processingToast,
+            "Extracting text from document..."
+          );
+        }
 
         if (result.success) {
           // Handle enhanced image
@@ -534,12 +504,20 @@ const ScanUpload = ({ fileData, action, onClose }) => {
             setPdfPreviewData(result.pdfPreview);
           }
 
+          // Update to show final processing
+          if (processingToast) {
+            updateLoadingToast(processingToast, "Finalizing document...");
+          }
+
           // Handle text extraction and subject extraction
           if (result.textExtraction && result.textExtraction.text) {
             setExtractedText(result.textExtraction.text);
 
             // Use the subject from API response (it handles both specific and legacy extraction)
-            const extractedSubject = result.textExtraction.subject || result.textExtraction.legacySubject || "";
+            const extractedSubject =
+              result.textExtraction.subject ||
+              result.textExtraction.legacySubject ||
+              "";
             if (extractedSubject && !subject) {
               setSubject(extractedSubject);
             }
@@ -553,33 +531,44 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   c.charCodeAt(0)
                 ),
               ],
-              { type: "application/pdf" },
+              { type: "application/pdf" }
             );
             const optimizedFile = new File(
               [pdfBlob],
               result.optimizedPdf.filename,
               {
                 type: "application/pdf",
-              },
+              }
             );
             setFile(optimizedFile);
           }
 
-          const sizeInfo = result.optimizedPdf
-            ? `${(result.optimizedPdf.size / 1024).toFixed(1)} KB`
-            : `${(file.size / 1024).toFixed(1)} KB`;
 
-          showNotification(
-            "success",
-            `Document processed successfully (${sizeInfo})`
-          );
+
+          // Only show success toast after everything completes successfully
+          if (processingToast) {
+            dismissToast(processingToast);
+            setTimeout(() => {
+              showSuccessToast("Document processed successfully!");
+            }, 100);
+          } else {
+            showSuccessToast("Document processed successfully!");
+          }
         } else {
           console.error("API returned error:", result.error);
           throw new Error(result.error || "Processing failed");
         }
       } catch (error) {
         console.error("File processing error:", error);
-        showNotification("error", `Processing failed: ${error.message}`);
+        // Dismiss the loading toast and show error
+        if (processingToast) {
+          dismissToast(processingToast);
+          setTimeout(() => {
+            showErrorToast(`Processing failed: ${error.message}`);
+          }, 100);
+        } else {
+          showErrorToast(`Processing failed: ${error.message}`);
+        }
 
         // Fallback to original file
         const fallbackUrl = URL.createObjectURL(file);
@@ -589,7 +578,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         setIsProcessing(false);
       }
     },
-    [subject, showNotification]
+    [subject]
   );
 
   const handleRetake = useCallback(() => {
@@ -620,12 +609,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       if (fileRejections.length > 0) {
         const { errors } = fileRejections[0];
         if (errors[0]?.code === "file-too-large") {
-          showNotification("error", "File is too large. Maximum size is 10MB.");
+          showErrorToast("File is too large. Maximum size is 10MB.");
         } else {
-          showNotification(
-            "error",
-            "Invalid file. Please upload a PDF or image file."
-          );
+          showErrorToast("Invalid file. Please upload a PDF or image file.");
         }
       }
     },
@@ -642,9 +628,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       setIsTorchOn(!isTorchOn);
     } catch (error) {
       console.error("Error toggling torch:", error);
-      showNotification("error", "Unable to control flash");
+      showErrorToast("Unable to control flash");
     }
-  }, [cameraTrack, isTorchAvailable, isTorchOn, showNotification]);
+  }, [cameraTrack, isTorchAvailable, isTorchOn]);
 
   // Toggle auto focus
   const toggleAutoFocus = useCallback(async () => {
@@ -666,7 +652,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     if (!webcamRef.current) return;
 
     setIsProcessing(true);
-    showNotification("info", "Capturing and processing document...", 0);
+
+    // Force a re-render to ensure toast is shown
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Show loading toast immediately
+    const processingToast = showLoadingToast(
+      "Capturing and processing document..."
+    );
 
     try {
       // Capture at optimal resolution
@@ -694,17 +687,23 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         type: "image/jpeg",
       });
 
-      // Call the document scanner API
-      showNotification("info", "Enhancing document with AI...", 0);
+      // Update the processing toast to show enhancement progress (keep loading state)
+      if (processingToast) {
+        updateLoadingToast(processingToast, "Enhancing document with AI...");
+      }
+
       const result = await callDocumentScannerAPI(
         capturedFile,
         "enhance_and_extract",
         "high"
       );
 
-      if (result.success) {
+      // Update to show text extraction progress
+      if (processingToast) {
+        updateLoadingToast(processingToast, "Extracting text from document...");
+      }
 
-        
+      if (result.success) {
         // Handle enhanced image
         if (result.enhancedImage) {
           const enhancedImageUrl = `data:${result.enhancedImage.mimeType};base64,${result.enhancedImage.base64}`;
@@ -722,7 +721,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           setExtractedText(result.textExtraction.text);
 
           // Use the subject from API response (it handles both specific and legacy extraction)
-          const extractedSubject = result.textExtraction.subject || result.textExtraction.legacySubject || "";
+          const extractedSubject =
+            result.textExtraction.subject ||
+            result.textExtraction.legacySubject ||
+            "";
           if (extractedSubject && !subject) {
             setSubject(extractedSubject);
           }
@@ -743,24 +745,45 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           });
           setFile(pdfFile);
           setFileName(result.optimizedPdf.filename);
+        }
 
-          const sizeInKB = (result.optimizedPdf.size / 1024).toFixed(1);
-          showNotification("success", `Document optimized (${sizeInKB} KB)!`);
+        // Update to show final processing
+        if (processingToast) {
+          updateLoadingToast(processingToast, "Finalizing document...");
         }
 
         // Handle text extraction and go to form
         await extractTextAndGoToForm(result);
+
+                  // Only show success toast after everything completes successfully
+          if (processingToast) {
+            dismissToast(processingToast);
+            setTimeout(() => {
+              showSuccessToast("Document optimized successfully!");
+            }, 100);
+          } else {
+            showSuccessToast("Document optimized successfully!");
+          }
       } else {
         throw new Error(result.error || "Processing failed");
       }
     } catch (error) {
       console.error("Capture error:", error);
-      showNotification("error", `Processing failed: ${error.message}`);
+      // Dismiss the loading toast and show error
+      if (processingToast) {
+        dismissToast(processingToast);
+        setTimeout(() => {
+          showErrorToast(`Processing failed: ${error.message}`);
+        }, 100);
+      } else {
+        showErrorToast(`Processing failed: ${error.message}`);
+      }
       setCurrentStep(1); // Go to manual step
+      return; // Stop execution here - don't continue with any success flows
     } finally {
       setIsProcessing(false);
     }
-  }, [cameraTrack, showNotification, turnOffTorch]);
+  }, [cameraTrack, turnOffTorch]);
 
   // Extract text and go to form with API results
   const extractTextAndGoToForm = useCallback(
@@ -769,24 +792,24 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       setExtractionFailed(false);
 
       try {
-        showNotification("info", "Extracting subject from document...", 0);
+        // No toast needed for text extraction
 
         if (apiResult.textExtraction && apiResult.textExtraction.text) {
           const extractedText = apiResult.textExtraction.text;
           setExtractedText(extractedText);
 
           // Use the subject from API response (it handles both specific and legacy extraction)
-          const extractedSubject = apiResult.textExtraction.subject || apiResult.textExtraction.legacySubject || "";
+          const extractedSubject =
+            apiResult.textExtraction.subject ||
+            apiResult.textExtraction.legacySubject ||
+            "";
           if (extractedSubject && !subject) {
             setSubject(extractedSubject);
           }
 
           // Go directly to form completion step (step 3)
           setCurrentStep(3);
-          showNotification(
-            "success",
-            "Subject extracted! Complete the form below."
-          );
+          // No toast needed - main success toast already shown
         } else {
           throw new Error("No text was extracted from the document");
         }
@@ -795,15 +818,12 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         setExtractionFailed(true);
         // On failure, go to step 1 to show enhanced image and manual options
         setCurrentStep(1);
-        showNotification(
-          "error",
-          "Subject extraction failed. Please complete the form manually."
-        );
+        throw error; // Re-throw so main process can handle it
       } finally {
         setIsExtracting(false);
       }
     },
-    [subject, showNotification]
+    [subject]
   );
 
   // Retry text extraction with API
@@ -814,7 +834,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     setExtractionFailed(false);
 
     try {
-      showNotification("info", "Retrying text extraction...", 0);
+      // No toast needed for retry extraction
 
       const result = await callDocumentScannerAPI(file, "extract_only", "high");
 
@@ -826,27 +846,31 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         setExtractedText(result.textExtraction.text);
 
         // Use the subject from API response
-        const extractedSubject = result.textExtraction.subject || result.textExtraction.legacySubject || "";
+        const extractedSubject =
+          result.textExtraction.subject ||
+          result.textExtraction.legacySubject ||
+          "";
         if (extractedSubject && !subject) {
           setSubject(extractedSubject);
         }
 
         setExtractionFailed(false);
-        showNotification("success", "Text extracted successfully!");
+        // No toast needed - user can see the extracted text
       } else {
         throw new Error("Text extraction failed");
       }
     } catch (error) {
       console.error("Retry extraction failed:", error);
       setExtractionFailed(true);
-      showNotification(
-        "error",
+      // Show error toast directly
+      showErrorToast(
         "Text extraction failed again. Please fill the form manually."
       );
+      return; // Stop execution here - don't continue with any success flows
     } finally {
       setIsExtracting(false);
     }
-  }, [file, subject, showNotification]);
+  }, [file, subject]);
 
   // Copy text to clipboard
   const copyToClipboard = useCallback(() => {
@@ -854,9 +878,9 @@ const ScanUpload = ({ fileData, action, onClose }) => {
 
     navigator.clipboard
       .writeText(extractedText)
-      .then(() => showNotification("success", "Text copied!"))
-      .catch(() => showNotification("error", "Failed to copy text"));
-  }, [extractedText, showNotification]);
+      .then(() => showSuccessToast("Text copied!"))
+      .catch(() => showErrorToast("Failed to copy text"));
+  }, [extractedText]);
 
   // Toggle camera facing mode
   const toggleCameraFacing = useCallback(() => {
@@ -876,23 +900,24 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   );
 
   const handleNumberOnlyInput = (e, setter) => {
-  const value = e.target.value;
-  if (/^\d*$/.test(value)) {
-    setter(value);
-  }
-};
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setter(value);
+    }
+  };
 
-const handleAlphabetOnlyInput = (e, setter) => {
-  const value = e.target.value;
-  if (/^[a-zA-Z]*$/.test(value)) {
-    setter(value);
-  }
-};
+  const handleAlphabetOnlyInput = (e, setter) => {
+    const value = e.target.value;
+    if (/^[a-zA-Z]*$/.test(value)) {
+      setter(value);
+    }
+  };
 
   // Form submission
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+
       setIsLoading(true);
 
       // Validation
@@ -906,8 +931,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
         if (!status) missingFields.push("Status");
 
         if (missingFields.length > 0) {
-          showNotification(
-            "error",
+          showErrorToast(
             `Please fill required fields: ${missingFields.join(", ")}`
           );
           setIsLoading(false);
@@ -923,7 +947,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
           !disposal ||
           !status
         ) {
-          showNotification("error", "Please fill all required fields");
+          showErrorToast("Please fill all required fields");
           setIsLoading(false);
           return;
         }
@@ -1008,10 +1032,12 @@ const handleAlphabetOnlyInput = (e, setter) => {
           ? `/api/scanupload/${fileData._id}`
           : "/api/scanupload";
 
-        showNotification(
-          "info",
-          isEditMode ? "Updating document..." : "Saving document...",
-          0
+        // Force a re-render to ensure toast is shown
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // Show loading toast immediately
+        const savingToast = showLoadingToast(
+          isEditMode ? "Updating document..." : "Saving document..."
         );
 
         const response = await fetch(url, { method, body: formData });
@@ -1028,12 +1054,23 @@ const handleAlphabetOnlyInput = (e, setter) => {
           throw new Error(errorMessage);
         }
 
-        showNotification(
-          "success",
+        // Dismiss the loading toast and show a clean success toast
+        if (savingToast) {
+          dismissToast(savingToast);
+          setTimeout(() => {
+            showSuccessToast(
           isEditMode
             ? "Document updated successfully!"
             : "Document saved successfully!"
         );
+          }, 100);
+        } else {
+          showSuccessToast(
+            isEditMode
+              ? "Document updated successfully!"
+              : "Document saved successfully!"
+          );
+        }
 
         setTimeout(() => {
           clearAllState();
@@ -1041,10 +1078,20 @@ const handleAlphabetOnlyInput = (e, setter) => {
         }, 1500);
       } catch (error) {
         console.error("Submit error:", error);
-        showNotification(
-          "error",
+        // Dismiss the loading toast and show error
+        if (savingToast) {
+          dismissToast(savingToast);
+          setTimeout(() => {
+            showErrorToast(
           `${isEditMode ? "Update" : "Upload"} failed: ${error.message}`
         );
+          }, 100);
+        } else {
+          showErrorToast(
+            `${isEditMode ? "Update" : "Upload"} failed: ${error.message}`
+          );
+        }
+        return; // Stop execution here - don't continue with any success flows
       } finally {
         setIsLoading(false);
       }
@@ -1066,7 +1113,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
       date,
       extractedText,
       fileData,
-      showNotification,
       onClose,
     ]
   );
@@ -1074,13 +1120,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
   if (isEditMode) {
     return (
       <div className="bg-zinc-800 p-10">
-        {notification && (
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            onDismiss={() => setNotification(null)}
-          />
-        )}{" "}
         <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-full sm:max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl text-center font-semibold mb-4 sm:mb-6">
             Edit Document
@@ -1187,14 +1226,22 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 onChange={(e) => setSelectedDepartment(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
+                disabled={departmentsLoading}
               >
-                <option value="">Select Department</option>
+                <option value="">
+                  {departmentsLoading ? "Loading departments..." : "Select Department"}
+                </option>
                 {departments.map((dept) => (
                   <option key={dept._id} value={dept._id}>
                     {dept.name}
                   </option>
                 ))}
               </select>
+              {departmentsLoading && (
+                <div className="mt-2 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -1203,14 +1250,26 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
+                disabled={categoriesLoading || !selectedDepartment}
               >
-                <option value="">Select Category</option>
+                <option value="">
+                  {!selectedDepartment 
+                    ? "Select Department First" 
+                    : categoriesLoading 
+                    ? "Loading categories..." 
+                    : "Select Category"}
+                </option>
                 {categories.map((cat, index) => (
                   <option key={index} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
+              {categoriesLoading && (
+                <div className="mt-2 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -1245,7 +1304,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 <input
                   type="text"
                   value={diaryNo}
-                  onChange= {(e) => handleNumberOnlyInput(e, setDiaryNo)}
+                  onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
                   className="w-full p-3 border border-gray-300 rounded-lg"
                   required
                 />
@@ -1331,18 +1390,10 @@ const handleAlphabetOnlyInput = (e, setter) => {
   if (isUploadMode) {
     return (
       <div className="bg-zinc-800 p-4 sm:p-10">
-        {notification && (
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            onDismiss={() => setNotification(null)}
-          />
-        )}{" "}
         <DocumentPreviewModal
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
           document={processedImage}
-          extractedText={extractedText}
           fileName={fileName}
           pdfPreviewData={pdfPreviewData}
         />{" "}
@@ -1407,7 +1458,11 @@ const handleAlphabetOnlyInput = (e, setter) => {
                         <p className="font-medium text-sm">{fileName}</p>
                         <p className="text-xs text-gray-500">
                           {(file.size / 1024).toFixed(1)} KB
-                          {file.type === "application/pdf" && pdfPreviewData?.pageCount && ` • ${pdfPreviewData.pageCount} page${pdfPreviewData.pageCount > 1 ? 's' : ''}`}
+                          {file.type === "application/pdf" &&
+                            pdfPreviewData?.pageCount &&
+                            ` • ${pdfPreviewData.pageCount} page${
+                              pdfPreviewData.pageCount > 1 ? "s" : ""
+                            }`}
                         </p>
                       </div>
                     </div>
@@ -1488,14 +1543,22 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 onChange={(e) => setSelectedDepartment(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
+                disabled={departmentsLoading}
               >
-                <option value="">Select Department</option>
+                <option value="">
+                  {departmentsLoading ? "Loading departments..." : "Select Department"}
+                </option>
                 {departments.map((dept) => (
                   <option key={dept._id} value={dept._id}>
                     {dept.name}
                   </option>
                 ))}
               </select>
+              {departmentsLoading && (
+                <div className="mt-2 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -1504,14 +1567,26 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg"
+                disabled={categoriesLoading || !selectedDepartment}
               >
-                <option value="">Select Category</option>
+                <option value="">
+                  {!selectedDepartment 
+                    ? "Select Department First" 
+                    : categoriesLoading 
+                    ? "Loading categories..." 
+                    : "Select Category"}
+                </option>
                 {categories.map((cat, index) => (
                   <option key={index} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
+              {categoriesLoading && (
+                <div className="mt-2 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -1550,7 +1625,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
                   Diary No *
                 </label>
                 <input
-                  type="text" 
+                  type="text"
                   value={diaryNo}
                   onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
                   className="w-full p-3 border border-gray-300 rounded-lg"
@@ -1697,10 +1772,8 @@ const handleAlphabetOnlyInput = (e, setter) => {
                     );
                     setHasCameraPermission(false);
                     setIsCameraActive(false);
-                    showNotification(
-                      "error",
-                      "Camera access denied. Please allow camera access and try again.",
-                      2000
+                    showErrorToast(
+                      "Camera access denied. Please allow camera access and try again."
                     );
                   }}
                 />
@@ -1970,7 +2043,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
               isOpen={isPreviewOpen}
               onClose={() => setIsPreviewOpen(false)}
               document={enhancedImage}
-              extractedText={extractedText}
               fileName={fileName}
               pdfPreviewData={pdfPreviewData}
             />
@@ -1990,7 +2062,11 @@ const handleAlphabetOnlyInput = (e, setter) => {
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <Eye className="w-5 h-5" />
-                  <span>{pdfPreviewData ? 'PDF Document Preview' : 'Enhanced Document Preview'}</span>
+                  <span>
+                    {pdfPreviewData
+                      ? "PDF Document Preview"
+                      : "Enhanced Document Preview"}
+                  </span>
                 </button>
               </div>
             )}
@@ -2022,14 +2098,22 @@ const handleAlphabetOnlyInput = (e, setter) => {
                       onChange={(e) => setSelectedDepartment(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                       required
+                      disabled={departmentsLoading}
                     >
-                      <option value="">Select Department</option>
+                      <option value="">
+                        {departmentsLoading ? "Loading departments..." : "Select Department"}
+                      </option>
                       {departments.map((dept) => (
                         <option key={dept._id} value={dept._id}>
                           {dept.name}
                         </option>
                       ))}
                     </select>
+                    {departmentsLoading && (
+                      <div className="mt-2 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -2043,14 +2127,26 @@ const handleAlphabetOnlyInput = (e, setter) => {
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                      disabled={categoriesLoading || !selectedDepartment}
                     >
-                      <option value="">Select Category</option>
+                      <option value="">
+                        {!selectedDepartment 
+                          ? "Select Department First" 
+                          : categoriesLoading 
+                          ? "Loading categories..." 
+                          : "Select Category"}
+                      </option>
                       {categories.map((cat, index) => (
                         <option key={index} value={cat}>
                           {cat}
                         </option>
                       ))}
                     </select>
+                    {categoriesLoading && (
+                      <div className="mt-2 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -2094,7 +2190,7 @@ const handleAlphabetOnlyInput = (e, setter) => {
                     </label>
                     <input
                       type="text"
-                      value={diaryNo} 
+                      value={diaryNo}
                       onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
@@ -2189,14 +2285,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
   if (!isCameraActive && currentStep === 0) {
     return (
       <div className="bg-zinc-800 min-h-screen p-4">
-        {notification && (
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            onDismiss={() => setNotification(null)}
-          />
-        )}
-
         <div className="bg-white rounded-lg max-w-md mx-auto p-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold mb-2">Scan Document</h2>
@@ -2215,7 +2303,9 @@ const handleAlphabetOnlyInput = (e, setter) => {
                 <li>• Real OCR text extraction using Tesseract.js</li>
                 <li>• Intelligent subject extraction from documents</li>
                 <li>• PDF optimization and generation</li>
-                <li>• Professional scan quality with multiple enhancement levels</li>
+                <li>
+                  • Professional scan quality with multiple enhancement levels
+                </li>
               </ul>
             </div>
 
@@ -2250,14 +2340,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
   // Main component render for scan mode
   return (
     <div className="bg-zinc-800 min-h-screen">
-      {notification && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          onDismiss={() => setNotification(null)}
-        />
-      )}
-
       {currentStep === 0 ? (
         renderStepContent()
       ) : (
@@ -2282,8 +2364,6 @@ const handleAlphabetOnlyInput = (e, setter) => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

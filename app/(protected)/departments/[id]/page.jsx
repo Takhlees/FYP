@@ -1,40 +1,49 @@
-"use client"
-import "@styles/globals.css"
-import { useState, useEffect } from "react"
-import { useRouter, useParams, useSearchParams } from "next/navigation"
-import ScanUpload from "@components/ScanUpload"
-import { Edit, Download, ArrowLeft, Trash2, X, CheckCircle, AlertTriangle, Save } from "lucide-react"
-import SearchBar from "@components/SearchBar"
-
+"use client";
+import "@styles/globals.css";
+import { useState, useEffect } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import ScanUpload from "@components/ScanUpload";
+import {
+  Edit,
+  Download,
+  ArrowLeft,
+  Trash2,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  Save,
+} from "lucide-react";
+import SearchBar from "@components/SearchBar";
 
 export default function DepartmentPage() {
-  const router = useRouter()
-  const params = useParams()
-  const searchParams = useSearchParams()
-  const id = params.id
-  const name = searchParams.get('name')
-  const [isLoading, setIsLoading] = useState(false)
-  const [categories, setCategories] = useState(["All"])
-  const [newCategory, setNewCategory] = useState("")
-  const [showInput, setShowInput] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [files, setFiles] = useState([])
-  const [editingFile, setEditingFile] = useState(null)
-  const [showForm, setShowForm] = useState(false)
-  const [action, setAction] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredFiles, setFilteredFiles] = useState([])
-  const [previewDoc, setPreviewDoc] = useState(null)
-  const [showPreview, setShowPreview] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState(null)
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const id = params.id;
+  const name = searchParams.get("name");
+  const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState(["All"]);
+  const [newCategory, setNewCategory] = useState("");
+  const [showInput, setShowInput] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [files, setFiles] = useState([]);
+  const [editingFile, setEditingFile] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [action, setAction] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredFiles, setFilteredFiles] = useState([]);
+  const [previewDoc, setPreviewDoc] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
   // Delete confirmation dialog states
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [docToDelete, setDocToDelete] = useState(null)
-  const [showSuccessToast, setShowSuccessToast] = useState(false)
-  const [showCategorySelect, setShowCategorySelect] = useState(false)
-  const [categorySearch, setCategorySearch] = useState("")
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showCategorySelect, setShowCategorySelect] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
   // Add new state for category deletion dialog
-  const [showCategoryDeleteDialog, setShowCategoryDeleteDialog] = useState(false);
+  const [showCategoryDeleteDialog, setShowCategoryDeleteDialog] =
+    useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   // Add new state for category editing
   const [editingCategory, setEditingCategory] = useState(null);
@@ -44,51 +53,51 @@ export default function DepartmentPage() {
     try {
       const response = await fetch(`/api/department/${id}`, {
         method: "GET",
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setCategories(["All", ...data.categories])
+        const data = await response.json();
+        setCategories(["All", ...data.categories]);
       } else {
         // Failed to fetch categories
       }
     } catch (error) {
       // Error fetching categories
     }
-  }
+  };
 
   useEffect(() => {
-    if (!id) return
-    fetchCategories()
-  }, [id])
+    if (!id) return;
+    fetchCategories();
+  }, [id]);
 
   useEffect(() => {
-    if (!selectedCategory || !id) return
-    fetchFiles(id, selectedCategory)
-  }, [selectedCategory, id])
+    if (!selectedCategory || !id) return;
+    fetchFiles(id, selectedCategory);
+  }, [selectedCategory, id]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredFiles(files)
+      setFilteredFiles(files);
     } else {
-      const lowercasedQuery = searchQuery.toLowerCase()
+      const lowercasedQuery = searchQuery.toLowerCase();
       const filtered = files.filter(
         (file) =>
           file.subject?.toLowerCase().includes(lowercasedQuery) ||
           file.diaryNo?.toLowerCase().includes(lowercasedQuery) ||
-          file.from?.toLowerCase().includes(lowercasedQuery),
-      )
-      setFilteredFiles(filtered)
+          file.from?.toLowerCase().includes(lowercasedQuery)
+      );
+      setFilteredFiles(filtered);
     }
-  }, [searchQuery, files])
+  }, [searchQuery, files]);
 
   useEffect(() => {
     if (showSuccessToast) {
       const timer = setTimeout(() => {
-        setShowSuccessToast(false)
-      }, 3000)
-      return () => clearTimeout(timer)
+        setShowSuccessToast(false);
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [showSuccessToast])
+  }, [showSuccessToast]);
 
   const addCategory = async () => {
     if (newCategory.trim()) {
@@ -99,15 +108,15 @@ export default function DepartmentPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ category: newCategory }),
-        })
+        });
         if (response.ok) {
-          const updatedCategories = await response.json()
+          const updatedCategories = await response.json();
           if (Array.isArray(updatedCategories)) {
-            setCategories(["All", ...updatedCategories])
+            setCategories(["All", ...updatedCategories]);
           }
-          setNewCategory("")
-          setShowInput(false)
-          fetchCategories()
+          setNewCategory("");
+          setShowInput(false);
+          fetchCategories();
         } else {
           // Failed to add category
         }
@@ -115,65 +124,67 @@ export default function DepartmentPage() {
         // Error adding category
       }
     }
-  }
+  };
 
   const fetchFiles = async (department, category) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      let url = `/api/scanupload?department=${department}`
+      let url = `/api/scanupload?department=${department}`;
       if (category && category !== "All") {
-        url += `&category=${category}`
+        url += `&category=${category}`;
       }
-      const response = await fetch(url)
+      const response = await fetch(url);
       if (response.ok) {
-        const data = await response.json()
-        const files = data.documents || []
-        setFiles(files)
-        setFilteredFiles(files)
+        const data = await response.json();
+        const files = data.documents || [];
+        setFiles(files);
+        setFilteredFiles(files);
       } else {
         // Failed to fetch files
       }
     } catch (error) {
       // Error fetching files
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handlePreview = async (doc) => {
     try {
-      setPreviewDoc(doc)
-      setShowPreview(true)
+      setPreviewDoc(doc);
+      setShowPreview(true);
       // Fetch the PDF data
-      const response = await fetch(`/api/scanupload/${doc._id}?download=true`)
+      const response = await fetch(`/api/scanupload/${doc._id}?download=true`);
       if (response.ok) {
-        const blob = await response.blob()
-        const url = URL.createObjectURL(blob)
-        setPdfUrl(url)
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
       } else {
-        setShowPreview(false)
+        setShowPreview(false);
       }
     } catch (error) {
-      setShowPreview(false)
+      setShowPreview(false);
     }
-  }
+  };
 
   const closePreview = () => {
-    setShowPreview(false)
-    setPreviewDoc(null)
+    setShowPreview(false);
+    setPreviewDoc(null);
     if (pdfUrl) {
-      URL.revokeObjectURL(pdfUrl)
-      setPdfUrl(null)
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(null);
     }
-  }
+  };
 
   const handleEdit = (doc) => {
     try {
       // Simple detection: if filename contains scan patterns, it was scanned
       const isScanned =
         doc.fileName &&
-        (doc.fileName.includes("a4_scan_") || doc.fileName.includes("scanned_") || doc.fileName.includes("scan_"))
-      const originalMode = isScanned ? "Scan" : "Upload"
+        (doc.fileName.includes("a4_scan_") ||
+          doc.fileName.includes("scanned_") ||
+          doc.fileName.includes("scan_"));
+      const originalMode = isScanned ? "Scan" : "Upload";
 
       // Prepare the file data for editing with proper structure
       const editData = {
@@ -190,72 +201,72 @@ export default function DepartmentPage() {
         extractedText: doc.extractedText || "",
         fileName: doc.fileName || doc.subject || "document",
         isEditMode: true,
-      }
+      };
 
-      setEditingFile(editData)
-      setAction(originalMode)
-      setShowForm(true)
+      setEditingFile(editData);
+      setAction(originalMode);
+      setShowForm(true);
     } catch (error) {
       // Error setting up edit
     }
-  }
+  };
 
   const handleDownload = async (doc) => {
     try {
       const response = await fetch(`/api/scanupload/${doc._id}?download=true`, {
         method: "GET",
-      })
+      });
       if (!response.ok) {
-        throw new Error(`Download failed: ${response.status}`)
+        throw new Error(`Download failed: ${response.status}`);
       }
-      const blob = await response.blob()
+      const blob = await response.blob();
       if (!blob || blob.size === 0) {
-        throw new Error("Downloaded file is empty")
+        throw new Error("Downloaded file is empty");
       }
-      downloadBlob(blob, doc)
+      downloadBlob(blob, doc);
     } catch (error) {
       // Download failed
     }
-  }
+  };
 
   const downloadBlob = (blob, doc) => {
     try {
       if (!blob || blob.size === 0) {
-        throw new Error("Downloaded file is empty")
+        throw new Error("Downloaded file is empty");
       }
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.style.display = "none"
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.style.display = "none";
 
-      let fileName = doc.fileName || doc.subject || "document"
-      fileName = fileName.replace(/[^a-z0-9.-]/gi, "_")
+      let fileName = doc.fileName || doc.subject || "document";
+      fileName = fileName.replace(/[^a-z0-9.-]/gi, "_");
       if (!fileName.toLowerCase().endsWith(".pdf")) {
-        fileName += ".pdf"
+        fileName += ".pdf";
       }
-      link.download = fileName
+      link.download = fileName;
 
-      document.body.appendChild(link)
-      link.click()
+      document.body.appendChild(link);
+      link.click();
 
       setTimeout(() => {
         if (document.body.contains(link)) {
-          document.body.removeChild(link)
+          document.body.removeChild(link);
         }
-        window.URL.revokeObjectURL(url)
-      }, 100)
+        window.URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
       // Error creating download
     }
-  }
+  };
 
   const handleDelete = (doc) => {
-    setDocToDelete(doc)
-    setShowDeleteConfirm(true)
-  }
+    setDocToDelete(doc);
+    setShowDeleteConfirm(true);
+  };
 
   const confirmDelete = async () => {
-    if (!docToDelete) return
+    if (!docToDelete) return;
 
     try {
       const response = await fetch(`/api/scanupload/${docToDelete._id}`, {
@@ -268,52 +279,56 @@ export default function DepartmentPage() {
           isDeleted: true,
           deletedAt: new Date().toISOString(),
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        throw new Error(errorData.message || `Delete failed: ${response.status}`)
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+        throw new Error(
+          errorData.message || `Delete failed: ${response.status}`
+        );
       }
 
       // Close delete confirmation dialog
-      setShowDeleteConfirm(false)
-      setDocToDelete(null)
+      setShowDeleteConfirm(false);
+      setDocToDelete(null);
 
       // Refresh the files list after deletion
       if (selectedCategory && id) {
-        await fetchFiles(id, selectedCategory)
+        await fetchFiles(id, selectedCategory);
       }
 
       // Show success toast
-      setShowSuccessToast(true)
+      setShowSuccessToast(true);
     } catch (error) {
-      setShowDeleteConfirm(false)
-      setDocToDelete(null)
+      setShowDeleteConfirm(false);
+      setDocToDelete(null);
     }
-  }
+  };
 
   const cancelDelete = () => {
-    setShowDeleteConfirm(false)
-    setDocToDelete(null)
-  }
+    setShowDeleteConfirm(false);
+    setDocToDelete(null);
+  };
 
   const closeSuccessMessage = () => {
-    setShowSuccessMessage(false)
-  }
+    setShowSuccessMessage(false);
+  };
 
   const handleFormClose = () => {
-    setShowForm(false)
-    setEditingFile(null)
-    setAction("")
+    setShowForm(false);
+    setEditingFile(null);
+    setAction("");
     if (selectedCategory && id) {
-      fetchFiles(id, selectedCategory)
+      fetchFiles(id, selectedCategory);
     }
-  }
+  };
 
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category)
-    setShowCategorySelect(false)
-  }
+    setSelectedCategory(category);
+    setShowCategorySelect(false);
+  };
 
   const handleCategoryDeleteClick = (category) => {
     setCategoryToDelete(category);
@@ -323,10 +338,16 @@ export default function DepartmentPage() {
   const confirmCategoryDelete = async () => {
     if (!categoryToDelete || !id) return;
     try {
-      const params = new URLSearchParams({ departmentId: id, category: categoryToDelete });
-      const response = await fetch(`/api/department/category?${params.toString()}`, {
-        method: 'DELETE',
+      const params = new URLSearchParams({
+        departmentId: id,
+        category: categoryToDelete,
       });
+      const response = await fetch(
+        `/api/department/category?${params.toString()}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (response.ok) {
         setShowCategoryDeleteDialog(false);
         setCategoryToDelete(null);
@@ -341,7 +362,7 @@ export default function DepartmentPage() {
       setShowCategoryDeleteDialog(false);
       setCategoryToDelete(null);
     }
-  }; 
+  };
   // Handler to cancel category deletion
   const cancelCategoryDelete = () => {
     setShowCategoryDeleteDialog(false);
@@ -357,22 +378,25 @@ export default function DepartmentPage() {
   // Handler to save category edit
   const saveCategoryEdit = async () => {
     if (!editingCategory || !editedCategoryName.trim() || !id) return;
-    
+
     try {
-      const params = new URLSearchParams({ 
-        departmentId: id, 
-        oldCategory: editingCategory, 
-        newCategory: editedCategoryName.trim() 
+      const params = new URLSearchParams({
+        departmentId: id,
+        oldCategory: editingCategory,
+        newCategory: editedCategoryName.trim(),
       });
-      const response = await fetch(`/api/department/category?${params.toString()}`, {
-        method: 'PUT',
-      });
-      
+      const response = await fetch(
+        `/api/department/category?${params.toString()}`,
+        {
+          method: "PUT",
+        }
+      );
+
       if (response.ok) {
         setEditingCategory(null);
         setEditedCategoryName("");
         await fetchCategories(); // refresh categories
-        setShowCategorySelect(true); 
+        setShowCategorySelect(true);
       } else {
         const errorData = await response.json();
         // Failed to update category
@@ -392,44 +416,45 @@ export default function DepartmentPage() {
   // Add useEffect to control body scroll when category selector is open
   useEffect(() => {
     if (showCategorySelect) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       setCategorySearch("");
       setEditingCategory(null);
       setEditedCategoryName("");
     } else {
-      document.body.style.overflow = 'unset';
-    }    return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
     };
   }, [showCategorySelect]);
- 
+
   // Filter categories based on search
-  const filteredCategories = categories.filter(category => 
+  const filteredCategories = categories.filter((category) =>
     category.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
   useEffect(() => {
     if (showForm) {
       // Lock body scroll and force to top
-      document.body.style.overflow = 'hidden';
-      document.body.style.height = '100%';
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
       window.scrollTo(0, 0);
-      
+
       // Force the form container to top
-      const formContainer = document.querySelector('.overflow-y-auto');
+      const formContainer = document.querySelector(".overflow-y-auto");
       if (formContainer) {
         formContainer.scrollTop = 0;
       }
     } else {
       // Restore body scroll
-      document.body.style.overflow = '';
-      document.body.style.height = '';
+      document.body.style.overflow = "";
+      document.body.style.height = "";
     }
 
     return () => {
       // Cleanup
-      document.body.style.overflow = '';
-      document.body.style.height = '';
+      document.body.style.overflow = "";
+      document.body.style.height = "";
     };
   }, [showForm]);
 
@@ -437,14 +462,18 @@ export default function DepartmentPage() {
     <>
       {/* Success Toast Notification */}
       {showSuccessToast && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right duration-300">
           <div className="bg-white border-l-4 border-green-500 rounded-r-2xl shadow-lg p-4 flex items-center space-x-3 min-w-80">
             <div className="flex-shrink-0">
               <CheckCircle className="h-6 w-6 text-green-500" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-[#111827]">Successfully Deleted!</p>
-              <p className="text-xs text-[#6B7280]">Document has been removed from your files</p>
+              <p className="text-sm font-medium text-[#111827]">
+                Successfully Deleted!
+              </p>
+              <p className="text-xs text-[#6B7280]">
+                Document has been removed from your files
+              </p>
             </div>
             <button
               onClick={() => setShowSuccessToast(false)}
@@ -455,20 +484,23 @@ export default function DepartmentPage() {
           </div>
         </div>
       )}
-
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && docToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6">
             {/* Header */}
             <div className="text-center mb-4">
-              <h3 className="text-xl font-semibold text-[#111827] mb-3">Delete?</h3>
+              <h3 className="text-xl font-semibold text-[#111827] mb-3">
+                Delete?
+              </h3>
               <p className="text-[#6B7280] text-sm leading-relaxed">
                 Are you sure you want to delete "{docToDelete.subject}"?
               </p>
               <div className="flex items-center justify-center gap-2 mt-2 text-red-600">
                 <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm font-medium">This action cannot be undone</span>
+                <span className="text-sm font-medium">
+                  This action cannot be undone
+                </span>
               </div>
             </div>
             {/* Action buttons */}
@@ -489,26 +521,33 @@ export default function DepartmentPage() {
           </div>
         </div>
       )}
-
-      {/* PDF Preview Modal */}      {showPreview && previewDoc && (
+      {/* PDF Preview Modal */}{" "}
+      {showPreview && previewDoc && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-11/12 h-5/6 flex flex-col">
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">{previewDoc.subject}</h2>
-              <button onClick={closePreview} className="text-gray-500 hover:text-gray-700">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {previewDoc.subject}
+              </h2>
+              <button
+                onClick={closePreview}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X size={24} />
               </button>
             </div>
-            <div className="flex-1 p-4">              {pdfUrl ? (
+            <div className="flex-1 p-4">
+              {" "}
+              {pdfUrl ? (
                 <embed
                   src={pdfUrl}
                   type="application/pdf"
                   className="w-full h-full border-0"
-                  style={{ 
-                    width: '100%',
-                    height: '100%',
-                    overflow: 'auto',
-                    WebkitOverflowScrolling: 'touch'
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    overflow: "auto",
+                    WebkitOverflowScrolling: "touch",
                   }}
                 />
               ) : (
@@ -516,29 +555,41 @@ export default function DepartmentPage() {
                   <p>Loading PDF...</p>
                 </div>
               )}
-            </div>            <div className="p-4 border-t flex gap-2 justify-end">
+            </div>{" "}
+            <div className="p-4 border-t flex gap-2 justify-end">
               <button
                 onClick={() => handleDownload(previewDoc)}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
               >
                 Download
               </button>
-              <button onClick={closePreview} className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+              <button
+                onClick={closePreview}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
                 Close
               </button>
             </div>
           </div>
         </div>
-      )}      {showForm ? (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 overflow-y-auto overflow-x-hidden" style={{ top: 0 }}>
-            <div className="w-full">
-              <div className="w-full bg-white">
-                <div className="-mx-6 sm:mx-0">
-                  <ScanUpload fileData={editingFile} action={action} onClose={handleFormClose} />
-                </div>
+      )}{" "}
+      {showForm ? (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 overflow-y-auto overflow-x-hidden"
+          style={{ top: 0 }}
+        >
+          <div className="w-full">
+            <div className="w-full bg-white">
+              <div className="-mx-6 sm:mx-0">
+                <ScanUpload
+                  fileData={editingFile}
+                  action={action}
+                  onClose={handleFormClose}
+                />
               </div>
             </div>
           </div>
+        </div>
       ) : (
         <div className="p-3 sm:p-6 bg-white">
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between">
@@ -564,7 +615,9 @@ export default function DepartmentPage() {
           {showInput && (
             <div className="mt-6 mb-8 p-6 rounded-lg shadow-lg border border-gray-200 bg-white">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-[#111827] mb-4">Add New Category</h3>
+                <h3 className="text-lg font-medium text-[#111827] mb-4">
+                  Add New Category
+                </h3>
 
                 <button
                   onClick={() => setShowInput(false)}
@@ -595,35 +648,52 @@ export default function DepartmentPage() {
           )}
 
           <div className="mt-6">
-            <h3 className="text-lg font-medium mb-2 text-[#111827]">Categories:</h3>
+            <h3 className="text-lg font-medium mb-2 text-[#111827]">
+              Categories:
+            </h3>
             <div className="w-full relative">
               <button
                 onClick={() => setShowCategorySelect(true)}
                 className="w-full px-4 py-2.5 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] cursor-pointer flex items-center justify-between text-left"
               >
-                <span className={selectedCategory === "All" ? "text-gray-500" : "text-gray-900"}>
+                <span
+                  className={
+                    selectedCategory === "All"
+                      ? "text-gray-500"
+                      : "text-gray-900"
+                  }
+                >
                   {selectedCategory}
                 </span>
-                <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
 
               {/* Category Selector Modal/Bottom Sheet */}
               {showCategorySelect && (
                 <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
-                  <div 
-                    className="fixed inset-0 bg-black bg-opacity-25 transition-opacity" 
+                  <div
+                    className="fixed inset-0 bg-black bg-opacity-25 transition-opacity"
                     onClick={() => setShowCategorySelect(false)}
                   />
-                  
 
                   <div className="fixed inset-x-0 bottom-0 transform md:relative md:inset-auto md:transform-none">
                     <div className="bg-white rounded-t-2xl md:rounded-xl shadow-xl max-h-[80vh] md:max-h-[600px] md:w-[400px] flex flex-col overflow-hidden">
                       {/* Header */}
                       <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                        <h2 className="text-lg font-semibold text-gray-900">Select Category</h2>
-                        <button 
+                        <h2 className="text-lg font-semibold text-gray-900">
+                          Select Category
+                        </h2>
+                        <button
                           onClick={() => setShowCategorySelect(false)}
                           className="text-gray-400 hover:text-gray-600 focus:outline-none"
                         >
@@ -641,13 +711,13 @@ export default function DepartmentPage() {
                             onChange={(e) => setCategorySearch(e.target.value)}
                             className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-[#3B5FE3] focus:border-[#3B5FE3] pl-10"
                           />
-                          <svg 
+                          <svg
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-                            fill="none" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth="2" 
-                            viewBox="0 0 24 24" 
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
                             stroke="currentColor"
                           >
                             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -664,19 +734,28 @@ export default function DepartmentPage() {
                         ) : (
                           <div className="divide-y divide-gray-200">
                             {filteredCategories.map((category, index) => (
-                              <div key={index} className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selectedCategory === category ? 'bg-indigo-50' : ''}`}>
+                              <div
+                                key={index}
+                                className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${
+                                  selectedCategory === category
+                                    ? "bg-indigo-50"
+                                    : ""
+                                }`}
+                              >
                                 {editingCategory === category ? (
                                   // Edit mode
                                   <div className="flex-1 flex items-center gap-2">
                                     <input
                                       type="text"
                                       value={editedCategoryName}
-                                      onChange={(e) => setEditedCategoryName(e.target.value)}
+                                      onChange={(e) =>
+                                        setEditedCategoryName(e.target.value)
+                                      }
                                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                                       onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
+                                        if (e.key === "Enter") {
                                           saveCategoryEdit();
-                                        } else if (e.key === 'Escape') {
+                                        } else if (e.key === "Escape") {
                                           cancelCategoryEdit();
                                         }
                                       }}
@@ -701,23 +780,33 @@ export default function DepartmentPage() {
                                   // View mode
                                   <>
                                     <button
-                                      onClick={() => handleCategorySelect(category)}
-                                      className={`flex-1 text-left focus:outline-none truncate ${selectedCategory === category ? 'text-indigo-600 font-medium' : 'text-gray-900'}`}
-                                      style={{ maxWidth: '70vw' }}
+                                      onClick={() =>
+                                        handleCategorySelect(category)
+                                      }
+                                      className={`flex-1 text-left focus:outline-none truncate ${
+                                        selectedCategory === category
+                                          ? "text-indigo-600 font-medium"
+                                          : "text-gray-900"
+                                      }`}
+                                      style={{ maxWidth: "70vw" }}
                                     >
                                       {category}
                                     </button>
-                                    {category !== 'All' && (
+                                    {category !== "All" && (
                                       <div className="flex items-center gap-1">
                                         <button
-                                          onClick={() => handleCategoryEditClick(category)}
+                                          onClick={() =>
+                                            handleCategoryEditClick(category)
+                                          }
                                           className="text-blue-600 hover:text-blue-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
                                           title="Edit category"
                                         >
                                           <Edit size={18} />
                                         </button>
                                         <button
-                                          onClick={() => handleCategoryDeleteClick(category)}
+                                          onClick={() =>
+                                            handleCategoryDeleteClick(category)
+                                          }
                                           className="text-red-500 hover:text-red-700 focus:outline-none p-2 min-w-[40px] min-h-[40px]"
                                           title="Delete category"
                                         >
@@ -743,7 +832,11 @@ export default function DepartmentPage() {
           </div>
 
           <div className="mt-4 sm:mt-6">
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />            <div className="overflow-x-auto mt-4 rounded-lg border-2 border-gray-300">
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />{" "}
+            <div className="overflow-x-auto mt-4 rounded-lg border-2 border-gray-300">
               <table className="min-w-full bg-white">
                 <thead className="bg-[#F3F4F6]">
                   <tr>
@@ -773,32 +866,50 @@ export default function DepartmentPage() {
                 <tbody className="divide-y divide-gray-300">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="7" className="px-6 py-4 text-center">
-                        Loading files...
+                      <td colSpan="7" className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                          <div className="text-gray-600 text-sm font-medium">Loading files...</div>
+                        </div>
                       </td>
                     </tr>
-                                     ) : Array.isArray(filteredFiles) && filteredFiles.length > 0 ? (
-                     filteredFiles.map((doc) => (
-                       <tr key={doc._id}>
-                         <td className="px-3 sm:px-6 py-4">
+                  ) : Array.isArray(filteredFiles) &&
+                    filteredFiles.length > 0 ? (
+                    filteredFiles.map((doc) => (
+                      <tr key={doc._id}>
+                        <td className="px-3 sm:px-6 py-4">
                           <button
                             onClick={() => handlePreview(doc)}
                             className="text-light hover:text-mid hover:underline focus:outline-none cursor-pointer text-left text-sm sm:text-base"
                           >
-                            <span className="line-clamp-2 sm:line-clamp-1">{doc.subject}</span>
+                            <span className="line-clamp-2 sm:line-clamp-1">
+                              {doc.subject}
+                            </span>
                             <span className="text-xs text-gray-500 block sm:hidden mt-1">
-                              {doc.date ? new Date(doc.date).toLocaleDateString("en-GB") : "N/A"}
+                              {doc.date
+                                ? new Date(doc.date).toLocaleDateString("en-GB")
+                                : "N/A"}
                             </span>
                           </button>
                         </td>
                         <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
-                          {doc.date ? new Date(doc.date).toLocaleDateString("en-GB") : "N/A"}
+                          {doc.date
+                            ? new Date(doc.date).toLocaleDateString("en-GB")
+                            : "N/A"}
                         </td>
-                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.diaryNo || "N/A"}</td>
-                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.from || "N/A"}</td>
-                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">{doc.disposal || "N/A"}</td>
+                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
+                          {doc.diaryNo || "N/A"}
+                        </td>
+                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
+                          {doc.from || "N/A"}
+                        </td>
+                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
+                          {doc.disposal || "N/A"}
+                        </td>
                         <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-[#6B7280]">
-                          <span className="px-2 py-1 rounded-full bg-gray-100">{doc.status || "N/A"}</span>
+                          <span className="px-2 py-1 rounded-full bg-gray-100">
+                            {doc.status || "N/A"}
+                          </span>
                         </td>
                         <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex gap-2 justify-end sm:justify-start">
@@ -829,7 +940,10 @@ export default function DepartmentPage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                      <td
+                        colSpan="7"
+                        className="px-6 py-4 text-center text-gray-500"
+                      >
                         No files found...
                       </td>
                     </tr>
@@ -840,19 +954,22 @@ export default function DepartmentPage() {
           </div>
         </div>
       )}
-
       {/* Category Delete Confirmation Dialog */}
       {showCategoryDeleteDialog && categoryToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6">
             <div className="text-center mb-4">
-              <h3 className="text-xl font-semibold text-[#111827] mb-3">Delete Category?</h3>
+              <h3 className="text-xl font-semibold text-[#111827] mb-3">
+                Delete Category?
+              </h3>
               <p className="text-[#6B7280] text-sm leading-relaxed">
                 Are you sure you want to delete category "{categoryToDelete}"?
               </p>
               <div className="flex items-center justify-center gap-2 mt-2 text-red-600">
                 <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm font-medium">This action cannot be undone</span>
+                <span className="text-sm font-medium">
+                  This action cannot be undone
+                </span>
               </div>
             </div>
             <div className="flex space-x-3 mt-6">
@@ -872,22 +989,6 @@ export default function DepartmentPage() {
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes slide-in-right {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        .animate-slide-in-right {
-          animation: slide-in-right 0.3s ease-out;
-        }
-             `}</style>
-     </>
-   );
- }
+    </>
+  );
+}

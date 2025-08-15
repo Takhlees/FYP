@@ -327,15 +327,6 @@ html.dark .text-info {
   border-color: #d1d5db !important;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* Loading toast specific styles */
 .Toastify__toast--info {
   background-color: #000000 !important;

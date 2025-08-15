@@ -59,20 +59,15 @@ try {
   .createHash("sha256")
   .update(resetToken)
   .digest("hex");
-  const passwordResetExpires = Date.now() + 3600000; // 1 hour expiry
+  const passwordResetExpires = Date.now() + 3600000;
   
-  // Save token in DB
   user.resetToken = passwordResetToken;
   user.resetTokenExpiry = passwordResetExpires;
   await user.save();
   
 
-  
-// Hash new password
 const hashedPassword = await bcrypt.hash(newPassword, 10);
-// Update user password
 user.password = hashedPassword;
-// Save updated user to database
 await user.save();
 
 } catch (error) {
@@ -81,7 +76,6 @@ await user.save();
     
 }
 return NextResponse.json({ message: "Password changed successfully" }, { status: 200 });
-//   Return updated user data
 
 }
 

@@ -1,38 +1,54 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import "@styles/globals.css"
-import { getSession, signOut } from "next-auth/react"
-import Image from "next/image"
-import DirectThemeToggle from "./ThemeToggel"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import "@styles/globals.css";
+import { getSession, signOut } from "next-auth/react";
+import Image from "next/image";
+import DirectThemeToggle from "./ThemeToggel";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
-  const [session, setSession] = useState(null)
-  const [profileImage, setProfileImage] = useState(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const pathname = usePathname();
 
   // Fetch session data
   useEffect(() => {
     const fetchSession = async () => {
-      const sessionData = await getSession()
-      setSession(sessionData)
-    }
-    fetchSession()
-  }, [])
+      const sessionData = await getSession();
+      setSession(sessionData);
+    };
+    fetchSession();
+  }, []);
 
   // Load profile image from localStorage
   useEffect(() => {
-    const savedProfile = localStorage.getItem("profileData")
+    const savedProfile = localStorage.getItem("profileData");
     if (savedProfile) {
-      const parsedProfile = JSON.parse(savedProfile)
+      const parsedProfile = JSON.parse(savedProfile);
       if (parsedProfile.image) {
-        setProfileImage(parsedProfile.image)
+        setProfileImage(parsedProfile.image);
       }
     }
-  }, [])
+  }, []);
+
+  // Helper function to check if a link is active
+  const isActiveLink = (href) => {
+    if (href === "/home") {
+      return pathname === "/home";
+    }
+    if (href.includes("/departments")) {
+      return pathname.includes("/departments");
+    }
+    if (href === "/about") {
+      return pathname === "/about";
+    }
+    return false;
+  };
 
   return (
     <nav className="bg-gray-200 dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
@@ -50,35 +66,51 @@ export default function Navbar() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/home"
-                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
+                className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveLink("/home")
+                    ? "text-black dark:text-white font-bold"
+                    : "text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
               >
                 Home
               </Link>
               <Link
                 href="/departments?type=uni"
-                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
+                className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveLink("/departments")
+                    ? "text-black dark:text-white font-bold"
+                    : "text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
               >
                 University
               </Link>
               <Link
                 href="/departments?type=admin"
-                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
+                className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveLink("/departments")
+                    ? "text-black dark:text-white font-bold"
+                    : "text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
               >
                 Admin
               </Link>
               <Link
                 href="/about"
-                className="text-black dark:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-300"
+                className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveLink("/about")
+                    ? "text-black dark:text-white font-bold"
+                    : "text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
               >
                 About
               </Link>
             </div>
           </div>
-          
+
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
             {/* Direct Theme Toggle */}
             <DirectThemeToggle />
-            
+
             {/* Profile Dropdown */}
             <div className="ml-3 relative">
               <div>
@@ -102,7 +134,11 @@ export default function Navbar() {
                         />
                       </div>
                     ) : (
-                      <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-full w-full text-gray-300 dark:text-gray-600"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                     )}
@@ -141,12 +177,12 @@ export default function Navbar() {
               )}
             </div>
           </div>
-          
+
           {/* Mobile menu button */}
           <div className="-mr-2 flex items-center sm:hidden space-x-2">
             {/* Mobile Direct Theme Toggle */}
             <DirectThemeToggle />
-            
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               type="button"
@@ -164,7 +200,12 @@ export default function Navbar() {
                   stroke="currentColor"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               ) : (
                 <svg
@@ -175,41 +216,68 @@ export default function Navbar() {
                   stroke="currentColor"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               )}
             </button>
           </div>
         </div>
-      </div>      {/* Mobile menu */}
+      </div>{" "}
+      {/* Mobile menu */}
       {isOpen && (
-        <div className="sm:hidden bg-white dark:bg-gray-800 transition-colors duration-300" id="mobile-menu">          <div className="pt-3 pb-2 flex flex-col">
+        <div
+          className="sm:hidden bg-white dark:bg-gray-800 transition-colors duration-300"
+          id="mobile-menu"
+        >
+          {" "}
+          <div className="pt-3 pb-2 flex flex-col">
             <Link
               href="/home"
-              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              className={`px-4 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                isActiveLink("/home")
+                  ? "text-black dark:text-white font-bold"
+                  : "text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
             >
               Home
             </Link>
             <Link
               href="/departments?type=uni"
-              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              className={`px-4 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                isActiveLink("/departments")
+                  ? "text-black dark:text-white font-bold"
+                  : "text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
             >
               University
             </Link>
             <Link
               href="/departments?type=admin"
-              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              className={`px-4 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                isActiveLink("/departments")
+                  ? "text-black dark:text-white font-bold"
+                  : "text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
             >
               Admin
             </Link>
             <Link
               href="/about"
-              className="px-4 py-2 rounded-md text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              className={`px-4 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                isActiveLink("/about")
+                  ? "text-black dark:text-white font-bold"
+                  : "text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
             >
               About
             </Link>
           </div>
-            {/* Mobile profile section */}
+          {/* Mobile profile section */}
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
@@ -225,14 +293,20 @@ export default function Navbar() {
                       />
                     </div>
                   ) : (
-                    <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="h-full w-full text-gray-300 dark:text-gray-600"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   )}
                 </span>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-black dark:text-white">{session?.user?.email}</div>
+                <div className="text-base font-medium text-black dark:text-white">
+                  {session?.user?.email}
+                </div>
               </div>
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
@@ -240,19 +314,27 @@ export default function Navbar() {
               >
                 <span className="sr-only">Open user menu</span>
                 <svg
-                  className={`h-6 w-6 transition-transform ${mobileDropdownOpen ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 transition-transform ${
+                    mobileDropdownOpen ? "rotate-180" : ""
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
-            </div>            {mobileDropdownOpen && (
+            </div>{" "}
+            {mobileDropdownOpen && (
               <div className="mt-3 px-4 bg-gray-100 dark:bg-gray-800">
-                <Link 
-                  href="/profile" 
+                <Link
+                  href="/profile"
                   className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
                 >
                   Profile
@@ -275,5 +357,5 @@ export default function Navbar() {
         </div>
       )}
     </nav>
-  )
+  );
 }

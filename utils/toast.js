@@ -1,6 +1,4 @@
 import { toast } from 'react-toastify';
-
-// Track active toasts to prevent duplicates
 let activeToastIds = new Set();
 
 // Clear all active toasts
@@ -132,7 +130,7 @@ export const showLoadingToast = (message, description = null) => {
       position: window.innerWidth < 768 ? "top-center" : "top-right",
       theme: "dark",
       icon: false,
-      autoClose: 3000, // 3 second timeout
+      autoClose: false, // Don't auto-close loading toasts so they can be updated
       className: "max-w-[90vw] sm:max-w-md",
       toastClassName: "max-w-[90vw] sm:max-w-md",
     }
@@ -144,8 +142,6 @@ export const showLoadingToast = (message, description = null) => {
 
 // Update loading toast to success/error
 export const updateToast = (toastId, type, message, description = null) => {
-  console.log("updateToast called with:", { toastId, type, message, description });
-  
   const toastConfig = {
     render: (
       <div className="min-w-0">
@@ -160,13 +156,9 @@ export const updateToast = (toastId, type, message, description = null) => {
     className: "max-w-[90vw] sm:max-w-md",
     toastClassName: "max-w-[90vw] sm:max-w-md",
   };
-
-  console.log("Toast config:", toastConfig);
-  console.log("Calling toast.update with ID:", toastId);
   
   try {
     toast.update(toastId, toastConfig);
-    console.log("toast.update called successfully");
     
     // Remove from active toasts when updated
     if (activeToastIds.has(toastId)) {
@@ -175,6 +167,35 @@ export const updateToast = (toastId, type, message, description = null) => {
   } catch (error) {
     console.error("Error in toast.update:", error);
     throw error;
+  }
+};
+
+// Dismiss a specific toast
+export const dismissToast = (toastId) => {
+  if (toastId && activeToastIds.has(toastId)) {
+    toast.dismiss(toastId);
+    activeToastIds.delete(toastId);
+  }
+};
+
+// Update loading toast message while keeping the spinner
+export const updateLoadingToast = (toastId, message) => {
+  if (toastId && activeToastIds.has(toastId)) {
+    toast.update(toastId, {
+      render: (
+        <div className="flex items-center min-w-0">
+          <div className="mr-3 flex-shrink-0">
+            <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-white border-t-transparent"></div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-white text-sm sm:text-base break-words">{message}</div>
+            <div className="text-gray-300 text-xs sm:text-sm mt-1 break-words">Processing your request...</div>
+          </div>
+        </div>
+      ),
+      isLoading: true,
+      autoClose: false
+    });
   }
 };
 
