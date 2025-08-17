@@ -42,97 +42,81 @@ html, body {
 
 /* Ensure dark mode class inheritance */
 html.dark, html.dark body {
-  background-color: rgb(17, 24, 39);
-  color: rgb(255, 255, 255);
+  background-color: rgb(var(--color-bg-primary));
+  color: rgb(var(--color-text-primary));
 }
 
-/* AUTOMATIC DARK MODE OVERRIDES */
+/* AUTOMATIC DARK MODE OVERRIDES - More targeted approach */
 
-/* Background overrides */
-html.dark [class*="bg-white"]:not([class*="dark:"]) {
-  background-color: rgb(31, 41, 55) !important;
-  color: white !important;
+/* Background overrides - only for specific cases */
+html.dark .bg-white:not(.dark\:bg-white) {
+  background-color: rgb(var(--color-bg-secondary)) !important;
 }
 
-html.dark [class*="bg-gray-50"]:not([class*="dark:"]) {
-  background-color: rgb(55, 65, 81) !important;
+html.dark .bg-gray-50:not(.dark\:bg-gray-50) {
+  background-color: rgb(var(--color-bg-tertiary)) !important;
 }
 
-html.dark [class*="bg-gray-100"]:not([class*="dark:"]) {
+html.dark .bg-gray-100:not(.dark\:bg-gray-100) {
   background-color: rgb(75, 85, 99) !important;
 }
 
-html.dark [class*="bg-gray-200"]:not([class*="dark:"]) {
-  background-color: rgb(55, 65, 81) !important;
+/* Text color overrides - more specific */
+html.dark .text-black:not(.dark\:text-black),
+html.dark .text-gray-900:not(.dark\:text-gray-900) {
+  color: rgb(var(--color-text-primary)) !important;
 }
 
-/* Text color overrides */
-html.dark [class*="text-black"]:not([class*="dark:"]),
-html.dark [class*="text-gray-900"]:not([class*="dark:"]) {
-  color: white !important;
-}
-
-html.dark [class*="text-gray-800"]:not([class*="dark:"]) {
+html.dark .text-gray-800:not(.dark\:text-gray-800) {
   color: rgb(229, 231, 235) !important;
 }
 
-html.dark [class*="text-gray-700"]:not([class*="dark:"]) {
-  color: rgb(209, 213, 219) !important;
-}
-
-html.dark [class*="text-gray-600"]:not([class*="dark:"]),
-html.dark [class*="text-gray-500"]:not([class*="dark:"]) {
-  color: rgb(156, 163, 175) !important;
-}
-
-html.dark [class*="text-secondary"]:not([class*="dark:"]) {
+html.dark .text-gray-700:not(.dark\:text-gray-700) {
   color: rgb(209, 213, 219) !important;
 }
 
 /* Border overrides */
-html.dark [class*="border-gray-200"]:not([class*="dark:"]),
-html.dark [class*="border-gray-300"]:not([class*="dark:"]),
-html.dark [class*="divide-gray-200"]:not([class*="dark:"]),
-html.dark [class*="divide-gray-100"]:not([class*="dark:"]) {
-  border-color: rgb(75, 85, 99) !important;
+html.dark .border-gray-200:not(.dark\:border-gray-200),
+html.dark .border-gray-300:not(.dark\:border-gray-300) {
+  border-color: rgb(var(--color-border)) !important;
 }
 
-/* Form elements */
+/* Form elements - consolidated and simplified */
 html.dark input:not([class*="dark:"]):not([type="radio"]):not([type="checkbox"]),
 html.dark textarea:not([class*="dark:"]),
 html.dark select:not([class*="dark:"]) {
-  background-color: rgb(55, 65, 81) !important;
-  border-color: rgb(75, 85, 99) !important;
-  color: white !important;
+  background-color: rgb(var(--color-bg-tertiary)) !important;
+  border-color: rgb(var(--color-border)) !important;
+  color: rgb(var(--color-text-primary)) !important;
 }
 
-html.dark option {
-  background-color: rgb(55, 65, 81) !important;
-  color: white !important;
+html.dark select option {
+  background-color: rgb(var(--color-bg-tertiary)) !important;
+  color: rgb(var(--color-text-primary)) !important;
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: rgb(156, 163, 175) !important;
+  color: rgb(var(--color-text-muted)) !important;
   opacity: 1;
 }
 
 /* Typography elements */
-html.dark h1:not([class*="text-"]), 
-html.dark h2:not([class*="text-"]), 
-html.dark h3:not([class*="text-"]), 
-html.dark h4:not([class*="text-"]), 
-html.dark h5:not([class*="text-"]), 
-html.dark h6:not([class*="text-"]) {
-  color: white !important;
+html.dark h1:not([class*="text-"]):not([class*="bg-"]), 
+html.dark h2:not([class*="text-"]):not([class*="bg-"]), 
+html.dark h3:not([class*="text-"]):not([class*="bg-"]), 
+html.dark h4:not([class*="text-"]):not([class*="bg-"]), 
+html.dark h5:not([class*="text-"]):not([class*="bg-"]), 
+html.dark h6:not([class*="text-"]):not([class*="bg-"]) {
+  color: rgb(var(--color-text-primary)) !important;
 }
 
 html.dark p:not([class*="text-"]):not([class*="bg-"]) {
-  color: rgb(209, 213, 219) !important;
+  color: rgb(var(--color-text-secondary)) !important;
 }
 
 html.dark label:not([class*="text-"]) {
-  color: rgb(209, 213, 219) !important;
+  color: rgb(var(--color-text-secondary)) !important;
 }
 
 /* Links */
@@ -144,10 +128,10 @@ html.dark a:hover:not([class*="text-"]):not([class*="bg-"]) {
   color: rgb(147, 197, 253) !important;
 }
 
-/* Buttons without specific styling */
-html.dark button:not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-yellow"]):not([class*="bg-primary"]):not([class*="dark:"]) {
+/* Buttons - more specific targeting */
+html.dark button:not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-yellow"]):not([class*="bg-primary"]):not([class*="dark:"]):not([class*="text-"]) {
   background-color: rgb(75, 85, 99) !important;
-  color: white !important;
+  color: rgb(var(--color-text-primary)) !important;
   border-color: rgb(107, 114, 128) !important;
 }
 
@@ -167,49 +151,16 @@ html.dark ::-webkit-scrollbar {
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: rgb(31, 41, 55);
+  background: rgb(var(--color-bg-secondary));
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-  background: rgb(75, 85, 99);
+  background: rgb(var(--color-border));
   border-radius: 4px;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgb(107, 114, 128);
-}
-
-/* Utility classes for manual overrides */
-.text-theme-primary {
-  color: rgb(var(--color-text-primary));
-}
-
-.text-theme-secondary {
-  color: rgb(var(--color-text-secondary));
-}
-
-.text-theme-muted {
-  color: rgb(var(--color-text-muted));
-}
-
-.bg-theme-primary {
-  background-color: rgb(var(--color-bg-primary));
-}
-
-.bg-theme-secondary {
-  background-color: rgb(var(--color-bg-secondary));
-}
-
-.bg-theme-tertiary {
-  background-color: rgb(var(--color-bg-tertiary));
-}
-
-.border-theme {
-  border-color: rgb(var(--color-border));
-}
-
-.border-theme-light {
-  border-color: rgb(var(--color-border-light));
 }
 
 /* Smooth transitions */
@@ -221,26 +172,24 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 /* SVG icons */
 html.dark svg:not([class*="text-"]):not([fill]):not([class*="lucide"]) {
-  color: rgb(209, 213, 219);
+  color: rgb(var(--color-text-secondary));
 }
-
-
 
 /* Specific fixes for custom color classes */
 html.dark .text-\[\#111827\] {
-  color: white !important;
+  color: rgb(var(--color-text-primary)) !important;
 }
 
 html.dark .text-\[\#6B7280\] {
-  color: rgb(156, 163, 175) !important;
+  color: rgb(var(--color-text-muted)) !important;
 }
 
 html.dark .bg-\[\#F3F4F6\] {
-  background-color: rgb(55, 65, 81) !important;
+  background-color: rgb(var(--color-bg-tertiary)) !important;
 }
 
 html.dark .border-\[\#F3F4F6\] {
-  border-color: rgb(75, 85, 99) !important;
+  border-color: rgb(var(--color-border)) !important;
 }
 
 /* Keep brand colors */
@@ -268,17 +217,6 @@ html.dark .text-warning {
 html.dark .text-info {
   color: rgb(59, 130, 246) !important;
 }
-
-/* Custom gradient for dark mode */
-.gradient-text {
-  background: linear-gradient(90deg, #ffffff, #2196f3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
-
-
 
 /* Toast Styles - Matching the exact design from image */
 .Toastify__toast {
@@ -338,8 +276,6 @@ html.dark .text-info {
   display: none !important;
 }
 
-
-
 .Toastify__toast-body {
   padding: 0 !important;
   margin: 0 !important;
@@ -387,32 +323,6 @@ button {
   cursor: pointer;
 }
 
-/* Form components */
-.form-group, .form-groupf {
-  @apply flex flex-col mb-2 w-full;
-}
-
-.form-group label, .form-groupf label {
-  @apply text-lg font-medium;
-}
-
-.form-group input, .form-groupf input {
-  @apply block w-full px-2 py-1.5 border border-gray-300 rounded-md text-lg focus:border-zinc-800 outline-none;
-}
-
-.form-group select, .form-groupf select {
-  @apply block w-full px-2 py-2 border border-gray-300 rounded-md cursor-pointer text-lg focus:border-zinc-800 outline-none;
-}
-
-.form-group input[type="date"],
-.form-group input[type="file"] {
-  @apply cursor-pointer;
-}
-
-.subutton {
-  @apply px-6 py-3 mt-4 mb-10 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200 cursor-pointer text-xl font-medium;
-}
-
 /* Mobile-friendly Toast Styles */
 @media (max-width: 768px) {
   .Toastify__toast-container {
@@ -444,7 +354,7 @@ button {
     height: 1.25rem !important;
   }
   
-  .Toastify__close-button {
+  .Toastify__toast--close-button {
     padding: 0.25rem !important;
     font-size: 1rem !important;
   }
@@ -472,4 +382,51 @@ button {
     right: 1rem !important;
     left: auto !important;
   }
+}
+
+/* Dropdown styling - consolidated and simplified */
+select {
+  background-color: white;
+  color: #111827;
+}
+
+select option {
+  background-color: white;
+  color: #111827;
+}
+
+/* Dark mode dropdown overrides */
+html.dark select {
+  background-color: rgb(var(--color-bg-tertiary));
+  color: rgb(var(--color-text-primary));
+}
+
+html.dark select option {
+  background-color: rgb(var(--color-bg-tertiary));
+  color: rgb(var(--color-text-primary));
+}
+
+/* Category hover effects for dark mode */
+html.dark .hover\:bg-gray-50:hover {
+  background-color: rgb(55, 65, 81) !important;
+}
+
+html.dark .hover\:bg-gray-700:hover {
+  background-color: rgb(75, 85, 99) !important;
+}
+
+/* Ensure dropdown options are visible */
+select:focus option:checked {
+  background-color: #3b82f6;
+  color: white;
+}
+
+select option:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+html.dark select option:hover {
+  background-color: rgb(75, 85, 99);
+  color: white;
 }

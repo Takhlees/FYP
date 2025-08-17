@@ -38,6 +38,7 @@ export default function DepartmentsPage() {
         const data = await response.json()
         setDepartments(data)
       } catch (error) {
+        console.error("Failed to fetch departments:", error)
       } finally {
         setIsLoading(false)
       }
@@ -446,7 +447,7 @@ export default function DepartmentsPage() {
                       </button>
                       <button
                         onClick={confirmDelete}
-                        className="w-full sm:w-1/2 px-5 py-3 bg-red-600 text-white rounded-md text-base font-medium order-1 sm:order-2 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-1/2 px-5 py-3 bg-black text-white rounded-md text-base font-medium order-1 sm:order-2 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={deletingId}
                       >
                         {deletingId ? "Deleting..." : "Delete"}

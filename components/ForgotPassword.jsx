@@ -1,7 +1,7 @@
 import "@styles/globals.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import "@styles/globals.css";
+import { showSuccessToast, showErrorToast, showLoadingToast, updateToast } from "@/utils/toast";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -21,8 +21,12 @@ export default function ForgotPassword() {
 
     if (!isValidEmail(email)) {
       setError("Please enter a valid email address");
+      setLoading(false);
       return;
     }
+
+    // Show loading toast
+    const loadingToastId = showLoadingToast("Sending reset link", "Please wait while we process your request...");
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -35,13 +39,30 @@ export default function ForgotPassword() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "user with this email dont exists.");
+        const errorMessage = data.error || "User with this email doesn't exist.";
+        setError(errorMessage);
+        
+        // Update loading toast to error
+        updateToast(loadingToastId, "error", "Reset link failed", errorMessage);
+        setLoading(false);
         return;
       }
 
-      router.push("/");
+      // Update loading toast to success
+      updateToast(loadingToastId, "success", "Reset link sent!", "Check your email for password reset instructions.");
+      
+      // Clear form and redirect after a short delay
+      setTimeout(() => {
+        setEmail("");
+        router.push("/");
+      }, 2000);
+
     } catch (error) {
-      setError("An unexpected error occurred. Please try again later.");
+      const errorMessage = "An unexpected error occurred. Please try again later.";
+      setError(errorMessage);
+      
+      // Update loading toast to error
+      updateToast(loadingToastId, "error", "Reset link failed", errorMessage);
     } finally {
       setLoading(false);
     }

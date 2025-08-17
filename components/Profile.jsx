@@ -3,35 +3,56 @@
 import "@styles/globals.css"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { X, Mail, Briefcase, Pencil, Check, Camera, User } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { X, Mail, Pencil, Check, Camera, User, Trash2 } from "lucide-react"
 import Image from "next/image"
 
 export default function Profile() {
   const router = useRouter()
+  const { data: session } = useSession()
   const fileInputRef = useRef(null)
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState(null)
   const [formData, setFormData] = useState(null)
 
+  const extractNameFromEmail = (email) => {
+    if (!email) return ""
+    const namePart = email.split('@')[0]
+    return namePart
+      .split('.')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem("profileData")
-    if (savedProfile) {
-      const parsedProfile = JSON.parse(savedProfile)
-      setProfile(parsedProfile)
-      setFormData(parsedProfile)
-    } else {
-      const defaultProfile = {
-        name: "IRFAN HASHMI",
-        email: "IRFAN@example.com",
-        job: "VC OFFICE",
-        image: null,
+    if (session?.user?.email) {
+      const userEmail = session.user.email
+      const userName = extractNameFromEmail(userEmail)
+      
+      const savedProfile = localStorage.getItem("profileData")
+      if (savedProfile) {
+        const parsedProfile = JSON.parse(savedProfile)
+        const updatedProfile = {
+          ...parsedProfile,
+          name: userName,
+          email: userEmail,
+        }
+        setProfile(updatedProfile)
+        setFormData(updatedProfile)
+        localStorage.setItem("profileData", JSON.stringify(updatedProfile))
+      } else {
+        const defaultProfile = {
+          name: userName,
+          email: userEmail,
+          job: "Staff Member",
+          image: null,
+        }
+        setProfile(defaultProfile)
+        setFormData(defaultProfile)
+        localStorage.setItem("profileData", JSON.stringify(defaultProfile))
       }
-      setProfile(defaultProfile)
-      setFormData(defaultProfile)
-      localStorage.setItem("profileData", JSON.stringify(defaultProfile))
     }
-  }, [])
+  }, [session])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -66,8 +87,30 @@ export default function Profile() {
     fileInputRef.current.click()
   }
 
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({ ...prev, image: null }))
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!profile) {
-    return <div>Loading...</div> 
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up profile...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -104,6 +147,12 @@ export default function Profile() {
                 >
                   <Camera className="h-4 w-4" />
                 </button>
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute bottom-0 left-0 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -135,9 +184,10 @@ export default function Profile() {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                 </div>
                 
                 <div>

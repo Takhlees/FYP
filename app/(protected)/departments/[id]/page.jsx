@@ -9,11 +9,11 @@ import {
   ArrowLeft,
   Trash2,
   X,
-  CheckCircle,
   AlertTriangle,
   Save,
 } from "lucide-react";
 import SearchBar from "@components/SearchBar";
+import { showLoadingToast, updateToast } from "@/utils/toast";
 
 export default function DepartmentPage() {
   const router = useRouter();
@@ -31,6 +31,7 @@ export default function DepartmentPage() {
   const [showForm, setShowForm] = useState(false);
   const [action, setAction] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchDate, setSearchDate] = useState("");
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -38,7 +39,6 @@ export default function DepartmentPage() {
   // Delete confirmation dialog states
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [docToDelete, setDocToDelete] = useState(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showCategorySelect, setShowCategorySelect] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
   // Add new state for category deletion dialog
@@ -79,31 +79,49 @@ const [totalFiles, setTotalFiles] = useState(0);
   }, [selectedCategory, id, currentPage, pageSize]);
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
+    if (searchQuery.trim() === "" && searchDate === "") {
       setFilteredFiles(files);
     } else {
       const lowercasedQuery = searchQuery.toLowerCase();
       const filtered = files.filter(
-        (file) =>
-          file.subject?.toLowerCase().includes(lowercasedQuery) ||
-          file.diaryNo?.toLowerCase().includes(lowercasedQuery) ||
-          file.from?.toLowerCase().includes(lowercasedQuery)
+        (file) => {
+          // Text search
+          const matchesText = 
+            file.subject?.toLowerCase().includes(lowercasedQuery) ||
+            file.diaryNo?.toLowerCase().includes(lowercasedQuery) ||
+            file.from?.toLowerCase().includes(lowercasedQuery);
+          
+          // Date search
+          let matchesDate = true;
+          if (searchDate) {
+            const fileDate = file.date ? new Date(file.date).toISOString().split('T')[0] : null;
+            matchesDate = fileDate === searchDate;
+          }
+          
+          // Both text and date must match if both are provided
+          if (searchQuery.trim() !== "" && searchDate !== "") {
+            return matchesText && matchesDate;
+          }
+          // If only text is provided, check text
+          if (searchQuery.trim() !== "") {
+            return matchesText;
+          }
+          // If only date is provided, check date
+          if (searchDate !== "") {
+            return matchesDate;
+          }
+          
+          return false;
+        }
       );
       setFilteredFiles(filtered);
     }
-  }, [searchQuery, files]);
-
-  useEffect(() => {
-    if (showSuccessToast) {
-      const timer = setTimeout(() => {
-        setShowSuccessToast(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSuccessToast]);
+  }, [searchQuery, searchDate, files]);
 
   const addCategory = async () => {
     if (newCategory.trim()) {
+      const loadingToast = showLoadingToast("Adding Category");
+      
       try {
         const response = await fetch(`/api/department/${id}`, {
           method: "PUT",
@@ -119,12 +137,13 @@ const [totalFiles, setTotalFiles] = useState(0);
           }
           setNewCategory("");
           setShowInput(false);
-          fetchCategories();
+          await fetchCategories();
+          updateToast(loadingToast, 'success', "Category Added!", "Category has been added successfully.");
         } else {
-          // Failed to add category
+          updateToast(loadingToast, 'error', "Failed to Add Category", "Failed to add category. Please try again.");
         }
       } catch (error) {
-        // Error adding category
+        updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred while adding category.");
       }
     }
   };
@@ -272,6 +291,8 @@ const [totalFiles, setTotalFiles] = useState(0);
   const confirmDelete = async () => {
     if (!docToDelete) return;
 
+    const loadingToast = showLoadingToast("Deleting Document");
+
     try {
       const response = await fetch(`/api/scanupload/${docToDelete._id}`, {
         method: "PUT",
@@ -303,21 +324,17 @@ const [totalFiles, setTotalFiles] = useState(0);
         await fetchFiles(id, selectedCategory);
       }
 
-      // Show success toast
-      setShowSuccessToast(true);
+      updateToast(loadingToast, 'success', "Document Deleted!", "Document has been deleted successfully.");
     } catch (error) {
       setShowDeleteConfirm(false);
       setDocToDelete(null);
+      updateToast(loadingToast, 'error', "Delete Failed", "Failed to delete document. Please try again.");
     }
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
     setDocToDelete(null);
-  };
-
-  const closeSuccessMessage = () => {
-    closeSuccessMessage(false);
   };
 
   const handleFormClose = () => {
@@ -338,9 +355,13 @@ const [totalFiles, setTotalFiles] = useState(0);
     setCategoryToDelete(category);
     setShowCategoryDeleteDialog(true);
   };
+
   // Handler to confirm category deletion
   const confirmCategoryDelete = async () => {
     if (!categoryToDelete || !id) return;
+    
+    const loadingToast = showLoadingToast("Deleting Category");
+    
     try {
       const params = new URLSearchParams({
         departmentId: id,
@@ -358,15 +379,19 @@ const [totalFiles, setTotalFiles] = useState(0);
         setShowCategorySelect(false); // close modal
         await fetchCategories(); // refresh categories
         setShowCategorySelect(true); // reopen modal
+        updateToast(loadingToast, 'success', "Category Deleted!", "Category has been deleted successfully.");
       } else {
         setShowCategoryDeleteDialog(false);
         setCategoryToDelete(null);
+        updateToast(loadingToast, 'error', "Delete Failed", "Failed to delete category. Please try again.");
       }
     } catch (error) {
       setShowCategoryDeleteDialog(false);
       setCategoryToDelete(null);
+      updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred while deleting category.");
     }
   };
+
   // Handler to cancel category deletion
   const cancelCategoryDelete = () => {
     setShowCategoryDeleteDialog(false);
@@ -382,6 +407,8 @@ const [totalFiles, setTotalFiles] = useState(0);
   // Handler to save category edit
   const saveCategoryEdit = async () => {
     if (!editingCategory || !editedCategoryName.trim() || !id) return;
+
+    const loadingToast = showLoadingToast("Updating Category");
 
     try {
       const params = new URLSearchParams({
@@ -401,13 +428,12 @@ const [totalFiles, setTotalFiles] = useState(0);
         setEditedCategoryName("");
         await fetchCategories(); // refresh categories
         setShowCategorySelect(true);
+        updateToast(loadingToast, 'success', "Category Updated!", "Category has been updated successfully.");
       } else {
-        const errorData = await response.json();
-        // Failed to update category
-        // Optionally show error message to user
+        updateToast(loadingToast, 'error', "Update Failed", "Failed to update category. Please try again.");
       }
     } catch (error) {
-      // Error updating category
+      updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred while updating category.");
     }
   };
 
@@ -417,7 +443,6 @@ const [totalFiles, setTotalFiles] = useState(0);
     setEditedCategoryName("");
   };
 
-  // Add useEffect to control body scroll when category selector is open
   useEffect(() => {
     if (showCategorySelect) {
       document.body.style.overflow = "hidden";
@@ -464,30 +489,6 @@ const [totalFiles, setTotalFiles] = useState(0);
 
   return (
     <>
-      {/* Success Toast Notification */}
-      {showSuccessToast && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right duration-300">
-          <div className="bg-white border-l-4 border-green-500 rounded-r-2xl shadow-lg p-4 flex items-center space-x-3 min-w-80">
-            <div className="flex-shrink-0">
-              <CheckCircle className="h-6 w-6 text-green-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-[#111827]">
-                Successfully Deleted!
-              </p>
-              <p className="text-xs text-[#6B7280]">
-                Document has been removed from your files
-              </p>
-            </div>
-            <button
-              onClick={() => setShowSuccessToast(false)}
-              className="flex-shrink-0 text-[#6B7280] hover:text-[#111827] transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && docToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -740,9 +741,9 @@ const [totalFiles, setTotalFiles] = useState(0);
                             {filteredCategories.map((category, index) => (
                               <div
                                 key={index}
-                                className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${
+                                className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
                                   selectedCategory === category
-                                    ? "bg-indigo-50"
+                                    ? "bg-indigo-50 dark:bg-indigo-900"
                                     : ""
                                 }`}
                               >
@@ -789,8 +790,8 @@ const [totalFiles, setTotalFiles] = useState(0);
                                       }
                                       className={`flex-1 text-left focus:outline-none truncate ${
                                         selectedCategory === category
-                                          ? "text-indigo-600 font-medium"
-                                          : "text-gray-900"
+                                          ? "text-indigo-600 dark:text-indigo-400 font-medium"
+                                          : "text-gray-900 dark:text-gray-100"
                                       }`}
                                       style={{ maxWidth: "70vw" }}
                                     >
@@ -839,7 +840,10 @@ const [totalFiles, setTotalFiles] = useState(0);
             <SearchBar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-            />{" "}
+              searchDate={searchDate}
+              setSearchDate={setSearchDate}
+            />
+            
             <div className="overflow-x-auto mt-4 rounded-lg border-2 border-gray-300">
               <table className="min-w-full bg-white">
                 <thead className="bg-[#F3F4F6]">

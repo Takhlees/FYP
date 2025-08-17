@@ -7,7 +7,6 @@ import {
   ZoomIn,
   ZoomOut,
   Camera,
-  Focus,
   X,
   Check,
   Zap,
@@ -26,10 +25,8 @@ import {
 import {
   showSuccessToast,
   showErrorToast,
-  showWarningToast,
   showLoadingToast,
   updateToast,
-  clearAllToasts,
   dismissToast,
   updateLoadingToast,
 } from "@/utils/toast";
@@ -160,42 +157,7 @@ const DocumentPreviewModal = ({
   );
 };
 
-// Enhanced subject extraction - looks for "Subject:" pattern specifically
-const extractSubjectFromText = (text) => {
-  if (!text || text.trim().length === 0) return "";
 
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-
-  // Look for explicit "Subject:" patterns
-  const subjectPatterns = [
-    /^subject\s*:\s*(.+)/i,
-    /\bsubject\s*:\s*(.+)/i,
-    /^subj\s*:\s*(.+)/i,
-    /\bsubj\s*:\s*(.+)/i,
-    /^re\s*:\s*(.+)/i,
-    /\bre\s*:\s*(.+)/i,
-  ];
-
-  // Search through each line for subject patterns
-  for (const line of lines) {
-    for (const pattern of subjectPatterns) {
-      const match = line.match(pattern);
-      if (match && match[1] && match[1].trim().length > 0) {
-        let subject = match[1].trim();
-        // Clean up the subject
-        subject = subject.replace(/[.,;:]+$/, "").trim();
-        return subject.length > 150
-          ? subject.substring(0, 150) + "..."
-          : subject;
-      }
-    }
-  }
-
-  return ""; // Return empty string if no subject pattern found
-};
 
 // API call to document scanner service
 const callDocumentScannerAPI = async (
@@ -254,17 +216,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const [status, setStatus] = useState(fileData?.status || "");
 
   // Camera and image processing states
-  const [processedImage, setProcessedImage] = useState(null);
   const [enhancedImage, setEnhancedImage] = useState(null);
   const [pdfPreviewData, setPdfPreviewData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [cameraFacingMode, setCameraFacingMode] = useState("environment");
-  const [isFocusing, setIsFocusing] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [isTorchAvailable, setIsTorchAvailable] = useState(false);
   const [isTorchOn, setIsTorchOn] = useState(false);
-  const [isAutoFocusEnabled, setIsAutoFocusEnabled] = useState(true);
   const [cameraTrack, setCameraTrack] = useState(null);
   const [extractedText, setExtractedText] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
@@ -282,7 +241,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   const clearAllState = useCallback(() => {
     setFile(null);
     setFileName("");
-    setProcessedImage(null);
     setEnhancedImage(null);
     setPdfPreviewData(null);
     setExtractedText("");
@@ -292,24 +250,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     setCurrentStep(0);
   }, []);
 
-  const showNotification = useCallback((type, message, duration = 3000) => {
-    switch (type) {
-      case "success":
-        showSuccessToast(message);
-        break;
-      case "error":
-        showErrorToast(message);
-        break;
-      case "warning":
-        showWarningToast(message);
-        break;
-      case "info":
-        const toastId = showLoadingToast(message);
-        return toastId;
-      default:
-        showSuccessToast(message);
-    }
-  }, []);
+
 
   const scrollToTop = useCallback(() => {
     const scrollableContainer = document.querySelector(
@@ -419,10 +360,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
   }, []);
 
   const startCamera = useCallback(async () => {
+    // Show loading toast immediately
+    const cameraToast = showLoadingToast("Requesting camera access...");
+    
     try {
-      // Show loading toast immediately
-      const cameraToast = showLoadingToast("Requesting camera access...");
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: cameraFacingMode,
@@ -448,6 +389,12 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       setHasCameraPermission(false);
       setIsCameraActive(false);
 
+      // Dismiss the loading toast first
+      if (cameraToast) {
+        dismissToast(cameraToast);
+      }
+
+      // Show error toast
       showErrorToast(
         "Camera access denied. Please allow camera access and try again."
       );
@@ -495,7 +442,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
           // Handle enhanced image
           if (result.enhancedImage) {
             const enhancedImageUrl = `data:${result.enhancedImage.mimeType};base64,${result.enhancedImage.base64}`;
-            setProcessedImage(enhancedImageUrl);
             setEnhancedImage(enhancedImageUrl);
           }
 
@@ -572,7 +518,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
 
         // Fallback to original file
         const fallbackUrl = URL.createObjectURL(file);
-        setProcessedImage(fallbackUrl);
         setEnhancedImage(fallbackUrl);
       } finally {
         setIsProcessing(false);
@@ -632,20 +577,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     }
   }, [cameraTrack, isTorchAvailable, isTorchOn]);
 
-  // Toggle auto focus
-  const toggleAutoFocus = useCallback(async () => {
-    if (!cameraTrack) return;
 
-    try {
-      const newAutoFocusState = !isAutoFocusEnabled;
-      await cameraTrack.applyConstraints({
-        advanced: [{ focusMode: newAutoFocusState ? "continuous" : "manual" }],
-      });
-      setIsAutoFocusEnabled(newAutoFocusState);
-    } catch (error) {
-      console.error("Error toggling auto-focus:", error);
-    }
-  }, [cameraTrack, isAutoFocusEnabled]);
 
   // Capture and process with API integration
   const captureAndProcess = useCallback(async () => {
@@ -708,7 +640,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         if (result.enhancedImage) {
           const enhancedImageUrl = `data:${result.enhancedImage.mimeType};base64,${result.enhancedImage.base64}`;
           setEnhancedImage(enhancedImageUrl);
-          setProcessedImage(enhancedImageUrl);
         }
 
         // Handle PDF preview data
@@ -1100,7 +1031,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
       isEditMode,
       file,
       enhancedImage,
-      processedImage,
       selectedDepartment,
       subject,
       diaryNo,
@@ -1188,7 +1118,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       onClick={() => {
                         setFile(null);
                         setFileName(fileData.fileName);
-                        setProcessedImage(null);
+                        setEnhancedImage(null);
                         setPdfPreviewData(null);
                       }}
                       className="text-green-500 hover:text-green-700"
@@ -1393,7 +1323,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
         <DocumentPreviewModal
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
-          document={processedImage}
+          document={enhancedImage}
           fileName={fileName}
           pdfPreviewData={pdfPreviewData}
         />{" "}
@@ -1480,7 +1410,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                         onClick={() => {
                           setFile(null);
                           setFileName("");
-                          setProcessedImage(null);
+                          setEnhancedImage(null);
                           setExtractedText("");
                           setPdfPreviewData(null);
                         }}
@@ -1493,18 +1423,18 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 </div>
               )}
 
-              {processedImage && !file && (
+              {enhancedImage && !file && (
                 <div className="mt-3">
                   <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                     <img
-                      src={processedImage || "/placeholder.svg"}
-                      alt="Processed document"
+                      src={enhancedImage || "/placeholder.svg"}
+                      alt="Enhanced document"
                       className="w-full h-auto max-h-56 object-contain mx-auto"
                     />
                     <button
                       type="button"
                       onClick={() => {
-                        setProcessedImage(null);
+                        setEnhancedImage(null);
                         setExtractedText("");
                         setPdfPreviewData(null);
                       }}
@@ -1779,11 +1709,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 />
               ) : null}
 
-              {isFocusing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                  <Focus className="w-16 h-16 text-white animate-pulse" />
-                </div>
-              )}
+
 
               {/* A4 Document frame guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -2303,9 +2229,6 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 <li>• Real OCR text extraction using Tesseract.js</li>
                 <li>• Intelligent subject extraction from documents</li>
                 <li>• PDF optimization and generation</li>
-                <li>
-                  • Professional scan quality with multiple enhancement levels
-                </li>
               </ul>
             </div>
 
