@@ -7,8 +7,14 @@ import { ThemeProvider } from "@components/Theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Mailing System",
-  description: "Next app",
+  title: "Doculus",
+  description: "Advanced document management system for universities and administrative departments.",
+  icons: {
+    shortcut: '/web-logo.png',
+    apple: [
+      { url: '/web-logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -22,7 +28,7 @@ export default function RootLayout({ children }) {
         </ThemeProvider>
         <ToastContainer
           position="top-right"
-          autoClose={4000}
+          autoClose={2000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
@@ -32,8 +38,9 @@ export default function RootLayout({ children }) {
           pauseOnHover
           theme="dark"
           limit={3}
-          className="!z-[9999]"
+          className="!z-[99999]"
           toastClassName="!max-w-[90vw] sm:!max-w-md"
+          style={{ zIndex: 99999 }}
         />
       </body>
     </html>

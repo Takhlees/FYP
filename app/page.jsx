@@ -2,12 +2,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 import SignInForm from '@components/sign-in-form'
-import Loading from '@components/Loading';
+import Loading from '@components/Loading'
+import AuthProvider from './AuthProvider'
 
-const Page=()=> {
-  const router = useRouter();
+const Page = () => {
+  const router = useRouter()
   const [isSignedIn, setIsSignedIn] = useState(false)
 
   const handleSignInSuccess = () => {
@@ -16,30 +17,26 @@ const Page=()=> {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.push('/home');
+      router.push('/home')
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, router])
 
   return (
-    <div className="flex flex-col min-h-screen">
-    
-      <main className="flex-grow max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {!isSignedIn ? (
-            <>
+    <AuthProvider>
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-grow max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="px-4 py-6 sm:px-0">
+            {!isSignedIn ? (
               <SignInForm onSignInSuccess={handleSignInSuccess} />
-            </>
-          ) : (
-           
-            // <p>Redirecting to home...</p> 
-              <Loading/>
-            
-          )}
-        </div>
-      </main>
-      
-    </div>
+            ) : (
+              <Loading />
+            )}
+          </div>
+        </main>
+      </div>
+    </AuthProvider>
   )
 }
-export default Page;
+
+export default Page
 

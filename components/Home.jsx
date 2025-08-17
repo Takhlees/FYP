@@ -9,6 +9,7 @@ import { Upload, Scan } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PulseLoader } from "react-spinners";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
@@ -26,35 +27,82 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [pdfError, setPdfError] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+  const [isStatusUpdated, setIsStatusUpdated] = useState(false);
 
-  // Add these state variables that were missing 
-  const [isScanning, setIsScanning] = useState(false);
-  const [isFullScreenScanning, setIsFullScreenScanning] = useState(false);
-  const [processedImage, setProcessedImage] = useState(null);
-  const [isApproved, setIsApproved] = useState(false);
-  const [extractedText, setExtractedText] = useState("");  const [showChat, setShowChat] = useState(false);
-
-  // Add refs for scrolling to sections
-  const recentActivityRef = useRef(null);
   const uploadScanRef = useRef(null);
-  const featuresRef = useRef(null);  // Add footer intersection state and ref
+  const recentActivityRef = useRef(null);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
-  const footerRef = useRef(null);
-useEffect(() => {
-  if (showForm || selectedMail) {
-    // Get current scroll bar width to prevent layout shift
-    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    document.body.style.paddingRight = `${scrollBarWidth}px`;
-  } else {
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
-  }
-  return () => {
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
+  const [hasShownLoginSuccess, setHasShownLoginSuccess] = useState(false);
+  const [isFreshLogin, setIsFreshLogin] = useState(false);
+
+  // Function to fetch overdue mails
+  const fetchOverdueMails = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/reminder", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setOverDueMails(data.overdueMails || []);
+    } catch (error) {
+      console.error("Error fetching overdue mails:", error);
+    }
   };
-}, [showForm, selectedMail]);
+
+  // Function to fetch recent mails
+  const fetchRecentMails = async () => {
+    try {
+      setIsLoadingRecent(true);
+      const response = await fetch("/api/recent");
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Response is not JSON");
+      }
+
+      const data = await response.json();
+      setRecentMails(data);
+    } catch (error) {
+      setRecentError(error.message);
+      setRecentMails([]); // Reset to empty array on error
+    } finally {
+      setIsLoadingRecent(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showForm || selectedMail) {
+      // Get current scroll bar width to prevent layout shift
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [showForm, selectedMail]);
+
   // Effect for session check and fetching overdue mails
   useEffect(() => {
     const checkSession = async () => {
@@ -63,6 +111,17 @@ useEffect(() => {
         const session = await getSession();
         if (!session) {
           router.push("/");
+        } else {
+          // Check if this is a fresh login by checking URL parameters or session timestamp
+          const urlParams = new URLSearchParams(window.location.search);
+          const fromLogin = urlParams.get('from') === 'login';
+          
+          if (fromLogin) {
+            setIsFreshLogin(true);
+            // Remove the parameter to prevent showing on refresh
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          }
         }
       } catch (error) {
       } finally {
@@ -71,61 +130,10 @@ useEffect(() => {
     };
     checkSession();
 
-    async function fetchOverdueMails() {
-      try {
-        const response = await fetch("http://localhost:3000/api/reminder", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setOverDueMails(data.overdueMails || []);
-      } catch (error) {
-      }
-    }
-
     fetchOverdueMails();
+    fetchRecentMails();
   }, [router]);
 
-  useEffect(() => {
-    const fetchRecentMails = async () => {
-      try {
-        setIsLoadingRecent(true);
-        const response = await fetch("/api/recent");
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // Check if response is JSON
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Response is not JSON");
-        }
-
-        const data = await response.json();
-        setRecentMails(data);
-      } catch (error) {
-        setRecentError(error.message);
-        setRecentMails([]); // Reset to empty array on error
-      } finally {
-        setIsLoadingRecent(false);
-      }
-    };
-
-    fetchRecentMails();
-  }, []);
-
-  // Effect for typing animation
   useEffect(() => {
     const typingSpeed = 100;
     const deletingSpeed = 50;
@@ -178,23 +186,11 @@ useEffect(() => {
   const handleOpenUpload = () => {
     setAction("Upload");
     setShowForm(true);
-    // Reset states for upload (no scanning states)
-    setIsScanning(false);
-    setIsFullScreenScanning(false);
-    setProcessedImage(null);
-    setIsApproved(false);
-    setExtractedText("");
   };
 
   const handleOpenScan = () => {
     setAction("Scan");
     setShowForm(true);
-    // Set scanning states for scan
-    setIsScanning(true);
-    setIsFullScreenScanning(true);
-    setProcessedImage(null);
-    setIsApproved(false);
-    setExtractedText("");
   };
 
   // Add navigation functions for Quick Actions
@@ -234,8 +230,14 @@ useEffect(() => {
 
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
+    console.log("Starting status change to:", newStatus);
+    let successShown = false; // Track if success was shown
 
     try {
+      setIsStatusUpdating(true);
+      setIsStatusUpdated(false); // Reset success state at the start
+      console.log("Status update started, loading state set");
+      
       const response = await fetch(
         `http://localhost:3000/api/reminder/${selectedMail._id}`,
         {
@@ -243,7 +245,6 @@ useEffect(() => {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            // Android-specific headers
             "Cache-Control": "no-cache",
             Pragma: "no-cache",
           },
@@ -251,19 +252,71 @@ useEffect(() => {
         }
       );
 
+      console.log("API response status:", response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const updatedMail = await response.json();
+      console.log("Updated mail received:", updatedMail);
+      
+      // Update the selectedMail state to show the new status immediately
+      setSelectedMail(updatedMail);
+      
+      // Update overdue mails array
       setOverDueMails((prevMails) =>
         prevMails.map((mail) =>
           mail._id === updatedMail._id ? updatedMail : mail
         )
       );
 
-      setSelectedMail(null);
+      // Update recent mails array
+      setRecentMails((prevMails) =>
+        prevMails.map((mail) =>
+          mail._id === updatedMail._id ? updatedMail : mail
+        )
+      );
+
+      console.log("Local arrays updated, refreshing data sources");
+
+      // Refresh both data sources to ensure consistency
+      await Promise.all([
+        fetchOverdueMails(),
+        fetchRecentMails()
+      ]);
+      
+      console.log("Data sources refreshed, setting success state");
+      
+      // Set success state and show toast only after everything is successful
+      setIsStatusUpdated(true);
+      successShown = true; // Mark that success was shown
+      
+      // Small delay to ensure no race conditions
+      setTimeout(() => {
+        showSuccessToast("Status Updated", `Mail status changed to ${newStatus}`);
+      }, 100);
+      
+      // Close the dialog after a short delay to show the success
+      setTimeout(() => {
+        console.log("Closing dialog after success");
+        setSelectedMail(null);
+        setIsStatusUpdated(false);
+      }, 1500);
+
     } catch (error) {
+      console.error("Error in status change:", error);
+      
+      // Only show error toast if we haven't already shown success
+      if (!successShown) {
+        showErrorToast("Update Failed", "Failed to update mail status. Please try again.");
+      }
+      
+      // Ensure success state is false
+      setIsStatusUpdated(false);
+    } finally {
+      console.log("Status change completed, resetting loading state");
+      setIsStatusUpdating(false);
     }
   };
 
@@ -304,53 +357,34 @@ useEffect(() => {
     const footerElement = document.querySelector('footer');
     if (!footerElement) return;
 
-    const createObserver = () => {
-      // Adjust margins based on screen size for better mobile experience
-      const isMobile = window.innerWidth <= 768;
-      const isTablet = window.innerWidth <= 1024;
-        let rootMargin;
-      if (isMobile) {
-        rootMargin = '0px 0px -150px 0px'; // More margin for mobile - trigger much earlier
-      } else if (isTablet) {
-        rootMargin = '0px 0px -120px 0px'; // Medium margin for tablet
-      } else {
-        rootMargin = '0px 0px -150px 0px'; // Larger margin for desktop
-      }      return new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            setIsFooterVisible(entry.isIntersecting);
-          });
-        },
-        {
-          threshold: 0,
-          rootMargin
-        }
-      );
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsFooterVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0,
+        rootMargin: '0px 0px -150px 0px'
+      }
+    );
 
-    let observer = createObserver();
     observer.observe(footerElement);
-
-    // Handle window resize to update observer with new margins
-    const handleResize = () => {
-      observer.disconnect();
-      observer = createObserver();
-      observer.observe(footerElement);
-    };
-
-    // Debounce resize handler for better performance
-    let resizeTimeout;
-    const debouncedResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(handleResize, 250);
-    };
-
-    window.addEventListener('resize', debouncedResize);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', debouncedResize);      clearTimeout(resizeTimeout);    };
+    };
   }, []);
+
+  // Effect for showing login success toast only after fresh login
+  useEffect(() => {
+    if (isFreshLogin && !hasShownLoginSuccess && !isLoading) {
+      // Show login success toast only once after fresh login
+      showSuccessToast("Login Successful", "You have been logged in successfully.");
+      setHasShownLoginSuccess(true);
+      setIsFreshLogin(false); // Reset to prevent showing on refresh
+    }
+  }, [isFreshLogin, hasShownLoginSuccess, isLoading]);
 
   return (
     <>      {showForm ? (
@@ -380,14 +414,37 @@ useEffect(() => {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Status
                     </label>
-                    <select
-                      value={selectedMail.status}
-                      onChange={handleStatusChange}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                      <option value="open">Open</option>
-                      <option value="closed">Closed</option>
-                      <option value="in-progress">In Progress</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedMail.status}
+                        onChange={handleStatusChange}
+                        disabled={isStatusUpdating}
+                        className={`w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm ${
+                          isStatusUpdating ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}>
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                        <option value="in-progress">In Progress</option>
+                      </select>
+                      {isStatusUpdating && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-700 bg-opacity-75 rounded-md">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        </div>
+                      )}
+                    </div>
+                    {isStatusUpdating && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        Updating status...
+                      </p>
+                    )}
+                    {isStatusUpdated && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Status updated successfully!
+                      </p>
+                    )}
                   </div>
 
                   <div className="mb-6">
@@ -423,8 +480,9 @@ useEffect(() => {
                       onClick={() => {
                         setSelectedMail(null);
                         setPdfError(null);
+                        setIsStatusUpdated(false);
                       }}
-                      className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-black dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
                       Close
                     </button>
                   </div>
@@ -461,8 +519,8 @@ useEffect(() => {
                   </button>
                   <button
                     onClick={handleOpenScan}
-                    className="flex items-center justify-center gap-2 px-6 sm:px-10 py-2.5 sm:py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded-lg shadow-md text-base sm:text-lg font-medium relative group text-center transition-transform transform hover:scale-105 duration-300 cursor-pointer w-full sm:w-auto">
-                    <Scan size={18} /> Scan
+                    className="flex items-center justify-center gap-2 px-6 sm:px-10 py-2.5 sm:py-2 bg-gray-200 dark:bg-gray-600 text-black dark:text-white rounded-lg shadow-md text-base sm:text-lg font-medium relative group text-center transition-transform transform hover:scale-105 duration-300 cursor-pointer w-full sm:w-auto hover:bg-gray-300 dark:hover:bg-gray-500">
+                    <Scan size={18} className="dark:stroke-white" /> Scan
                   </button>
                 </div>
               </div>
@@ -553,7 +611,7 @@ useEffect(() => {
             </div>
 
             {/* Powerful Features Section */}
-            <div className="w-full max-w-6xl mb-12" ref={featuresRef}>
+            <div className="w-full max-w-6xl mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 lg:mb-10 w-full px-4">
                 <span className="bg-gradient-to-r from-black via-mid to-light dark:from-white dark:via-blue-300 dark:to-blue-500 bg-clip-text text-transparent">
                   Powerful Features
@@ -707,7 +765,13 @@ useEffect(() => {
             {/* Chat Button */}
             <div
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg text-sm sm:text-lg font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap"
-              onClick={() => setShowChat(true)}>
+               onClick={() => {
+                 setShowChat(true);
+                 // Close overdue mails panel if it's open
+                 if (showOverdueMails) {
+                   setShowOverdueMails(false);
+                 }
+               }}>
               <span className="text-lg sm:text-xl">💬</span>
               <span className="hidden sm:inline">Let's Chat</span>
               <span className="sm:hidden">Chat</span>
@@ -767,11 +831,12 @@ useEffect(() => {
                     : "max-h-0 opacity-0"
                 }`}
               >
-                <div className={`p-2 sm:p-3 transform transition-all duration-300 ${
-                  showOverdueMails 
-                    ? "translate-y-0 scale-100" 
-                    : "-translate-y-4 scale-95"
-                }`}>
+                <div className={`
+                  p-2 sm:p-3 transform transition-all duration-300 ${
+                    showOverdueMails 
+                      ? "translate-y-0 scale-100" 
+                      : "-translate-y-4 scale-95"
+                  }`}>
                   {overDueMails.length > 0 ? (
                     <ul className="divide-y divide-gray-100 dark:divide-gray-600 space-y-1 max-h-48 sm:max-h-56 overflow-y-auto overflow-x-hidden">
                       {overDueMails.map((mail, index) => (

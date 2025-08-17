@@ -33,7 +33,7 @@ export const showSuccessToast = (message, description = null) => {
     </div>,
     {
       position: window.innerWidth < 768 ? "top-center" : "top-right",
-      autoClose: 4000,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -63,7 +63,7 @@ export const showErrorToast = (message, description = null) => {
     </div>,
     {
       position: window.innerWidth < 768 ? "top-center" : "top-right",
-      autoClose: 5000,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -93,7 +93,7 @@ export const showWarningToast = (message, description = null) => {
     </div>,
     {
       position: window.innerWidth < 768 ? "top-center" : "top-right",
-      autoClose: 4000,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -151,7 +151,7 @@ export const updateToast = (toastId, type, message, description = null) => {
     ),
     type: type,
     isLoading: false,
-    autoClose: type === 'error' ? 5000 : 4000,
+    autoClose: 2000,
     icon: type === 'success' ? "✓" : type === 'error' ? "✕" : false,
     className: "max-w-[90vw] sm:max-w-md",
     toastClassName: "max-w-[90vw] sm:max-w-md",
