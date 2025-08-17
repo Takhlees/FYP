@@ -134,7 +134,11 @@ export default function DepartmentsPage() {
 
         if (response.ok) {
           const updatedDept = await response.json()
+        if (updatedDept.type !== type) {
+          setDepartments(departments.filter((dept) => dept._id !== updatedDept._id))
+        } else {
           setDepartments(departments.map((dept) => (dept._id === updatedDept._id ? updatedDept : dept)))
+        }
           setEditingDepartmentId(null)
           setEditedDepartmentName("")
           setEditedType("")
@@ -219,7 +223,7 @@ export default function DepartmentsPage() {
         </div>
       )}
       
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col m-4 sm:m-4">
         <div className="flex-1 p-3 sm:p-5 bg-white relative">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>
@@ -230,7 +234,7 @@ export default function DepartmentsPage() {
           </div>
           <button
             onClick={() => setShowInput(!showInput)}
-            className="max-w-[180px] w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform sm:hover:scale-105 duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-sm text-sm sm:text-base touch-none"
+            className="max-w-[200px] w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform sm:hover:scale-105 duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-sm text-sm sm:text-base touch-none"
             disabled={isLoading || isNavigating}
           >
             <Folder size={18} />
