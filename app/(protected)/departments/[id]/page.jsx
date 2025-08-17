@@ -48,6 +48,9 @@ export default function DepartmentPage() {
   // Add new state for category editing
   const [editingCategory, setEditingCategory] = useState(null);
   const [editedCategoryName, setEditedCategoryName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+const [pageSize, setPageSize] = useState(3); // or any default
+const [totalFiles, setTotalFiles] = useState(0);
 
   const fetchCategories = async () => {
     try {
@@ -72,8 +75,8 @@ export default function DepartmentPage() {
 
   useEffect(() => {
     if (!selectedCategory || !id) return;
-    fetchFiles(id, selectedCategory);
-  }, [selectedCategory, id]);
+    fetchFiles(id, selectedCategory, currentPage, pageSize);
+  }, [selectedCategory, id, currentPage, pageSize]);
 
   useEffect(() => {
     if (searchQuery.trim() === "" && searchDate === "") {
@@ -145,10 +148,10 @@ export default function DepartmentPage() {
     }
   };
 
-  const fetchFiles = async (department, category) => {
+  const fetchFiles = async (department, category, page = 1, limit = pageSize) => {
     setIsLoading(true);
     try {
-      let url = `/api/scanupload?department=${department}`;
+      let url = `/api/scanupload?department=${department}&page=${page}&limit=${limit}`;
       if (category && category !== "All") {
         url += `&category=${category}`;
       }
@@ -158,6 +161,7 @@ export default function DepartmentPage() {
         const files = data.documents || [];
         setFiles(files);
         setFilteredFiles(files);
+         setTotalFiles(data.pagination?.totalDocuments || 0); 
       } else {
         // Failed to fetch files
       }
@@ -941,6 +945,7 @@ export default function DepartmentPage() {
                           </div>
                         </td>
                       </tr>
+                      
                     ))
                   ) : (
                     <tr>
@@ -954,7 +959,31 @@ export default function DepartmentPage() {
                   )}
                 </tbody>
               </table>
+         
             </div>
+             <div className="flex justify-center items-center mt-4">
+  <button
+    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+    disabled={currentPage === 1}
+    className="px-4 py-1 rounded-lg bg-black text-white disabled:opacity-60 hover:bg-gray-900 transition cursor-pointer"
+  >
+    Prev
+  </button>
+  <span className="font-medium text-base mr-3 ml-3">
+    Page {currentPage} of {Math.ceil(totalFiles / pageSize) || 1}
+  </span>
+  <button
+    onClick={() =>
+      setCurrentPage((p) =>
+        p < Math.ceil(totalFiles / pageSize) ? p + 1 : p
+      )
+    }
+    disabled={currentPage >= Math.ceil(totalFiles / pageSize)}
+    className="px-4 py-1 rounded-lg bg-black text-white disabled:opacity-60 hover:bg-gray-900 transition cursor-pointer"
+  >
+    Next
+  </button>
+</div>
           </div>
         </div>
       )}
