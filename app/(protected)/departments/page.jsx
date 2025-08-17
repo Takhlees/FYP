@@ -135,7 +135,11 @@ export default function DepartmentsPage() {
 
         if (response.ok) {
           const updatedDept = await response.json()
+        if (updatedDept.type !== type) {
+          setDepartments(departments.filter((dept) => dept._id !== updatedDept._id))
+        } else {
           setDepartments(departments.map((dept) => (dept._id === updatedDept._id ? updatedDept : dept)))
+        }
           setEditingDepartmentId(null)
           setEditedDepartmentName("")
           setEditedType("")
@@ -220,7 +224,7 @@ export default function DepartmentsPage() {
         </div>
       )}
       
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col m-4 sm:m-4">
         <div className="flex-1 p-3 sm:p-5 bg-white relative">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>
