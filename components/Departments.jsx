@@ -228,15 +228,17 @@ const Departments = () => {
             {type === "uni" ? "University Departments" : "Admin Departments"}
           </h1>
           <p className="text-[#6B7280] mt-1 text-sm sm:text-base">Manage and access your departments</p>
-        </div>        <button
+        </div>        
+        <button
           onClick={() => setShowInput(!showInput)}
-          className="max-w-[180px] w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform sm:hover:scale-105 duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-sm text-sm sm:text-base touch-none"
+          className="max-w-[200px] w-full  px-4 sm:px-5 py-2.5 bg-[#1E213A] text-white rounded-md relative group text-center transition-transform sm:hover:scale-105 duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-sm text-sm sm:text-base touch-none"
           disabled={isLoading || isNavigating}
         >
           <Folder size={18} />
-          Add Department
+          Add Departmenttt
         </button>
-      </div>      {showInput && (
+      </div>     
+       {showInput && (
         <div className="mt-1 mb-6 sm:mb-8 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-200 bg-white">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-base sm:text-lg font-medium text-[#111827]">Add New Department</h3>
