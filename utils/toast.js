@@ -1,13 +1,11 @@
 import { toast } from 'react-toastify';
 let activeToastIds = new Set();
 
-// Clear all active toasts
 export const clearAllToasts = () => {
   activeToastIds.forEach(id => toast.dismiss(id));
   activeToastIds.clear();
 };
 
-// Check if a toast with the same message is already active
 const isToastActive = (message) => {
   return Array.from(activeToastIds).some(id => {
     const toastElement = document.querySelector(`[data-toastid="${id}"]`);
@@ -19,9 +17,7 @@ const isToastActive = (message) => {
   });
 };
 
-// Success toast
 export const showSuccessToast = (message, description = null) => {
-  // Prevent duplicate toasts
   if (isToastActive(message)) {
     return;
   }
@@ -49,9 +45,7 @@ export const showSuccessToast = (message, description = null) => {
   return toastId;
 };
 
-// Error toast
 export const showErrorToast = (message, description = null) => {
-  // Prevent duplicate toasts
   if (isToastActive(message)) {
     return;
   }
@@ -79,9 +73,8 @@ export const showErrorToast = (message, description = null) => {
   return toastId;
 };
 
-// Warning toast
 export const showWarningToast = (message, description = null) => {
-  // Prevent duplicate toasts
+
   if (isToastActive(message)) {
     return;
   }
@@ -109,28 +102,26 @@ export const showWarningToast = (message, description = null) => {
   return toastId;
 };
 
-// Loading toast
 export const showLoadingToast = (message, description = null) => {
-  // Prevent duplicate loading toasts
   if (isToastActive(message)) {
     return;
   }
 
-  const toastId = toast.info(
+  const toastId = toast.loading(
     <div className="flex items-center min-w-0">
       <div className="mr-3 flex-shrink-0">
-        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-white border-t-transparent"></div>
+        <div className="custom-spin lg"></div>
       </div>
       <div className="min-w-0 flex-1">
         <div className="font-semibold text-white text-sm sm:text-base break-words">{message}</div>
-        <div className="text-gray-300 text-xs sm:text-sm mt-1 break-words">Processing your request...</div>
+        {description && <div className="text-gray-300 text-xs sm:text-sm mt-1 break-words">{description}</div>}
       </div>
     </div>,
     {
       position: window.innerWidth < 768 ? "top-center" : "top-right",
       theme: "dark",
       icon: false,
-      autoClose: false, // Don't auto-close loading toasts so they can be updated
+      autoClose: false,
       className: "max-w-[90vw] sm:max-w-md",
       toastClassName: "max-w-[90vw] sm:max-w-md",
     }
@@ -140,7 +131,6 @@ export const showLoadingToast = (message, description = null) => {
   return toastId;
 };
 
-// Update loading toast to success/error
 export const updateToast = (toastId, type, message, description = null) => {
   const toastConfig = {
     render: (
@@ -160,7 +150,6 @@ export const updateToast = (toastId, type, message, description = null) => {
   try {
     toast.update(toastId, toastConfig);
     
-    // Remove from active toasts when updated
     if (activeToastIds.has(toastId)) {
       activeToastIds.delete(toastId);
     }
@@ -185,7 +174,7 @@ export const updateLoadingToast = (toastId, message) => {
       render: (
         <div className="flex items-center min-w-0">
           <div className="mr-3 flex-shrink-0">
-            <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-white border-t-transparent"></div>
+            <div className="custom-spin lg"></div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-white text-sm sm:text-base break-words">{message}</div>

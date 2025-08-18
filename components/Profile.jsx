@@ -27,7 +27,7 @@ export default function Profile() {
   useEffect(() => {
     if (session?.user?.email) {
       const userEmail = session.user.email
-      const userName = extractNameFromEmail(userEmail)
+      const userName = session.user.name || extractNameFromEmail(userEmail)
       
       const savedProfile = localStorage.getItem("profileData")
       if (savedProfile) {

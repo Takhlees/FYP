@@ -27,11 +27,10 @@ export const authOptions = {
             throw new Error("enter a correct password");
           }
 
-          // Return user with essential fields only
           return {
             _id: user._id,
             email: user.email,
-            role: user.role,
+            name: user.name,
           };
         } catch (error) {
           throw new Error(error.message || "Something went wrong");
@@ -47,12 +46,14 @@ export const authOptions = {
       if (user) {
         token.id = user._id;
         token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.email = token.email;
+      session.user.name = token.name;
       return session;
     },
   },

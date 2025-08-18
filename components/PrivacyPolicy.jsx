@@ -8,7 +8,6 @@ import Link from 'next/link';
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header with back navigation */}
       <div className="bg-white shadow-sm border-b">
         <div className="relative">
           <Link
@@ -177,7 +176,6 @@ const PrivacyPolicy = () => {
             </p>
           </section>
 
-          {/* Contact Information */}
           <section className="mb-8 md:mb-10">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
               <Users className="w-6 h-6 md:w-7 md:h-7 text-gray-600 flex-shrink-0" />
@@ -188,9 +186,9 @@ const PrivacyPolicy = () => {
             </p>
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <p className="text-gray-700 text-sm md:text-base">
-                <strong>Email:</strong> privacy@documentmanagement.com<br />
-                <strong>Phone:</strong> +1 (555) 123-4567<br />
-                <strong>Address:</strong> 123 University Ave, City, State 12345
+                <strong>Email:</strong> projectfyp@gmail.com<br />
+                <strong>Phone:</strong> +92 302 4936848<br />
+                <strong>Address:</strong> GC University, Lahore
               </p>
             </div>
           </section>

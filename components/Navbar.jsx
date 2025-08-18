@@ -16,7 +16,6 @@ export default function Navbar() {
   const [profileImage, setProfileImage] = useState(null);
   const pathname = usePathname();
 
-  // Fetch session data
   useEffect(() => {
     const fetchSession = async () => {
       const sessionData = await getSession();
@@ -25,7 +24,6 @@ export default function Navbar() {
     fetchSession();
   }, []);
 
-  // Load profile image from localStorage
   useEffect(() => {
     const savedProfile = localStorage.getItem("profileData");
     if (savedProfile) {
@@ -36,7 +34,6 @@ export default function Navbar() {
     }
   }, []);
 
-  // Helper function to check if a link is active
   const isActiveLink = (href) => {
     if (href === "/home") {
       return pathname === "/home";
@@ -113,74 +110,84 @@ export default function Navbar() {
 
             {/* Profile Dropdown */}
             <div className="ml-3 relative">
-              <div>
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="bg-primary flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors duration-300"
-                  id="user-menu"
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                >
-                  <span className="sr-only">Open user menu</span>
-                  <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    {profileImage ? (
-                      <div className="relative h-10 w-10">
-                        <Image
-                          src={profileImage || "/placeholder.svg"}
-                          alt="Profile"
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-full"
-                        />
-                      </div>
-                    ) : (
-                      <svg
-                        className="h-full w-full text-gray-300 dark:text-gray-600"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
+              {session ? (
+                <>
+                  <div>
+                    <button
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      className="bg-primary flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors duration-300"
+                      id="user-menu"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                    >
+                      <span className="sr-only">Open user menu</span>
+                      <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        {profileImage ? (
+                          <div className="relative h-10 w-10">
+                            <Image
+                              src={profileImage || "/placeholder.svg"}
+                              alt="Profile"
+                              layout="fill"
+                              objectFit="cover"
+                              className="rounded-full"
+                            />
+                          </div>
+                        ) : (
+                          <svg
+                            className="h-full w-full text-gray-300 dark:text-gray-600"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                  {showDropdown && (
+                    <div
+                      className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 focus:outline-none transition-colors duration-300"
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="user-menu"
+                    >
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+                        role="menuitem"
                       >
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    )}
-                  </span>
-                </button>
-              </div>
-              {showDropdown && (
-                <div
-                  className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 focus:outline-none transition-colors duration-300"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="user-menu"
-                >
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
-                    role="menuitem"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/change-password"
-                    className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
-                    role="menuitem"
-                  >
-                    Change Password
-                  </Link>
-                  <button
-                    onClick={() => signOut()}
-                    className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
-                    role="menuitem"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                        Profile
+                      </Link>
+                      <Link
+                        href="/change-password"
+                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+                        role="menuitem"
+                      >
+                        Change Password
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+                        role="menuitem"
+                      >
+                        Create New User
+                      </Link>
+                      <button
+                        onClick={() => signOut()}
+                        className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+                        role="menuitem"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : null}
             </div>
           </div>
 
           {/* Mobile menu button */}
           <div className="-mr-2 flex items-center sm:hidden space-x-2">
-            {/* Mobile Direct Theme Toggle */}
             <DirectThemeToggle />
 
             <button
@@ -344,6 +351,12 @@ export default function Navbar() {
                   className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
                 >
                   Change Password
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
+                >
+                  Create New User
                 </Link>
                 <button
                   onClick={() => signOut()}

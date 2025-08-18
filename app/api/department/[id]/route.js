@@ -31,7 +31,7 @@ export async function GET(req, { params }) {
   }
 }
 
-// PUT request handler for adding a category to a department or edit department
+
 export async function PUT(req, { params }) {
     const { id } = await params; 
     const body = await req.json(); 
@@ -77,8 +77,6 @@ export async function DELETE(req, { params }) {
   await connectToDB();
 
   try {
-    // Only allow category deletion, not department deletion
-    // First check if we have a category to delete in the request body
     const body = await req.json();
     
     if (!body.category) {

@@ -9,7 +9,6 @@ export async function POST(req) {
   try {
     await connectToDB();
 
-    // Get logged-in user session
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

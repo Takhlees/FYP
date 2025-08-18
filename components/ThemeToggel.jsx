@@ -8,15 +8,12 @@ export default function DirectThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    
-    // Check initial theme
     const stored = localStorage.getItem('ui-theme');
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const shouldBeDark = stored === 'dark' || (!stored && isSystemDark);
     
     setIsDark(shouldBeDark);
     
-    // Apply theme immediately
     const root = document.documentElement;
     if (shouldBeDark) {
       root.classList.add('dark');
@@ -31,8 +28,7 @@ export default function DirectThemeToggle() {
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
-    
-    // Apply theme directly to DOM
+
     const root = document.documentElement;
     
     if (newIsDark) {
@@ -69,7 +65,6 @@ export default function DirectThemeToggle() {
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       type="button"
     >
-      {/* Toggle Circle */}
       <span
         className={`
           w-5 h-5 bg-white rounded-full shadow-sm
@@ -78,7 +73,6 @@ export default function DirectThemeToggle() {
           ${isDark ? "translate-x-6" : "translate-x-0.5"}
         `}
       >
-        {/* Sun Icon */}
         <svg
           className={`w-3 h-3 text-amber-500 transition-all duration-200 ${
             isDark ? "opacity-0 scale-75" : "opacity-100 scale-100"
@@ -93,7 +87,6 @@ export default function DirectThemeToggle() {
           />
         </svg>
         
-        {/* Moon Icon */}
         <svg
           className={`absolute w-3 h-3 text-slate-600 transition-all duration-200 ${
             isDark ? "opacity-100 scale-100" : "opacity-0 scale-75"

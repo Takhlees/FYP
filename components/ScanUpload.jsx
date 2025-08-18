@@ -15,7 +15,6 @@ import {
   Copy,
   ChevronRight,
   ArrowLeft,
-  Loader2,
   RotateCcw,
   UploadCloud,
   RefreshCw,
@@ -1300,10 +1299,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Updating...
-                </>
+                "Updating..."
               ) : (
                 <>
                   <Check className="w-5 h-5" />
@@ -1530,12 +1526,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
-              {isExtracting && (
-                <div className="text-sm text-blue-500 flex items-center mt-1">
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  Extracting subject from document...
-                </div>
-              )}
+                               {isExtracting && (
+                   <div className="text-sm text-blue-500 flex items-center mt-1">
+                     Extracting subject from document...
+                   </div>
+                 )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -1614,17 +1609,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     disabled={isExtracting}
                     className="mt-1 px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md flex items-center text-xs font-medium"
                   >
-                    {isExtracting ? (
-                      <>
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        Retrying...
-                      </>
-                    ) : (
-                      <>
-                        <RotateCcw className="w-3 h-3 mr-1" />
-                        Retry Text Extraction
-                      </>
-                    )}
+                                         {isExtracting ? (
+                       "Retrying..."
+                     ) : (
+                       <>
+                         <RotateCcw className="w-3 h-3 mr-1" />
+                         Retry Text Extraction
+                       </>
+                     )}
                   </button>
                 </div>
               </div>
@@ -1648,13 +1640,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               type="submit"
               onClick={handleSubmit}
               disabled={isLoading || (!file && !enhancedImage) || isExtracting}
-              className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Saving...
-                </>
+                "Saving..."
               ) : (
                 <>
                   <Check className="w-5 h-5" />
@@ -1786,11 +1775,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   type="button"
                   disabled={isProcessing}
                 >
-                  {isProcessing ? (
-                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-                  ) : (
-                    <Camera className="w-10 h-10 text-blue-600" />
-                  )}
+                                     {isProcessing ? (
+                     "Processing..."
+                   ) : (
+                     <Camera className="w-10 h-10 text-blue-600" />
+                   )}
                 </button>
 
                 <button
@@ -1866,17 +1855,14 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   disabled={!file || isExtracting}
                   className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Retrying...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-5 h-5" />
-                      Retry Extraction
-                    </>
-                  )}
+                                     {isExtracting ? (
+                     "Retrying..."
+                   ) : (
+                     <>
+                       <RefreshCw className="w-5 h-5" />
+                       Retry Extraction
+                     </>
+                   )}
                 </button>
 
                 <button
@@ -2086,12 +2072,11 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
-                    {isExtracting && (
-                      <div className="text-sm text-blue-500 flex items-center mt-2">
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Extracting subject...
-                      </div>
-                    )}
+                                         {isExtracting && (
+                       <div className="text-sm text-blue-500 flex items-center mt-2">
+                         Extracting subject...
+                       </div>
+                     )}
                   </div>
                 </div>
 
@@ -2183,13 +2168,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Saving...
-                    </>
+                    "Saving..."
                   ) : (
                     <>
                       <Check className="w-5 h-5" />
