@@ -1,7 +1,7 @@
 "use client";
 
 import "@styles/globals.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Edit, Trash, Folder, Building, BookOpen, FileText, Users } from "lucide-react";
@@ -10,7 +10,7 @@ import { showLoadingToast, updateToast } from "@/utils/toast";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 
-export default function AdminDepPage() {
+function AdminDepPageContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
   const [departments, setDepartments] = useState([]);
@@ -38,7 +38,7 @@ export default function AdminDepPage() {
         const data = await response.json();
         setDepartments(data);
       } catch (error) {
-        console.error("Failed to fetch departments:", error);
+        // Error handling
       } finally {
         setIsLoading(false);
       }
@@ -71,7 +71,6 @@ export default function AdminDepPage() {
           updateToast(loadingToast, 'error', "Failed to Add", "Failed to add department. Please try again.");
         }
       } catch (error) {
-        console.error("Error adding department:", error);
         updateToast(loadingToast, 'error', "Error Occurred", "An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
@@ -462,5 +461,13 @@ export default function AdminDepPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+export default function AdminDepPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminDepPageContent />
+    </Suspense>
   );
 } 
