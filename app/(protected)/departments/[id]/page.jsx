@@ -961,15 +961,19 @@ const [totalFiles, setTotalFiles] = useState(0);
               </table>
          
             </div>
-             <div className="flex justify-center items-center mt-4">
+            <div className="flex justify-center items-center mt-4">
   <button
     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
     disabled={currentPage === 1}
-    className="px-4 py-1 rounded-lg bg-black text-white disabled:opacity-60 hover:bg-gray-900 transition cursor-pointer"
+    className={`px-4 py-1 rounded-lg bg-black text-white transition ${
+      currentPage === 1
+        ? "opacity-60 cursor-not-allowed"
+        : "hover:bg-gray-900 cursor-pointer"
+    }`}
   >
     Prev
   </button>
-  <span className="font-medium text-base mr-3 ml-3">
+  <span className="font-medium text-base mx-3">
     Page {currentPage} of {Math.ceil(totalFiles / pageSize) || 1}
   </span>
   <button
@@ -979,7 +983,11 @@ const [totalFiles, setTotalFiles] = useState(0);
       )
     }
     disabled={currentPage >= Math.ceil(totalFiles / pageSize)}
-    className="px-4 py-1 rounded-lg bg-black text-white disabled:opacity-60 hover:bg-gray-900 transition cursor-pointer"
+    className={`px-4 py-1 rounded-lg bg-black text-white transition ${
+      currentPage >= Math.ceil(totalFiles / pageSize)
+        ? "opacity-60 cursor-not-allowed"
+        : "hover:bg-gray-900 cursor-pointer"
+    }`}
   >
     Next
   </button>
