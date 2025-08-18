@@ -2,55 +2,29 @@ import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import Tesseract from 'tesseract.js';
 import { PDFDocument } from 'pdf-lib';
-import fs from 'fs/promises';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-// Configuration
-const UPLOAD_DIR = path.join(process.cwd(), 'temp');
-const MAX_FILE_SIZE = 10 * 1024 * 1024; 
-
-// Ensure upload directory exists
-async function ensureUploadDir() {
-  try {
-    await fs.access(UPLOAD_DIR);
-  } catch {
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
-
-// Document Processing Class
 class DocumentScanner {
   
-  // High-performance image enhancement using Sharp
   static async enhanceDocument(imageInput, options = {}) {
     try {
       const {
-        targetWidth = 1654,   // 200 DPI A4 width
-        targetHeight = 2339,  // 200 DPI A4 height
+        targetWidth = 1654,
+        targetHeight = 2339,
         quality = 'high'
       } = options;
       
       let pipeline;
       
-      // Handle both file paths and buffers
       if (Buffer.isBuffer(imageInput)) {
         pipeline = sharp(imageInput);
       } else if (typeof imageInput === 'string') {
-        try {
-          const metadata = await sharp(imageInput).metadata();
-          pipeline = sharp(imageInput);
-        } catch (metadataError) {
-          console.error('Failed to get image metadata:', metadataError);
-          // Try to process anyway
-          pipeline = sharp(imageInput);
-        }
+        pipeline = sharp(imageInput);
       } else {
         throw new Error('Invalid input type');
       }
       
-      // Image enhancement pipeline with error handling
       try {
         pipeline = pipeline
           .resize(targetWidth, targetHeight, {
@@ -61,10 +35,9 @@ class DocumentScanner {
           .grayscale()
           .normalize();
         
-        // Quality-based processing
         if (quality === 'high') {
           pipeline = pipeline
-            .linear(1.3, -15)  // High contrast
+            .linear(1.3, -15)
             .sharpen({ sigma: 0.8, m1: 1.0, m2: 2.5 })
             .median(1);
         } else if (quality === 'medium') {
@@ -76,9 +49,8 @@ class DocumentScanner {
             .linear(1.1, -5);
         }
         
-        // Final processing
         const enhancedBuffer = await pipeline
-          .threshold(120)  // Convert to black/white
+          .threshold(120)
           .png({ 
             compressionLevel: 6,
             palette: true,
@@ -96,7 +68,6 @@ class DocumentScanner {
       } catch (processingError) {
         console.error('Image processing failed, trying simplified enhancement:', processingError);
         
-        // Fallback to simplified enhancement
         const fallbackPipeline = sharp(imageInput)
           .resize(targetWidth, targetHeight, { fit: 'inside' })
           .grayscale()
@@ -115,12 +86,11 @@ class DocumentScanner {
     } catch (error) {
       console.error('Enhancement failed:', error);
       
-      // Return original image as fallback
       if (Buffer.isBuffer(imageInput)) {
         return {
           buffer: imageInput,
           size: imageInput.length,
-          dimensions: { width: 800, height: 600 }, // Default dimensions
+          dimensions: { width: 800, height: 600 },
           format: 'original'
         };
       }
@@ -129,34 +99,29 @@ class DocumentScanner {
     }
   }
   
-  // Real OCR using Tesseract.js with corrected configuration
   static async extractTextWithVision(imageBuffer) {
     try {
       const startTime = Date.now();
       
-      // Add timeout for OCR processing
       const ocrPromise = Tesseract.recognize(imageBuffer, 'eng', {
         logger: m => {
           if (m.status === 'recognizing text') {
-            console.log(`OCR Progress: ${(m.progress * 100).toFixed(1)}%`);
+            
           }
         },
-        // Enhanced OCR settings for better text layout and spacing
-        tessedit_pageseg_mode: '1', // Automatic page segmentation with OSD
-        preserve_interword_spaces: '1', // Preserve spaces between words
+        tessedit_pageseg_mode: '1',
+        preserve_interword_spaces: '1',
         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,!?@#$%^&*()_+-=[]{}|;\':"<>?/~` \n\r\t',
-        // Additional settings for better accuracy
-        tessedit_do_invert: '0', // Don't invert colors
-        textord_heavy_nr: '1', // Heavy noise removal
-        textord_min_linesize: '2.0', // Minimum line size
-        textord_old_baselines: '0', // Use new baseline detection
-        textord_old_xheight: '0', // Use new x-height detection
-        textord_min_xheight: '8', // Minimum x-height
-        textord_force_make_prop_words: 'F', // Don't force proportional words
-        textord_use_cjk_fp_model: 'F' // Don't use CJK model
+        tessedit_do_invert: '0',
+        textord_heavy_nr: '1',
+        textord_min_linesize: '2.0',
+        textord_old_baselines: '0',
+        textord_old_xheight: '0',
+        textord_min_xheight: '8',
+        textord_force_make_prop_words: 'F',
+        textord_use_cjk_fp_model: 'F'
       });
 
-      // Add timeout (30 seconds)
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('OCR timeout after 30 seconds')), 30000);
       });
@@ -165,25 +130,14 @@ class DocumentScanner {
       
       const processingTime = (Date.now() - startTime) / 1000;
       
-      console.log(`OCR completed in ${processingTime.toFixed(2)}s`);
-      console.log(`Confidence: ${data.confidence.toFixed(1)}%`);
-      console.log(`Extracted ${data.text.length} characters`);
-      
-      // More careful text cleaning that preserves intentional spacing
       let cleanedText = data.text
-        // First normalize line breaks but preserve paragraph structure
         .replace(/\r\n/g, '\n')
         .replace(/\r/g, '\n')
-        // Remove excessive empty lines (3+ consecutive) but keep meaningful breaks
         .replace(/\n{3,}/g, '\n\n')
-        // Normalize spaces within lines but preserve line structure
         .replace(/[ \t]+/g, ' ')
-        // Remove trailing spaces at end of lines
         .replace(/[ \t]+\n/g, '\n')
-        // Remove leading/trailing whitespace from entire text
         .trim();
       
-      // If OCR returned empty or very short text, try preprocessing
       if (!cleanedText || cleanedText.length < 10) {
         return await this.extractTextWithPreprocessing(imageBuffer);
       }
@@ -200,13 +154,11 @@ class DocumentScanner {
     } catch (error) {
       console.error('OCR failed:', error);
       
-      // Try with preprocessing as fallback
       try {
         return await this.extractTextWithPreprocessing(imageBuffer);
       } catch (preprocessError) {
         console.error('Preprocessing OCR also failed:', preprocessError);
         
-        // Return empty result instead of throwing error
         return {
           text: '',
           confidence: 0,
@@ -220,10 +172,8 @@ class DocumentScanner {
     }
   }
   
-  // OCR with image preprocessing for better results
   static async extractTextWithPreprocessing(imageBuffer) {
     try {
-      // Pre-process the image for better OCR results
       const preprocessedBuffer = await sharp(imageBuffer)
         .grayscale()
         .normalize()
@@ -234,31 +184,26 @@ class DocumentScanner {
       
       const startTime = Date.now();
       
-      // Use enhanced settings for preprocessing as well
       const { data } = await Tesseract.recognize(preprocessedBuffer, 'eng', {
         logger: m => {
           if (m.status === 'recognizing text') {
-            console.log(`Preprocessed OCR Progress: ${(m.progress * 100).toFixed(1)}%`);
+            
           }
         },
         tessedit_pageseg_mode: '1',
         preserve_interword_spaces: '1',
         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,!?@#$%^&*()_+-=[]{}|;\':"<>?/~` \n\r\t',
-        // Additional settings for better accuracy
-        tessedit_do_invert: '0', // Don't invert colors
-        textord_heavy_nr: '1', // Heavy noise removal
-        textord_min_linesize: '2.0', // Minimum line size
-        textord_old_baselines: '0', // Use new baseline detection
-        textord_old_xheight: '0', // Use new x-height detection
-        textord_min_xheight: '8', // Minimum x-height
-        textord_force_make_prop_words: 'F', // Don't force proportional words
-        textord_use_cjk_fp_model: 'F' // Don't use CJK model
+        tessedit_do_invert: '0',
+        textord_heavy_nr: '1',
+        textord_min_linesize: '2.0',
+        textord_old_baselines: '0',
+        textord_old_xheight: '0',
+        textord_min_xheight: '8',
+        textord_force_make_prop_words: 'F',
+        textord_use_cjk_fp_model: 'F'
       });
       
       const processingTime = (Date.now() - startTime) / 1000;
-      
-      console.log(`Preprocessed OCR completed in ${processingTime.toFixed(2)}s`);
-      console.log(`Confidence: ${data.confidence.toFixed(1)}%`);
       
       let cleanedText = data.text
         .replace(/\r\n/g, '\n')
@@ -283,13 +228,10 @@ class DocumentScanner {
     }
   }
   
-  // PDF processing using pdf-parse (reliable)
-  static async processPDF(pdfBuffer) {
+    static async processPDF(pdfBuffer) {
     try {
-      // Import pdf-parse dynamically to avoid issues in Next.js
       const pdfParse = (await import('pdf-parse')).default;
       
-      // First attempt: Standard PDF parsing
       try {
         const pdfData = await pdfParse(pdfBuffer);
         
@@ -304,21 +246,19 @@ class DocumentScanner {
           };
         }
       } catch (parseError) {
-        // Standard PDF parsing failed
+        console.error('Standard PDF parsing failed:', parseError.message);
       }
-      
-      // Second attempt: Enhanced PDF parsing with different options
       
       try {
         const pdfData = await pdfParse(pdfBuffer, {
-          max: 0, // No page limit
+          max: 0,
           version: 'v2.0.550'
         });
         
         if (pdfData.text && pdfData.text.trim().length > 0) {
           return {
             text: pdfData.text.trim(),
-            confidence: 85, // Slightly lower confidence for enhanced parsing
+            confidence: 85, 
             pagesProcessed: pdfData.numpages,
             wordCount: pdfData.text.split(/\s+/).length,
             characterCount: pdfData.text.length,
@@ -326,28 +266,24 @@ class DocumentScanner {
           };
         }
       } catch (enhancedError) {
-        console.log('Enhanced PDF parsing failed:', enhancedError.message);
+        console.error('Enhanced PDF parsing failed:', enhancedError.message);
       }
       
-      // Third attempt: Try to get basic PDF structure info
       try {
         const pdfDoc = await PDFDocument.load(pdfBuffer);
         const pageCount = pdfDoc.getPageCount();
         
-        // If we can load the PDF but no text, it's likely scanned
         if (pageCount > 0) {
           
-          // Try scanned PDF processing as fallback
           try {
             const scannedResult = await DocumentScanner.processScannedPDF(pdfBuffer);
             if (scannedResult.text && scannedResult.text.trim().length > 0) {
               return scannedResult;
             }
-          } catch (scannedError) {
-            // Scanned PDF processing failed
+                      } catch (scannedError) {
+            console.error('Scanned PDF processing failed:', scannedError.message);
           }
           
-          // Return structure info if OCR also fails
           return { 
             text: '', 
             confidence: 0, 
@@ -359,10 +295,9 @@ class DocumentScanner {
           };
         }
       } catch (structureError) {
-        // PDF structure analysis failed
+        console.error('PDF structure analysis failed:', structureError.message);
       }
       
-      // All PDF processing methods failed
       return { text: '', confidence: 0, pagesProcessed: 0, wordCount: 0, characterCount: 0, method: 'failed' };
       
     } catch (error) {
@@ -371,10 +306,8 @@ class DocumentScanner {
     }
   }
   
-  // Fallback method for scanned PDFs - convert to image and use OCR
   static async processScannedPDF(pdfBuffer) {
     try {
-      // First, try to get basic text with enhanced pdf-parse
       try {
         const pdfParse = (await import('pdf-parse')).default;
         const pdfData = await pdfParse(pdfBuffer, {
@@ -393,115 +326,24 @@ class DocumentScanner {
           };
         }
       } catch (parseError) {
-        // Enhanced PDF parsing failed
+        console.error('Enhanced PDF parsing failed:', parseError.message);
       }
 
-      // If pdf-parse fails, convert PDF to images and use OCR
-      
-      let tempPdfPath = null;
-      let tempDir = null;
-      
-      try {
-        // Create temporary directory for processing
-        tempDir = path.join(UPLOAD_DIR, `pdf_${uuidv4()}`);
-        await fs.mkdir(tempDir, { recursive: true });
-        
-        // Save PDF to temporary file
-        tempPdfPath = path.join(tempDir, 'temp.pdf');
-        await fs.writeFile(tempPdfPath, pdfBuffer);
-        
-        // Method 1: Try pdf2pic for PDF to image conversion (if available)
-        try {
-          const { fromPath } = await import('pdf2pic');
-          
-          const options = {
-            density: 300,           // High DPI for better OCR
-            saveFilename: "page",
-            savePath: tempDir,
-            format: "png",
-            width: 1654,           // A4 width at 200 DPI
-            height: 2339           // A4 height at 200 DPI
-          };
-          
-          // Ensure the temporary directory exists and is writable
-          await fs.access(tempDir, fs.constants.W_OK);
-          
-          const convert = fromPath(tempPdfPath, options);
-          const pageCount = await convert.bulk(-1); // Convert all pages
-          
-          // Process each page with OCR
-          let allText = '';
-          let totalConfidence = 0;
-          let processedPages = 0;
-          
-          for (let i = 0; i < pageCount.length; i++) {
-            const imagePath = path.join(tempDir, `page_${i + 1}.png`);
-            
-            try {
-              // Read the generated image
-              const imageBuffer = await fs.readFile(imagePath);
-              
-              // Enhance the image for better OCR
-              const enhancedImage = await DocumentScanner.enhanceDocument(imageBuffer, {
-                quality: 'high',
-                targetWidth: 1654,
-                targetHeight: 2339
-              });
-              
-              // Extract text using OCR
-              const ocrResult = await DocumentScanner.extractTextWithPreprocessing(enhancedImage.buffer);
-              
-              if (ocrResult.text && ocrResult.text.trim().length > 0) {
-                allText += (allText ? '\n\n' : '') + ocrResult.text.trim();
-                totalConfidence += ocrResult.confidence || 0;
-                processedPages++;
-              }
-              
-              // Clean up individual image file
-              await fs.unlink(imagePath);
-              
-            } catch (pageError) {
-              // Error processing page
-            }
-          }
-          
-          if (allText.trim().length > 0) {
-            const avgConfidence = processedPages > 0 ? Math.round(totalConfidence / processedPages) : 0;
-            
-            return {
-              text: allText.trim(),
-              confidence: avgConfidence,
-              pagesProcessed: processedPages,
-              wordCount: allText.trim().split(/\s+/).length,
-              characterCount: allText.trim().length,
-              method: 'pdf2pic_ocr'
-            };
-          }
-          
-        } catch (pdf2picError) {
-          // pdf2pic conversion failed (will use fallback)
-        }
-        
-        // Method 2: Fallback to pdfjs-dist for PDF to image conversion
         try {
           const pdfjsLib = await import('pdfjs-dist');
           
-          // Set worker path
           const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
           pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
           
-          // Load PDF document - convert Buffer to Uint8Array for pdfjs-dist
           const loadingTask = pdfjsLib.getDocument({ 
             data: DocumentScanner.convertBufferToUint8Array(pdfBuffer),
-            // Add timeout and error handling
             maxImageSize: -1,
             cMapUrl: null,
             cMapPacked: true
           });
           
-          // Add timeout for PDF loading
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('PDF loading timeout')), 30000); // 30 second timeout
+            setTimeout(() => reject(new Error('PDF loading timeout')), 30000);
           });
           
           const pdfDocument = await Promise.race([loadingTask.promise, timeoutPromise]);
@@ -510,17 +352,14 @@ class DocumentScanner {
           let totalConfidence = 0;
           let processedPages = 0;
           
-          // Process each page
           for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
             try {
               const page = await pdfDocument.getPage(pageNum);
-              const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better quality
+              const viewport = page.getViewport({ scale: 2.0 });
               
-              // Create canvas for rendering
               const canvas = new (await import('canvas')).Canvas(viewport.width, viewport.height);
               const context = canvas.getContext('2d');
               
-              // Render PDF page to canvas
               const renderContext = {
                 canvasContext: context,
                 viewport: viewport
@@ -528,17 +367,14 @@ class DocumentScanner {
               
               await page.render(renderContext).promise;
               
-              // Convert canvas to buffer
               const imageBuffer = canvas.toBuffer('image/png');
               
-              // Enhance the image for better OCR
               const enhancedImage = await DocumentScanner.enhanceDocument(imageBuffer, {
                 quality: 'high',
                 targetWidth: 1654,
                 targetHeight: 2339
               });
               
-              // Extract text using OCR
               const ocrResult = await DocumentScanner.extractTextWithPreprocessing(enhancedImage.buffer);
               
               if (ocrResult.text && ocrResult.text.trim().length > 0) {
@@ -547,9 +383,9 @@ class DocumentScanner {
                 processedPages++;
               }
               
-            } catch (pageError) {
-              // Error processing page
-            }
+                          } catch (pageError) {
+                console.error('Error processing PDF page:', pageError.message);
+              }
           }
           
           if (allText.trim().length > 0) {
@@ -565,11 +401,10 @@ class DocumentScanner {
             };
           }
           
-        } catch (pdfjsError) {
-          // pdfjs-dist conversion failed
-        }
+                  } catch (pdfjsError) {
+            console.error('pdfjs-dist conversion failed:', pdfjsError.message);
+          }
         
-        // If all methods fail, return PDF structure info
         try {
           const pdfDoc = await PDFDocument.load(pdfBuffer);
           const pageCount = pdfDoc.getPageCount();
@@ -584,24 +419,9 @@ class DocumentScanner {
           };
           
         } catch (structureError) {
-          // PDF structure analysis failed
+          console.error('PDF structure analysis failed:', structureError.message);
         }
         
-      } finally {
-        // Clean up temporary files
-        try {
-          if (tempPdfPath && await fs.access(tempPdfPath).then(() => true).catch(() => false)) {
-            await fs.unlink(tempPdfPath);
-          }
-          if (tempDir && await fs.access(tempDir).then(() => true).catch(() => false)) {
-            await fs.rm(tempDir, { recursive: true, force: true });
-          }
-        } catch (cleanupError) {
-          // Cleanup error
-        }
-      }
-      
-      // If all methods fail, return empty result
       return { text: '', confidence: 0, pagesProcessed: 0, wordCount: 0, characterCount: 0 };
       
     } catch (error) {
@@ -610,96 +430,75 @@ class DocumentScanner {
     }
   }
   
-  // Extract subject from text with improved pattern matching
   static extractSubjectFromText(text) {
     if (!text || text.trim().length === 0) {
-      console.log('No text provided for subject extraction');
       return '';
     }
     
-    console.log(`Extracting subject from text (${text.length} characters)`);
-    
-    // Create a version for pattern matching (normalize spaces but keep line breaks)
     const searchableText = text
-      .replace(/[ \t]+/g, ' ')  // Normalize horizontal spaces
-      .replace(/\n+/g, '\n')    // Normalize line breaks
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n+/g, '\n')
       .trim();
     
-    // Enhanced subject patterns - more flexible and comprehensive
     const subjectPatterns = [
-      // Primary patterns with field boundaries
       /subject\s*:\s*([^]*?)(?=\n\s*(?:from|to|date|ref|cc|bcc|sent|received|time|reply|forward|attachment|enclosure|regarding|attn|attention|dear|sincerely|regards|yours|phone|fax|email|mobile)\s*:|$)/i,
       /subj\s*:\s*([^]*?)(?=\n\s*(?:from|to|date|ref|cc|bcc|sent|received|time|reply|forward|attachment|enclosure|regarding|attn|attention|dear|sincerely|regards|yours|phone|fax|email|mobile)\s*:|$)/i,
       /re\s*:\s*([^]*?)(?=\n\s*(?:from|to|date|ref|cc|bcc|sent|received|time|reply|forward|attachment|enclosure|regarding|attn|attention|dear|sincerely|regards|yours|phone|fax|email|mobile)\s*:|$)/i,
       
-      // Single line patterns (more flexible)
       /subject\s*:\s*([^\n\r]+)/i,
       /subj\s*:\s*([^\n\r]+)/i,
       /re\s*:\s*([^\n\r]+)/i,
       
-      // Alternative patterns for different document formats
       /subject\s*line\s*:\s*([^\n\r]+)/i,
       /subject\s*field\s*:\s*([^\n\r]+)/i,
       
-      // Look for text that might be a subject based on position and content
       /^(?!from|to|date|ref|cc|bcc|sent|received|time|reply|forward|attachment|enclosure|regarding|attn|attention|dear|sincerely|regards|yours|phone|fax|email|mobile)[^:\n\r]{5,50}$/im
     ];
     
-    // Search through the text for subject patterns
     for (const pattern of subjectPatterns) {
       const match = searchableText.match(pattern);
       if (match && match[1] && match[1].trim().length > 0) {
         let subject = match[1].trim();
         
-        // Clean up the subject while preserving meaningful spaces
         subject = subject
-          .replace(/\n+/g, ' ')           // Convert line breaks to spaces
-          .replace(/[ \t]+/g, ' ')        // Normalize multiple spaces to single space
-          .replace(/[.,;!?]+$/, '')       // Remove trailing punctuation
+          .replace(/\n+/g, ' ')
+          .replace(/[ \t]+/g, ' ')
+          .replace(/[.,;!?]+$/, '')
           .trim();
         
-        // Additional validation - subject should be reasonable length
         if (subject.length < 3 || subject.length > 200) {
-          continue; // Skip if too short or too long
+          continue;
         }
         
-        // Limit length for form field
         const finalSubject = subject.length > 150 ? subject.substring(0, 150) + '...' : subject;
         
         return finalSubject;
       }
     }
     
-    // Fallback: try to find the first meaningful line that could be a subject
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     for (let i = 0; i < Math.min(5, lines.length); i++) {
       const line = lines[i];
-      // Skip common header lines
       if (/^(from|to|date|ref|cc|bcc|sent|received|time|reply|forward|attachment|enclosure|regarding|attn|attention|dear|sincerely|regards|yours|phone|fax|email|mobile):/i.test(line)) {
         continue;
       }
-      // Skip very short lines or lines that are just numbers/dates
       if (line.length < 5 || /^\d+[\/\-\.]\d+[\/\-\.]\d+/.test(line)) {
         continue;
       }
       
-      // This could be a subject line
       const finalSubject = line.length > 150 ? line.substring(0, 150) + '...' : line;
       return finalSubject;
     }
     
-    return ''; // Return empty string if no subject pattern found
+    return '';
   }
 
-  // Legacy method - kept for backward compatibility but now uses the new specific method
   static extractSubject(text) {
-    // First try the specific subject extraction
     const specificSubject = this.extractSubjectFromText(text);
     if (specificSubject) {
       return specificSubject;
     }
     
-    // If no specific subject found, fall back to old behavior
     return this.findMostProminentTopLine(text.split('\n').filter(line => line.trim().length > 0));
   }
 
@@ -779,7 +578,6 @@ class DocumentScanner {
     return 'No subject found';
   }
   
-    // Helper method to convert Buffer to Uint8Array for pdfjs-dist
   static convertBufferToUint8Array(buffer) {
     if (Buffer.isBuffer(buffer)) {
       return new Uint8Array(buffer);
@@ -839,24 +637,22 @@ class DocumentScanner {
         try {
           // Create a simple colored rectangle as placeholder
           const placeholderBuffer = await DocumentScanner.createPlaceholderImage(viewport.width, viewport.height);
-          console.log('Created placeholder image for PDF preview');
           return placeholderBuffer;
         } catch (placeholderError) {
-          console.log('Placeholder creation also failed:', placeholderError.message);
+          console.error('Placeholder creation also failed:', placeholderError.message);
           
           // Method 3: Try the simple PDF preview method
           try {
             const simplePreview = await DocumentScanner.createSimplePDFPreview(pdfBuffer);
             if (simplePreview) {
-              console.log('Created simple PDF preview as fallback');
               return simplePreview;
             }
           } catch (simpleError) {
-            console.log('Simple PDF preview also failed:', simpleError.message);
+            console.error('Simple PDF preview also failed:', simpleError.message);
           }
           
           // Final Fallback: "No preview available" image
-          console.log('All specific preview methods failed. Creating generic "no preview" image.');
+          console.error('All specific preview methods failed. Creating generic "no preview" image.');
           return await DocumentScanner.createNoPreviewImage();
         }
       }
@@ -871,7 +667,6 @@ class DocumentScanner {
       
       // Convert canvas to PNG buffer
       const imageBuffer = canvas.toBuffer('image/png');
-      console.log(`PDF preview image created: ${imageBuffer.length} bytes`);
       
       return imageBuffer;
       
@@ -882,15 +677,15 @@ class DocumentScanner {
       try {
         const simplePreview = await DocumentScanner.createSimplePDFPreview(pdfBuffer);
         if (simplePreview) {
-          console.log('Created simple PDF preview after error');
+          console.error('Created simple PDF preview after error');
           return simplePreview;
         }
       } catch (simpleError) {
-        console.log('Simple PDF preview also failed after error:', simpleError.message);
+        console.error('Simple PDF preview also failed after error:', simpleError.message);
       }
       
       // Final Fallback: "No preview available" image
-      console.log('All preview methods failed. Creating generic "no preview" image.');
+      console.error('All preview methods failed. Creating generic "no preview" image.');
       return await DocumentScanner.createNoPreviewImage();
     }
   }
@@ -898,7 +693,6 @@ class DocumentScanner {
   // Create a simple placeholder image when canvas is not available
   static async createPlaceholderImage(width, height) {
     try {
-      console.log('Creating placeholder image...');
       
       // Create a simple colored rectangle using Sharp
       const svgContent = `
@@ -914,7 +708,6 @@ class DocumentScanner {
         .png()
         .toBuffer();
       
-      console.log(`Placeholder image created: ${placeholderBuffer.length} bytes`);
       return placeholderBuffer;
       
     } catch (error) {
@@ -926,14 +719,13 @@ class DocumentScanner {
   // Alternative method: Create a simple PDF preview without complex rendering
   static async createSimplePDFPreview(pdfBuffer) {
     try {
-      console.log('Creating simple PDF preview...');
       
       // Get basic PDF info without complex rendering
       const pdfDoc = await PDFDocument.load(pdfBuffer);
       const pageCount = pdfDoc.getPageCount();
       
       if (pageCount === 0) {
-        console.log('PDF has no pages');
+        console.error('PDF has no pages');
         return null;
       }
       
@@ -967,7 +759,6 @@ class DocumentScanner {
         .png()
         .toBuffer();
       
-      console.log(`Simple PDF preview created: ${previewBuffer.length} bytes`);
       return previewBuffer;
       
     } catch (error) {
@@ -979,7 +770,6 @@ class DocumentScanner {
   // Create a "No preview available" image as ultimate fallback
   static async createNoPreviewImage() {
     try {
-      console.log('Creating "no preview available" placeholder image...');
       const svgContent = `
         <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
           <rect width="100%" height="100%" fill="#f8f9fa"/>
@@ -990,7 +780,6 @@ class DocumentScanner {
       const noPreviewBuffer = await sharp(Buffer.from(svgContent))
         .png()
         .toBuffer();
-      console.log(`"No preview" image created: ${noPreviewBuffer.length} bytes`);
       return noPreviewBuffer;
     } catch (error) {
       console.error('Failed to create "no preview" image:', error);
@@ -1040,10 +829,7 @@ class DocumentScanner {
 
 // Main API handler - POST METHOD
 export async function POST(request) {
-  let tempFilePath = null;
-  
   try {
-    await ensureUploadDir();
     
     const formData = await request.formData();
     const file = formData.get('file');
@@ -1073,17 +859,12 @@ export async function POST(request) {
       );
     }
     
-    console.log(`Processing: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
     
     const startTime = Date.now();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Save temporary file for processing
-    const fileExtension = file.type === 'application/pdf' ? '.pdf' : '.jpg';
-    const tempFileName = `${uuidv4()}${fileExtension}`;
-    tempFilePath = path.join(UPLOAD_DIR, tempFileName);
-    await fs.writeFile(tempFilePath, buffer);
+
     
     let result = {
       success: true,
@@ -1117,8 +898,8 @@ export async function POST(request) {
             text: pdfResult.text,
             confidence: pdfResult.confidence,
             pagesProcessed: pdfResult.pagesProcessed,
-            subject: extractedSubject, // This will be empty string if no subject pattern found
-            legacySubject: DocumentScanner.extractSubject(pdfResult.text), // Fallback for compatibility
+            subject: extractedSubject,
+            legacySubject: DocumentScanner.extractSubject(pdfResult.text),
             wordCount: pdfResult.wordCount,
             characterCount: pdfResult.characterCount
           };
@@ -1183,7 +964,7 @@ export async function POST(request) {
               }
             };
           } catch (previewError) {
-            console.log('PDF preview creation failed after error, using fallback:', previewError.message);
+            console.error('PDF preview creation failed after error, using fallback:', previewError.message);
             // Use simple preview as fallback
             const simplePreview = await DocumentScanner.createSimplePDFPreview(buffer);
             if (simplePreview) {
@@ -1205,7 +986,7 @@ export async function POST(request) {
         
         // Ensure PDF preview is always available (fallback for edge cases)
         if (!result.pdfPreview) {
-          console.log('Creating fallback PDF preview...');
+          console.error('Creating fallback PDF preview...');
           try {
             const previewImage = await DocumentScanner.createPDFPreviewImage(buffer);
             result.pdfPreview = {
@@ -1221,7 +1002,7 @@ export async function POST(request) {
               }
             };
           } catch (fallbackError) {
-            console.log('Fallback PDF preview failed:', fallbackError.message);
+            console.error('Fallback PDF preview failed:', fallbackError.message);
             // Create minimal PDF preview with simple fallback
             const simplePreview = await DocumentScanner.createSimplePDFPreview(buffer);
             result.pdfPreview = {
@@ -1240,14 +1021,10 @@ export async function POST(request) {
         }
         
       } else {
-        // Process Image
-        console.log('Processing image...');
-        
         let enhancedResult = null;
         
-        // Step 1: Enhance image
         if (action === 'enhance_only' || action === 'enhance_and_extract') {
-          enhancedResult = await DocumentScanner.enhanceDocument(tempFilePath, { quality });
+          enhancedResult = await DocumentScanner.enhanceDocument(buffer, { quality });
           
           result.enhancement = {
             originalSize: file.size,
@@ -1258,7 +1035,7 @@ export async function POST(request) {
           };
         }
         
-        // Step 2: Extract text using REAL OCR
+        // Step 2: Extract text using OCR
         if (action === 'extract_only' || action === 'enhance_and_extract') {
           try {
             const bufferToProcess = enhancedResult ? enhancedResult.buffer : buffer;
@@ -1294,7 +1071,6 @@ export async function POST(request) {
           }
         }
         
-        // Step 3: Create PDF
         if (enhancedResult) {
           const pdfResult = await DocumentScanner.createOptimizedPDF(
             enhancedResult.buffer,
@@ -1307,7 +1083,6 @@ export async function POST(request) {
             base64: pdfResult.buffer.toString('base64')
           };
           
-          // Enhanced image as base64
           result.enhancedImage = {
             base64: enhancedResult.buffer.toString('base64'),
             mimeType: `image/${enhancedResult.format}`,
@@ -1323,28 +1098,12 @@ export async function POST(request) {
     } catch (processingError) {
       console.error('Processing error:', processingError);
       
-      // Provide more specific error messages
-      let errorMessage = 'Document processing failed';
-      let errorDetails = processingError.message;
-      
-      if (processingError.message.includes('timeout')) {
-        errorMessage = 'Processing timeout - document too complex or large';
-        errorDetails = 'The document took too long to process. Try with a simpler document or lower quality setting.';
-      } else if (processingError.message.includes('memory')) {
-        errorMessage = 'Memory limit exceeded';
-        errorDetails = 'The document is too large or complex. Try with a smaller document or lower quality setting.';
-      } else if (processingError.message.includes('format')) {
-        errorMessage = 'Unsupported file format';
-        errorDetails = 'The file format is not supported or corrupted.';
-      } else if (processingError.message.includes('OCR')) {
-        errorMessage = 'Text extraction failed';
-        errorDetails = 'Unable to extract text from the document. The image might be too blurry or contain no readable text.';
-      }
+      const errorMessage = 'Document processing failed';
       
       return NextResponse.json(
         {
           error: errorMessage,
-          details: errorDetails,
+          details: processingError.message,
           success: false,
           processingTime: Date.now() - startTime
         },
@@ -1362,26 +1121,13 @@ export async function POST(request) {
       },
       { status: 500 }
     );
-    
-  } finally {
-    // Cleanup
-    if (tempFilePath) {
-      try {
-        await fs.unlink(tempFilePath);
-      } catch (cleanupError) {
-        console.error('Cleanup failed:', cleanupError);
-      }
-    }
   }
 }
 
-// Health check - GET METHOD
 export async function GET() {
   try {
-    // Test basic functionality
     const testBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
     
-    // Test Sharp
     let sharpWorking = false;
     try {
       const sharpTest = await sharp(testBuffer).metadata();
@@ -1407,12 +1153,11 @@ export async function GET() {
         'High-performance image enhancement',
         'Real OCR text extraction (Tesseract.js)',
         'PDF processing',
-        'Specific subject extraction for scan forms',
+        'Subject extraction for scan forms',
         'PDF generation'
       ],
       supportedFormats: ['JPEG', 'PNG', 'PDF'],
-      ocrEngine: 'tesseract.js-simple',
-      mockData: false,
+      ocrEngine: 'tesseract.js',
       components: {
         sharp: sharpWorking ? 'working' : 'failed',
         tesseract: tesseractWorking ? 'working' : 'failed'
