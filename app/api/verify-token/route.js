@@ -13,10 +13,8 @@ export async function POST(req) {
 
     await connectToDB();
 
-    // Hash the received token
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    // Check ALL users with reset tokens
     const allUsersWithTokens = await User.find({ 
       resetToken: { $exists: true, $ne: null } 
     }).select('email resetToken resetTokenExpiry');
@@ -28,15 +26,17 @@ export async function POST(req) {
 
     });
 
-    // Now search with both conditions
     const user = await User.findOne({
       resetToken: hashedToken,
       resetTokenExpiry: { $gt: Date.now() }
     });
-
-    const userWithToken = await User.findOne({ resetToken: hashedToken });
     
     if (!user) {
+      return NextResponse.json({ error: "Token is invalid or expired" }, { status: 400 });
+    }
+
+    const userWithToken = await User.findOne({ resetToken: hashedToken });
+    if (!userWithToken) {
       return NextResponse.json({ error: "Token is invalid or expired" }, { status: 400 });
     }
 

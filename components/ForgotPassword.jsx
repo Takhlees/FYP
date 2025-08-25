@@ -1,6 +1,8 @@
 import "@styles/globals.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { showSuccessToast, showErrorToast, showLoadingToast, updateToast } from "@/utils/toast";
 
 export default function ForgotPassword() {
@@ -70,6 +72,17 @@ export default function ForgotPassword() {
 
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Back Button - Fixed in left corner */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Login</span>
+        </Link>
+      </div>
+      
       <h1 className="text-3xl font-bold mb-6">Forgot Password</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

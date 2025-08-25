@@ -1,47 +1,37 @@
-// import withOptimizedImages from 'next-optimized-images';
-
-// /** @type {import('next').NextConfig} */
-// const nextConfig = withOptimizedImages({
-//   images: {
-//     disableStaticImages: true, // Optional, disable Next.js built-in image optimization
-   
-//   },
-// });
-
-  
-
-// export default nextConfig;
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
-    if (isServer) {
-      // Help with tesseract.js server-side rendering
-      config.externals.push({
-        'tesseract.js': 'tesseract.js'
-      });
-    }
-    
-    // Handle canvas - only disable for client-side
+    // Handle heavy dependencies for deployment
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
         canvas: false,
+        'tesseract.js': false,
+        'pdf-lib': false,
+        'pdfjs-dist': false,
       };
+    }
+    
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'tesseract.js': 'commonjs tesseract.js',
+        'pdf-lib': 'commonjs pdf-lib',
+        'pdfjs-dist': 'commonjs pdfjs-dist',
+        'canvas': 'commonjs canvas',
+      });
     }
     
     return config;
   },
   
-
-  serverExternalPackages: ['tesseract.js', 'sharp', 'pdf-parse', 'pdfjs-dist', 'canvas'],
-  
-  // Optional: Additional optimizations for image processing
-  // images: {
-  //   domains: ['localhost'],
-  //   dangerouslyAllowSVG: true,
-  // },
-
+  serverExternalPackages: [
+    'sharp',          
+    'pdf-parse',      
+    'tesseract.js',    
+    'pdf-lib',        
+    'pdfjs-dist',     
+  ],
 };
 
 export default nextConfig;

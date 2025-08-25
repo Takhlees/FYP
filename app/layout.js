@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning={true} className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <div className="min-h-screen bg-surface text-on-surface transition-colors duration-300">
             {children}
           </div>
@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="dark"
+          theme="light"
           limit={3}
           className="!z-[99999]"
           toastClassName="!max-w-[90vw] sm:!max-w-md"

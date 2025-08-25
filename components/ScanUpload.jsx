@@ -836,12 +836,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
     }
   };
 
-  const handleAlphabetOnlyInput = (e, setter) => {
-    const value = e.target.value;
-    if (/^[a-zA-Z]*$/.test(value)) {
-      setter(value);
-    }
-  };
+
 
   // Form submission
   const handleSubmit = useCallback(
@@ -1137,7 +1132,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               >
                 <option value="">Select Type</option>
@@ -1153,7 +1148,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
                 disabled={departmentsLoading}
               >
@@ -1178,7 +1173,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 disabled={categoriesLoading || !selectedDepartment}
               >
                 <option value="">
@@ -1209,7 +1204,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               />
             </div>
@@ -1221,7 +1216,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                   required
                 />
               </div>
@@ -1234,7 +1229,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   type="text"
                   value={diaryNo}
                   onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                   required
                 />
               </div>
@@ -1245,9 +1240,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={from}
-                onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                onChange={(e) => setFrom(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 required
+                placeholder="Enter sender name"
               />
             </div>
 
@@ -1255,13 +1251,22 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <label className="block text-sm font-medium mb-1">
                 Disposal *
               </label>
-              <input
-                type="text"
+              <select
                 value={disposal}
-                onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                onChange={(e) => setDisposal(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
-              />
+              >
+                <option value="">Select Disposal</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Pending">Pending</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Completed">Completed</option>
+                <option value="Forwarded">Forwarded</option>
+                <option value="Returned">Returned</option>
+                <option value="Archived">Archived</option>
+              </select>
             </div>
 
             <div>
@@ -1269,7 +1274,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               >
                 <option value="">Select Status</option>
@@ -1451,7 +1456,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               >
                 <option value="">Select Type</option>
@@ -1467,7 +1472,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
                 disabled={departmentsLoading}
               >
@@ -1492,7 +1497,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 disabled={categoriesLoading || !selectedDepartment}
               >
                 <option value="">
@@ -1523,7 +1528,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               />
                                {isExtracting && (
@@ -1540,7 +1545,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                   required
                 />
               </div>
@@ -1553,7 +1558,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                   type="text"
                   value={diaryNo}
                   onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                   required
                 />
               </div>
@@ -1564,9 +1569,10 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <input
                 type="text"
                 value={from}
-                onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                onChange={(e) => setFrom(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 required
+                placeholder="Enter sender name"
               />
             </div>
 
@@ -1574,13 +1580,18 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <label className="block text-sm font-medium mb-1">
                 Disposal *
               </label>
-              <input
-                type="text"
+              <select
                 value={disposal}
-                onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                onChange={(e) => setDisposal(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
-              />
+              >
+                <option value="">Select From</option>
+                <option value="VC Office">VC Office</option>
+                <option value="Registrar">Registrar</option>
+                <option value="HOD">HOD</option>
+                <option value="Examination">Examination</option>
+              </select>
             </div>
 
             <div>
@@ -1588,7 +1599,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                 required
               >
                 <option value="">Select Status</option>
@@ -2069,7 +2080,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       type="text"
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                       required
                     />
                                          {isExtracting && (
@@ -2090,7 +2101,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                       required
                     />
                   </div>
@@ -2103,7 +2114,7 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                       type="text"
                       value={diaryNo}
                       onChange={(e) => handleNumberOnlyInput(e, setDiaryNo)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                       required
                     />
                   </div>
@@ -2115,26 +2126,36 @@ const ScanUpload = ({ fileData, action, onClose }) => {
                     <label className="block text-sm font-medium mb-2">
                       From *
                     </label>
-                    <input
-                      type="text"
-                      value={from}
-                      onChange={(e) => handleAlphabetOnlyInput(e, setFrom)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
+                                         <input
+                       type="text"
+                       value={from}
+                       onChange={(e) => setFrom(e.target.value)}
+                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                       required
+                       placeholder="Enter sender name"
+                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Disposal *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={disposal}
-                      onChange={(e) => handleAlphabetOnlyInput(e, setDisposal)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      onChange={(e) => setDisposal(e.target.value)}
+                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white"
                       required
-                    />
+                    >
+                      <option value="">Select Disposal</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Under Review">Under Review</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Forwarded">Forwarded</option>
+                      <option value="Returned">Returned</option>
+                      <option value="Archived">Archived</option>
+                    </select>
                   </div>
                 </div>
 

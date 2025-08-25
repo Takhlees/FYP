@@ -9,8 +9,8 @@ export default function DirectThemeToggle() {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem('ui-theme');
-    const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = stored === 'dark' || (!stored && isSystemDark);
+    // Default to light mode if no preference is stored
+    const shouldBeDark = stored === 'dark';
     
     setIsDark(shouldBeDark);
     
@@ -23,6 +23,11 @@ export default function DirectThemeToggle() {
       root.classList.remove('dark');
     }
     root.setAttribute('data-theme', shouldBeDark ? 'dark' : 'light');
+    
+    // Ensure localStorage has a value (default to light if none)
+    if (!stored) {
+      localStorage.setItem('ui-theme', 'light');
+    }
   }, []);
 
   const toggleTheme = () => {

@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
           <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 mb-6 md:mb-8">
             <div className="flex items-center gap-2 text-gray-800 text-sm md:text-base">
               <Clock className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">Last Updated: January 15, 2025</span>
+              <span className="font-medium">Last Updated: August 18, 2025</span>
             </div>
             <p className="text-gray-700 mt-3 text-sm md:text-base leading-relaxed">
               We may update this Privacy Policy from time to time. We will notify you of any material changes.

@@ -73,12 +73,32 @@ html, body {
   background-color: rgb(var(--color-bg-primary));
   color: rgb(var(--color-text-primary));
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 /* Ensure dark mode class inheritance */
 html.dark, html.dark body {
   background-color: rgb(var(--color-bg-primary));
   color: rgb(var(--color-text-primary));
+}
+
+/* Ensure consistent scrollbar behavior for sign-in page */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+html.dark body {
+  scrollbar-color: rgb(var(--color-border)) rgb(var(--color-bg-secondary));
+}
+
+/* Ensure login page fits perfectly in viewport */
+#__next {
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* AUTOMATIC DARK MODE OVERRIDES - More targeted approach */
@@ -179,12 +199,26 @@ html.dark select:focus:not([class*="dark:"]) {
   outline: none;
 }
 
-/* Scrollbar styling */
-html.dark ::-webkit-scrollbar {
+/* Scrollbar styling - Consistent for both light and dark modes */
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dark mode scrollbar overrides */
 html.dark ::-webkit-scrollbar-track {
   background: rgb(var(--color-bg-secondary));
 }

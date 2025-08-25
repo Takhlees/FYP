@@ -137,8 +137,8 @@ export default function SignInForm({ onSignInSuccess }) {
   };
 
   return (
-    <div className="flex min-h-screen w-full p-4">
-      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row h-[90vh] shadow-2xl rounded-2xl overflow-hidden">
+    <div className="flex h-screen w-full p-4">
+      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row h-full shadow-2xl rounded-2xl overflow-hidden">
         {/* Left side - Image background with GCU Mailbox */}
         <div
           className="hidden md:block w-1/2 relative overflow-hidden rounded-l-2xl"
@@ -164,7 +164,7 @@ export default function SignInForm({ onSignInSuccess }) {
 
         {/* Right side - Sign in form */}
         <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 flex items-center justify-center rounded-r-2xl">
-          <div className="w-full max-w-md px-6 md:px-8 py-8 md:py-0">
+          <div className="w-full max-w-md px-6 md:px-8 py-6 md:py-0">
             {/* Mobile Header - Show on mobile only */}
             <div className="md:hidden text-center mb-8">
               <div className="mb-4 p-3 rounded-full bg-indigo-600/70 backdrop-blur-md shadow-xl w-fit mx-auto">
@@ -177,7 +177,7 @@ export default function SignInForm({ onSignInSuccess }) {
                 Digital file management system
               </p>
             </div>
-            <div className="text-center mb-6">
+            <div className="text-center mb-4">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                 Welcome To Doculus!
               </h2>
@@ -193,7 +193,7 @@ export default function SignInForm({ onSignInSuccess }) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
@@ -302,7 +302,7 @@ export default function SignInForm({ onSignInSuccess }) {
               </button>
             </form>
 
-            <div className="text-center mt-6 text-gray-500 dark:text-gray-400 text-xs">
+            <div className="text-center mt-4 text-gray-500 dark:text-gray-400 text-xs">
               <p>
                 © {new Date().getFullYear()} GCU University. All rights
                 reserved.
