@@ -1,17 +1,7 @@
-/** @type {import('next').NextConfig} */
+/** @type {import('next').Config} */
 const nextConfig = {
+  // Remove problematic webpack aliases that break functionality
   webpack: (config, { isServer }) => {
-    // Handle heavy dependencies for deployment
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        canvas: false,
-        'tesseract.js': false,
-        'pdf-lib': false,
-        'pdfjs-dist': false,
-      };
-    }
-    
     if (isServer) {
       config.externals = config.externals || [];
       config.externals.push({
@@ -21,17 +11,31 @@ const nextConfig = {
         'canvas': 'commonjs canvas',
       });
     }
-    
     return config;
   },
-  
+
   serverExternalPackages: [
     'sharp',          
     'pdf-parse',      
     'tesseract.js',    
-    'pdf-lib',        
-    'pdfjs-dist',     
+    'pdf-lib',         
+    'pdfjs-dist',      
+    'canvas'           
   ],
+
+  async headers() {
+    return [
+      {
+        source: '/api/document-scanner',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

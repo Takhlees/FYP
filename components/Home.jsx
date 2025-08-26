@@ -33,14 +33,15 @@ export default function Home() {
 
   const uploadScanRef = useRef(null);
   const recentActivityRef = useRef(null);
-  const [isFooterVisible, setIsFooterVisible] = useState(false);
+
+
   const [hasShownLoginSuccess, setHasShownLoginSuccess] = useState(false);
   const [isFreshLogin, setIsFreshLogin] = useState(false);
 
   // Function to fetch overdue mails
   const fetchOverdueMails = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/reminder", {
+      const response = await fetch("/api/reminder", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -239,7 +240,7 @@ export default function Home() {
       console.log("Status update started, loading state set");
       
       const response = await fetch(
-        `http://localhost:3000/api/reminder/${selectedMail._id}`,
+        `/api/reminder/${selectedMail._id}`,
         {
           method: "PUT",
           headers: {
@@ -351,30 +352,9 @@ export default function Home() {
       bubble.style.top = randomTop;
       bubble.style.left = randomLeft;
     });
-  }, []);
-  // Footer intersection observer for responsive positioning
-  useEffect(() => {
-    const footerElement = document.querySelector('footer');
-    if (!footerElement) return;
+    }, []);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsFooterVisible(entry.isIntersecting);
-        });
-      },
-      {
-        threshold: 0,
-        rootMargin: '0px 0px -150px 0px'
-      }
-    );
 
-    observer.observe(footerElement);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   // Effect for showing login success toast only after fresh login
   useEffect(() => {
@@ -756,18 +736,13 @@ export default function Home() {
             </div>
           )}         
           <div 
-            className={`fixed right-4 sm:right-5 z-50 flex flex-col items-end space-y-3 transition-all duration-300 ${
-              isFooterVisible 
-                ? 'bottom-[500px] sm:bottom-[200px] md:bottom-[220px]' // Fixed positioning when footer is visible
-                : 'bottom-4 sm:bottom-5 md:bottom-6'
-            }`}
+            className="fixed right-4 sm:right-5 bottom-6 sm:bottom-12 md:bottom-10 z-50 flex flex-col items-end space-y-3 transition-all duration-300"
           >
             {/* Chat Button */}
             <div
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg text-sm sm:text-lg font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap"
                onClick={() => {
                  setShowChat(true);
-                 // Close overdue mails panel if it's open
                  if (showOverdueMails) {
                    setShowOverdueMails(false);
                  }
@@ -777,7 +752,6 @@ export default function Home() {
               <span className="sm:hidden">Chat</span>
             </div>
             
-            {/* Overdue Mails Panel */}
             <div
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:scale-105 w-72 sm:w-80 md:w-96 max-w-[calc(100vw-2rem)]"
               onClick={() => setShowOverdueMails(!showOverdueMails)}
@@ -889,7 +863,7 @@ export default function Home() {
           
           {showChat && (
             <ChatBot onClose={() => setShowChat(false)} />
-          )}
+                    )}
 
           <Footer />
         </div>

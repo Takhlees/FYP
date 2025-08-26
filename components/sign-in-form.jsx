@@ -131,7 +131,6 @@ export default function SignInForm({ onSignInSuccess }) {
       setErrors((prev) => ({ ...prev, global: errorMessage }));
       setSignInStatus(null);
       
-      // Update loading toast to error
       updateToast(loadingToastId, "error", "Sign in failed", errorMessage);
     }
   };
@@ -139,7 +138,6 @@ export default function SignInForm({ onSignInSuccess }) {
   return (
     <div className="flex h-screen w-full p-4">
       <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row h-full shadow-2xl rounded-2xl overflow-hidden">
-        {/* Left side - Image background with GCU Mailbox */}
         <div
           className="hidden md:block w-1/2 relative overflow-hidden rounded-l-2xl"
           style={{

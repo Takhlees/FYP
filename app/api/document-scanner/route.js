@@ -829,8 +829,11 @@ class DocumentScanner {
 
 // Main API handler - POST METHOD
 export async function POST(request) {
+  // Add deployment-specific timeout handling
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+  
   try {
-    
     const formData = await request.formData();
     const file = formData.get('file');
     const action = formData.get('action') || 'enhance_and_extract';
@@ -1093,10 +1096,16 @@ export async function POST(request) {
       
       result.totalProcessingTime = Date.now() - startTime;
       
+      // Clear timeout
+      clearTimeout(timeoutId);
+      
       return NextResponse.json(result);
       
     } catch (processingError) {
       console.error('Processing error:', processingError);
+      
+      // Clear timeout
+      clearTimeout(timeoutId);
       
       const errorMessage = 'Document processing failed';
       
@@ -1113,6 +1122,10 @@ export async function POST(request) {
     
   } catch (error) {
     console.error('API error:', error);
+    
+    // Clear timeout
+    clearTimeout(timeoutId);
+    
     return NextResponse.json(
       {
         error: 'Internal server error',

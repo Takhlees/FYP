@@ -2,10 +2,7 @@ import ScanUpload from '@models/scanUpload';
 import { NextResponse } from 'next/server' ;
 import { connectToDB } from '@utils/database';
 
-export async function GET(req, res) {
-  if (req.method !== 'GET') {
-    return NextResponse.json({ message: 'Only GET requests allowed' }, { status: 405 });
-  }
+export async function GET(req) {
 
   try { 
     await connectToDB();
