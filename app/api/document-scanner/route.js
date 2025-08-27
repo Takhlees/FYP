@@ -3,7 +3,8 @@ import sharp from 'sharp';
 import Tesseract from 'tesseract.js';
 import { PDFDocument } from 'pdf-lib';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+// Vercel API route limit: 4.5MB max
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
 
 class DocumentScanner {
   
@@ -849,7 +850,7 @@ export async function POST(request) {
     
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB.', success: false },
+        { error: `File too large. Maximum size is ${(MAX_FILE_SIZE / (1024 * 1024)).toFixed(1)}MB for Vercel deployment.`, success: false },
         { status: 400 }
       );
     }
