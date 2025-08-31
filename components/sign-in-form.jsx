@@ -23,29 +23,18 @@ export default function SignInForm({ onSignInSuccess }) {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const router = useRouter();
   
-  // Load remembered email and password from localStorage on component mount
+  // Load remembered email from localStorage on component mount
   useEffect(() => {
     const rememberedEmail = localStorage.getItem("rememberedEmail");
-    // const rememberedPassword = localStorage.getItem("rememberedPassword")
     if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail }));
+      setFormData((prev) => ({ 
+        ...prev, 
+        email: rememberedEmail,
+        rememberMe: true // Set remember me to true if we have remembered data
+      }));
     }
-    // if (rememberedPassword) {
-    //   setFormData((prev) => ({ ...prev, password: rememberedPassword }))
-    // }
   }, []);
 
-  useEffect(() => {
-    localStorage.removeItem("rememberedEmail");
-    localStorage.removeItem("rememberedPassword");
-    setFormData({
-      email: "",
-      password: "",
-      rememberMe: false,
-    });
-  }, []);
-
-  // Handle input focus to show remembered email and password
   const handleEmailFocus = () => {
     const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail && !formData.email) {
@@ -53,12 +42,7 @@ export default function SignInForm({ onSignInSuccess }) {
     }
   };
 
-  const handlePasswordFocus = () => {
-    const rememberedPassword = localStorage.getItem("rememberedPassword");
-    if (rememberedPassword && !formData.password) {
-      setFormData((prev) => ({ ...prev, password: rememberedPassword }));
-    }
-  };
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -86,7 +70,6 @@ export default function SignInForm({ onSignInSuccess }) {
 
     setSignInStatus("signing-in");
 
-    // Show loading toast
     const loadingToastId = showLoadingToast("Signing in", "Please wait while we authenticate you...");
 
     try {
@@ -105,17 +88,11 @@ export default function SignInForm({ onSignInSuccess }) {
         return;
       }
 
-      // Handle "Remember Me" functionality
       if (formData.rememberMe) {
         localStorage.setItem("rememberedEmail", formData.email);
-        localStorage.setItem("rememberedPassword", formData.password);
       } else {
         localStorage.removeItem("rememberedEmail");
-        localStorage.removeItem("rememberedPassword");
       }
-
-      // Dismiss the loading toast since we don't want any toast during success
-      // The success will be shown on the home page instead
       dismissToast(loadingToastId);
 
       // Set success state
@@ -163,7 +140,6 @@ export default function SignInForm({ onSignInSuccess }) {
         {/* Right side - Sign in form */}
         <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 flex items-center justify-center rounded-r-2xl">
           <div className="w-full max-w-md px-6 md:px-8 py-6 md:py-0">
-            {/* Mobile Header - Show on mobile only */}
             <div className="md:hidden text-center mb-8">
               <div className="mb-4 p-3 rounded-full bg-indigo-600/70 backdrop-blur-md shadow-xl w-fit mx-auto">
                 <Mail className="h-8 w-8 text-white" />
@@ -242,7 +218,6 @@ export default function SignInForm({ onSignInSuccess }) {
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    onFocus={handlePasswordFocus}
                     autoComplete="new-password"
                     placeholder="••••••••"
                     className="w-full pl-9 pr-9 py-3 md:py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm dark:text-white dark:placeholder-gray-400"

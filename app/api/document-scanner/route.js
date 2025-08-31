@@ -830,9 +830,11 @@ class DocumentScanner {
 
 // Main API handler - POST METHOD
 export async function POST(request) {
-  // Add deployment-specific timeout handling
+
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, 55000); 
   
   try {
     const formData = await request.formData();
@@ -882,12 +884,9 @@ export async function POST(request) {
     
     try {
       if (file.type === 'application/pdf') {
-        // Process PDF
-        
         try {
           let pdfResult = await DocumentScanner.processPDF(buffer);
           
-          // If no text extracted, try scanned PDF processing
           if (!pdfResult.text || pdfResult.text.trim().length === 0) {
             const scannedResult = await DocumentScanner.processScannedPDF(buffer);
             if (scannedResult.text && scannedResult.text.trim().length > 0) {
@@ -895,7 +894,6 @@ export async function POST(request) {
             }
           }
           
-          // Extract subject specifically for scan form
           const extractedSubject = DocumentScanner.extractSubjectFromText(pdfResult.text);
           
           result.textExtraction = {
@@ -908,7 +906,6 @@ export async function POST(request) {
             characterCount: pdfResult.characterCount
           };
           
-          // Add PDF preview data
           result.pdfPreview = {
             base64: buffer.toString('base64'),
             mimeType: 'application/pdf',
@@ -917,7 +914,6 @@ export async function POST(request) {
             pageCount: pdfResult.pagesProcessed || 1
           };
           
-          // Create preview image from first page
           try {
             const previewImage = await DocumentScanner.createPDFPreviewImage(buffer);
             result.pdfPreview.previewImage = {
@@ -926,8 +922,7 @@ export async function POST(request) {
               size: previewImage.length
             };
           } catch (previewError) {
-            // PDF preview creation failed, using fallback
-            // Use simple preview as fallback
+  
             const fallbackPreview = await DocumentScanner.createSimplePDFPreview(buffer);
             if (fallbackPreview) {
               result.pdfPreview.previewImage = {
@@ -937,7 +932,6 @@ export async function POST(request) {
               };
             }
           }
-          
           
         } catch (pdfError) {
           console.error('PDF processing error:', pdfError);
