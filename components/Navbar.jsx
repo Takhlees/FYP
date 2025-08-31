@@ -165,13 +165,7 @@ export default function Navbar() {
                       >
                         Change Password
                       </Link>
-                      <Link
-                        href="/signup"
-                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
-                        role="menuitem"
-                      >
-                        Create New User
-                      </Link>
+
                       <button
                         onClick={() => signOut()}
                         className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
@@ -352,12 +346,7 @@ export default function Navbar() {
                 >
                   Change Password
                 </Link>
-                <Link
-                  href="/signup"
-                  className="block w-full px-4 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-300"
-                >
-                  Create New User
-                </Link>
+
                 <button
                   onClick={() => signOut()}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-black dark:text-white hover:bg-red-100 dark:hover:bg-red-600 hover:text-red-600 dark:hover:text-white rounded-md transition-colors duration-300"
